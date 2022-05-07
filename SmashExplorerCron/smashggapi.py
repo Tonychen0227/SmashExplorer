@@ -164,7 +164,7 @@ class API:
 
         if ret is None:
             result = self.__call_api("Get Ult Tournament Events BACKUP", backup_query_string, params)
-            ret = self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["event"]])
+            ret = self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["events"]])
 
         return ret
 
