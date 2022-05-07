@@ -1,2 +1,3 @@
 .idea
 /python-cron/.idea
+/SmashExplorerCron/__pycache__/*
