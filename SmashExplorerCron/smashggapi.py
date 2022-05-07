@@ -1,5 +1,7 @@
 import time
+from copy import copy
 from datetime import datetime
+from cosmos import CosmosDB
 
 from graphqlclient import GraphQLClient, json
 
@@ -33,9 +35,56 @@ class API:
                 print(f"Error {json.loads(result)} occured calling query {description} with {params}")
                 num_retries += 1
 
-    def get_ult_tournament_events(self, slug):
+    def get_upcoming_ult_tournaments(self, start_after: datetime, start_before: datetime):
+        start_after = int(start_after.timestamp())
+        start_before = int(start_before.timestamp())
         query_string = '''
-            query TournamentsQuery($slug: String) {
+            query TournamentsQuery($beforeDate: Timestamp, $afterDate: Timestamp, $page: Int) {
+              tournaments(query:{page: $page, perPage: 500, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1386], published:true, publiclySearchable:true}}) {
+                pageInfo{
+                  perPage
+                  totalPages
+                }
+                nodes {
+                  city
+                  countryCode
+                  slug
+                  name
+                  startAt
+                  numAttendees
+                }
+              }
+            }
+        '''
+
+        params = {"beforeDate": start_before, "afterDate": start_after}
+
+        current_page = 1
+        total_pages = 2
+
+        tournaments = []
+
+        while current_page <= total_pages:
+            params_temp = copy(params)
+            params_temp["page"] = current_page
+
+            results = self.__call_api("Get Upcoming Ult Tournaments", query_string, params_temp)
+
+            def filter_events(tournament):
+                return tournament["numAttendees"] is not None and tournament["numAttendees"] >= 16
+
+            tournaments_filtered = list(filter(filter_events, results["tournaments"]["nodes"]))
+
+            tournaments.extend(tournaments_filtered)
+            total_pages = results["tournaments"]["pageInfo"]["totalPages"]
+
+            current_page += 1
+
+        return tournaments
+
+    def get_ult_tournament_events(self, tournament_slug):
+        query_string = '''
+            query TournamentQuery($slug: String) {
               tournament(slug: $slug) {
                 city
                 countryCode
@@ -44,6 +93,8 @@ class API:
                 events(filter:{published:true, videogameId: [1386]}) {
                   id
                   state
+                  createdAt
+                  updatedAt
                   startAt
                   name
                   slug
@@ -54,13 +105,14 @@ class API:
                       entrant {
                         name
                         initialSeedNum
+                        isDisqualified
                       }
                     }
                   }
               }}}
             '''
 
-        params = {"slug": slug}
+        params = {"slug": tournament_slug}
 
         return self.__call_api("Get Ult Tournament Events", query_string, params)
 
@@ -79,6 +131,18 @@ class API:
                 name
                 slug
               }
+              participants {
+                user {
+                  authorizations(types: [TWITCH, DISCORD]) {
+                    url
+                  }
+                  address {
+                    city
+                    state
+                    country
+                  }
+                }
+              }
             }
           }
           '''
@@ -89,10 +153,10 @@ class API:
 
         return result["entrant"]["event"], result["entrant"]
 
-    def get_ult_event_entrants(self, event_slug):
+    def get_ult_event_entrants(self, event_id):
         query_string = '''
-            query EventEntrantsQuery($slug: String, $page: Int) {
-              event(slug: $slug) {
+            query EventEntrantsQuery($eventId: ID, $page: Int) {
+              event(id: $eventId) {
                 id
                 slug
                 entrants(query:{page: $page, perPage: 100}) {
@@ -107,6 +171,18 @@ class API:
                     standing {
                       placement
                     }
+                    participants {
+                      user {
+                        authorizations(types: [TWITCH, DISCORD]) {
+                          url
+                        }
+                        location {
+                          city
+                          state
+                          country
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -119,7 +195,7 @@ class API:
         entrants = []
 
         while current_page <= total_pages:
-            params = {"slug": event_slug, "page": current_page}
+            params = {"eventId": event_id, "page": current_page}
             results = self.__call_api("Get Entrants For Event", query_string, params)
             entrants.extend(results["event"]["entrants"]["nodes"])
             total_pages = results["event"]["entrants"]["pageInfo"]["totalPages"]
@@ -128,23 +204,43 @@ class API:
 
         return entrants
 
-    def get_event_sets_updated_after_timestamp(self, event_slug: str, start_timestamp: datetime):
+    def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
-            query EventSetsQuery($slug: String, $page: Int) {
-              event(slug: $slug) {
+            query EventSetsQuery($eventId: ID, $page: Int, $updatedAfter: Timestamp) {
+              event(id:$eventId) {
                 id
                 slug
-                sets(query:{page: $page, perPage: 100}) {
+                sets(page: $page, perPage: 50, sortType:ROUND, 
+                  filters:{showByes:false, hideEmpty:true, updatedAfter: $updatedAfter}) {
                   pageInfo {
                     totalPages
+                    perPage
                     page
                   }
                   nodes {
-                    name
-                    initialSeedNum
                     id
-                    standing {
-                      placement
+                    fullRoundText
+                    displayScore
+                    winnerId
+                    round
+                    phaseGroup{
+                      phase {
+                        name
+                        phaseOrder
+                      }
+                    }
+                    slots {
+                      entrant{
+                        id
+                        name
+                        initialSeedNum
+                      }
+                      prereqId
+                      prereqType
+                    }
+                    stream {
+                      streamSource
+                      streamId
                     }
                   }
                 }
@@ -152,3 +248,21 @@ class API:
             }
             '''
 
+        if start_timestamp is None:
+            start_timestamp = int(datetime.fromisocalendar(1971, 1, 1).timestamp())
+
+        params_root = {"eventId": event_id, "updatedAfter": start_timestamp}
+        current_page = 1
+        total_pages = 2
+
+        sets = []
+
+        while current_page <= total_pages:
+            params = copy(params_root)
+            results = self.__call_api("Get Sets For Event", query_string, params)
+            sets.extend(results["event"]["sets"]["nodes"])
+            total_pages = results["event"]["sets"]["pageInfo"]["totalPages"]
+
+            current_page += 1
+
+        return sets
