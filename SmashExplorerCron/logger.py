@@ -32,7 +32,12 @@ class Logger:
         if not os.path.exists(path_root):
             os.mkdir(path_root)
 
-        with open(file_name, "w+") as infile:
+        if os.path.exists(file_name):
+            method = "w+"
+        else:
+            method = "a"
+
+        with open(file_name, method) as infile:
             final_log_string = f"{date_now} - {log_string}"
             infile.write(final_log_string)
             print(final_log_string)
