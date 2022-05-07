@@ -62,10 +62,19 @@ class OperationsManager:
 
     def get_and_create_entrants_for_event(self, event_id):
         event_entrants = self.api.get_ult_event_entrants(event_id)
+        existing_entrant_ids = set([x["id"] for x in self.cosmos.get_event_entrants(event_id)])
 
-        self.logger.log(f"Creating {len(event_entrants)} entrants for event {event_id}")
+        entrants_to_add = []
 
-        self.cosmos.create_entrants(event_id, event_entrants)
+        for proposed_entrant in event_entrants:
+            if str(proposed_entrant["id"]) in existing_entrant_ids:
+                continue
+
+            entrants_to_add.append(proposed_entrant)
+
+        self.logger.log(f"Creating {len(entrants_to_add)} entrants for event {event_id}")
+
+        self.cosmos.create_entrants(event_id, entrants_to_add)
 
     def update_tracked_entrants_for_event(self, event_id):
         vanity_links = self.cosmos.get_vanity_links(event_id)

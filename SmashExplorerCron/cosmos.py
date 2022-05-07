@@ -55,6 +55,11 @@ class CosmosDB:
 
         return response
 
+    def get_event_entrants(self, event_id):
+        response = self.entrants.query_items(query=f"SELECT k.id FROM k WHERE k.eventId = \"{event_id}\"",
+                                           partition_key=event_id)
+        return response
+
     def get_outstanding_events(self):
         response = self.events.query_items(query="SELECT * FROM k WHERE k.state <> \"COMPLETED\"",
                                            enable_cross_partition_query=True)
