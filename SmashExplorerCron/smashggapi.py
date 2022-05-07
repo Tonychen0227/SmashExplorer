@@ -106,7 +106,8 @@ class API:
                 }
               }
             }
-            '''
+          }
+          '''
 
         results = []
 
