@@ -1,7 +1,6 @@
 import time
 from copy import copy
 from datetime import datetime
-from cosmos import CosmosDB
 
 from graphqlclient import GraphQLClient, json
 
@@ -14,13 +13,15 @@ class API:
         self.clients.append(ret)
         return ret
 
-    def __init__(self, tokens):
+    def __init__(self, tokens, logger):
         self.clients = []
 
         for token in tokens.split(" "):
             client = GraphQLClient('https://api.smash.gg/gql/alpha')
             client.inject_token(f'Bearer {token}')
             self.clients.append(client)
+
+        self.logger = logger
 
     def __call_api(self, description, input, params):
         num_retries = 0
@@ -32,7 +33,7 @@ class API:
                 return json.loads(result)["data"]
             except:
                 time.sleep(2)
-                print(f"Error {json.loads(result)} occured calling query {description} with {params}")
+                self.logger.log(f"Error {json.loads(result)} occured calling query {description} with {params}")
                 num_retries += 1
 
     def get_upcoming_ult_tournaments(self, start_after: datetime, start_before: datetime):
@@ -82,7 +83,52 @@ class API:
 
         return tournaments
 
+    def get_ult_events_one_by_one(self, event_ids):
+        query_string = '''
+          query EventQuery($eventId: ID) {
+            event(filter:{published:true, videogameId: [1386]}) {
+              id
+              state
+              createdAt
+              updatedAt
+              startAt
+              name
+              slug
+              numEntrants
+              standings(query: {perPage: 128}) {
+                nodes {
+                  placement
+                  entrant {
+                    name
+                    initialSeedNum
+                    isDisqualified
+                  }
+                }
+              }
+            }
+            '''
+
+        results = []
+
+        for event_id in event_ids:
+            query_result = self.__call_api("Get single event", query_string, {"eventId": event_id})
+            results.append(query_result)
+
+        return results
+
     def get_ult_tournament_events(self, tournament_slug):
+        backup_query_string = '''
+            query TournamentQuery($slug: String) {
+              tournament(slug: $slug) {
+                city
+                countryCode
+                slug
+                name
+                events(filter:{published:true, videogameId: [1386]}) {
+                  id
+              }}}
+        '''
+
         query_string = '''
             query TournamentQuery($slug: String) {
               tournament(slug: $slug) {
@@ -114,7 +160,13 @@ class API:
 
         params = {"slug": tournament_slug}
 
-        return self.__call_api("Get Ult Tournament Events", query_string, params)
+        ret = self.__call_api("Get Ult Tournament Events", query_string, params)
+
+        if ret is None:
+            result = self.__call_api("Get Ult Tournament Events BACKUP", backup_query_string, params)
+            ret = self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["event"]])
+
+        return ret
 
     def get_ult_entrant(self, entrant_id):
         query_string = '''

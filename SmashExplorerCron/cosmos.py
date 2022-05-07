@@ -5,13 +5,14 @@ from azure.cosmos import CosmosClient, exceptions
 
 
 class CosmosDB:
-    def __init__(self, endpoint, key):
+    def __init__(self, endpoint, key, logger):
         self.database = CosmosClient(endpoint, key).get_database_client("smash-explorer-database")
         self.entrants = self.database.get_container_client("Entrants")
         self.events = self.database.get_container_client("Events")
         self.vanityLinks = self.database.get_container_client("VanityLinks")
         self.sets = self.database.get_container_client("Sets")
         self.entrants = self.database.get_container_client("Entrants")
+        self.logger = logger
 
     def __upsert_entrant(self, entrant):
         entrant["lastUpdatedTime"] = datetime.utcnow().timestamp()
