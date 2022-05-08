@@ -25,10 +25,10 @@ class API:
 
         self.logger = logger
 
-    def __call_api(self, description, input, params, should_retry=True):
+    def __call_api(self, description, input, params):
         num_retries = 0
 
-        while num_retries < 10 and should_retry:
+        while num_retries < 10:
             result = None
             try:
                 result = self.__get_client().execute(input, params)
@@ -64,19 +64,25 @@ class API:
 
         return all_results
 
-    def get_upcoming_ult_tournaments(self, start_time: datetime, end_time: datetime):
+    def get_upcoming_ult_events(self, start_time: datetime, end_time: datetime):
         after_date = int(start_time.timestamp())
         before_date = int(end_time.timestamp())
         query_string = '''
             query TournamentsQuery($beforeDate: Timestamp, $afterDate: Timestamp, $page: Int) {
-              tournaments(query:{page: $page, perPage: 500, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1386], published:true, publiclySearchable:true}}) {
+              tournaments(query:{page: $page, perPage: 200, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1, 1386], published:true, publiclySearchable:true}}) {
+                pageInfo{
+                  perPage
+                  totalPages
+                }
                 pageInfo{
                   perPage
                   totalPages
                 }
                 nodes {
-                  slug
-                  numAttendees
+                  events(filter:{published:true, videogameId: [1, 1386]}) {
+                    id
+                    numEntrants
+                  }
                 }
               }
             }
@@ -84,10 +90,9 @@ class API:
 
         params = {"beforeDate": before_date, "afterDate": after_date}
 
-        tournaments = self.make_paginated_calls(query_string, ["tournaments"], params)
-        return [x for x in tournaments if x["numAttendees"] is not None and x["numAttendees"] >= 10]
+        return [x["events"] for x in self.make_paginated_calls(query_string, ["tournaments"], params)]
 
-    def get_ult_event(self, event_id):
+    def get_event(self, event_id):
         query_string = '''
           query EventQuery($eventId: ID) {
             event(id: $eventId) {
@@ -99,6 +104,17 @@ class API:
               name
               slug
               numEntrants
+              tournament {
+                addrState
+                city
+                countryCode
+                slug
+                name
+                images {
+                  url
+                  ratio
+                }
+              }
               standings(query: {perPage: 128}) {
                 nodes {
                   placement
@@ -113,84 +129,19 @@ class API:
           }
           '''
 
-        return self.__call_api("Get single event", query_string, {"eventId": event_id})
+        result = self.__call_api("Get single event", query_string, {"eventId": event_id})
+        tournament = result["event"]["tournament"]
+        event = result["event"]
 
-    def get_ult_events_one_by_one(self, event_ids):
-        return [self.get_ult_event(event_id)["event"] for event_id in event_ids]
-
-    def get_ult_tournament_events(self, tournament_slug):
-        backup_query_string = '''
-            query TournamentQuery($slug: String) {
-              tournament(slug: $slug) {
-                city
-                countryCode
-                slug
-                name
-                images {
-                  url
-                  ratio
-                }
-                events(filter:{published:true, videogameId: [1386]}) {
-                  id
-              }}}
-        '''
-
-        query_string = '''
-            query TournamentQuery($slug: String) {
-              tournament(slug: $slug) {
-                city
-                countryCode
-                slug
-                name
-                images {
-                  url
-                  ratio
-                }
-                events(filter:{published:true, videogameId: [1386]}) {
-                  id
-                  state
-                  createdAt
-                  updatedAt
-                  startAt
-                  name
-                  slug
-                  numEntrants
-                  standings(query: {perPage: 128}) {
-                    nodes {
-                      placement
-                      entrant {
-                        name
-                        initialSeedNum
-                        isDisqualified
-                      }
-                    }
-                  }
-              }}}
-            '''
-
-        params = {"slug": tournament_slug}
-
-        ret = self.__call_api("Get Ult Tournament Events", query_string, params, should_retry=False)
-
-        if ret is None:
-            result = self.__call_api("Get Ult Tournament Events BACKUP", backup_query_string, params)
-            ret = {
-                "tournament": {
-                    "city": result["tournament"]["city"],
-                    "countryCode": result["tournament"]["countryCode"],
-                    "slug": result["tournament"]["slug"],
-                    "name": result["tournament"]["name"],
-                    "images": result["tournament"]["images"],
-                    "events": self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["events"]])
-                }
-            }
-
-        return [
-            {
-                "tournamentSlug": ret["tournament"]["slug"],
-                "tournamentName": ret["tournament"]["name"],
-                "tournamentLocation": f"{ret['tournament']['city']}, {ret['tournament']['countryCode']}",
-                "tournamentImages": ret["tournament"]["images"],
+        return {
+                "tournamentSlug": tournament["slug"],
+                "tournamentName": tournament["name"],
+                "tournamentLocation": {
+                    "city": tournament["city"],
+                    "countryCode": tournament["countryCode"],
+                    "addrState": tournament["addrState"]
+                },
+                "tournamentImages": tournament["images"],
                 "state": event["state"],
                 "id": str(event["id"]),
                 "name": event["name"],
@@ -200,8 +151,20 @@ class API:
                 "slug": event["slug"],
                 "numEntrants": event["numEntrants"],
                 "standings": event["standings"]["nodes"]
-            } for event in ret["tournament"]["events"] if event["numEntrants"] >= 10
-        ]
+            }
+
+    def get_ult_tournament_events(self, tournament_slug):
+        query_string = '''
+            query TournamentQuery($slug: String) {
+              tournament(slug: $slug) {
+                events(filter:{published:true, videogameId: [1, 1386]}) {
+                  id
+              }}}
+            '''
+
+        params = {"slug": tournament_slug}
+
+        return self.__call_api("Get Ult Tournament Events", query_string, params)
 
     def get_ult_entrant(self, entrant_id):
         query_string = '''
@@ -246,7 +209,7 @@ class API:
               event(id: $eventId) {
                 id
                 slug
-                entrants(query:{page: $page, perPage: 100}) {
+                entrants(query:{page: $page, perPage: 50}) {
                   pageInfo {
                     totalPages
                     page

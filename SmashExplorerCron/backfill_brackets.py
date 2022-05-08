@@ -9,13 +9,18 @@ if __name__ == '__main__':
     operations = OperationsManager(logger)
     logger.log("Starting Backfill")
 
-    tournament_count = 1
-    new_tournament_slugs = operations.get_tournament_slugs(days_back=30, days_forward=0)
-    tournaments_size = len(new_tournament_slugs)
-    for tournament_slug in new_tournament_slugs:
-        logger.log(f"Daily operation creating new tournaments - {tournament_count} of {tournaments_size}")
-        events = operations.get_and_create_events_for_tournament(tournament_slug)
-        for event in events:
-            operations.get_and_create_entrants_for_event(event["id"])
-            operations.update_event_sets(event["id"])
-        tournament_count += 1
+    events_count = 1
+    new_events = operations.get_new_events(days_back=30, days_forward=1)
+    events_size = len(new_events)
+    for event_id in new_events:
+        events_count += 1
+        logger.log(f"Backfill operation creating new events - {events_count} of {events_size}")
+        existing_event = operations.get_event_from_db(event_id)
+
+        if existing_event is not None:
+            logger.log(f"Skipping existing event {event_id}")
+            continue
+
+        operations.get_and_create_event(event_id)
+        operations.get_and_create_entrants_for_event(event_id)
+        operations.update_event_sets(event_id)

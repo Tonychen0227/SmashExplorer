@@ -16,25 +16,33 @@ class OperationsManager:
         self.api = api
         self.logger = logger
 
-    def get_open_events(self):
-        return self.cosmos.get_outstanding_events()
+    def get_event_from_db(self, event_id):
+        return self.cosmos.get_event(event_id)
 
-    def get_tournament_slugs(self, days_back=0, days_forward=7):
+    def get_open_event_ids(self):
+        return self.cosmos.get_outstanding_event_ids()
+
+    def get_new_events(self, days_back=0, days_forward=7):
         date_now = datetime.datetime.now(datetime.timezone.utc)
 
         start_time = date_now - datetime.timedelta(days=days_back)
         end_time = date_now + datetime.timedelta(days=days_forward)
 
-        upcoming_tournaments = self.api.get_upcoming_ult_tournaments(start_time, end_time)
+        upcoming_event_lists = self.api.get_upcoming_ult_events(start_time, end_time)
 
-        upcoming_tournaments_slugs = [tournament["slug"] for tournament in upcoming_tournaments]
-        nominated_tournaments = [] if "NOMINATED_TOURNAMENTS" not in os.environ else os.environ["NOMINATED_TOURNAMENTS"].split(" ")
+        upcoming_event_ids = []
+        for event_list in upcoming_event_lists:
+            for event in event_list:
+                if event["numEntrants"] is not None and event["numEntrants"] >= 10:
+                    upcoming_event_ids.append(str(event["id"]))
 
-        self.logger.log(f"Returned {len(upcoming_tournaments_slugs)} upcoming tournaments "
-                        f"and {len(nominated_tournaments)} nominated tournaments")
+        if "NOMINATED_TOURNAMENTS" in os.environ:
+            for slug in os.environ["NOMINATED_TOURNAMENTS"].split(" "):
+                upcoming_event_ids.extend([str(event["id"]) for event in self.api.get_ult_tournament_events(slug)["tournament"]["events"]])
 
-        upcoming_tournaments_slugs.extend(nominated_tournaments)
-        return upcoming_tournaments_slugs
+        self.logger.log(f"Returned {len(upcoming_event_ids)} upcoming events")
+
+        return upcoming_event_ids
 
     def update_event_sets(self, event_id):
         start_time = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
@@ -52,12 +60,12 @@ class OperationsManager:
         for tournament_set in sets:
             self.cosmos.create_set(tournament_set)
 
-    def get_and_create_events_for_tournament(self, tournament_slug):
-        events = self.api.get_ult_tournament_events(tournament_slug)
+    def get_events_for_tournament(self, tournament_slug):
+        return self.api.get_ult_tournament_events(tournament_slug)
 
-        self.logger.log(f"Creating {len(events)} events for tournament {tournament_slug}")
-
-        return self.cosmos.create_events(events)
+    def get_and_create_event(self, event_id):
+        event = self.api.get_event(event_id)
+        self.cosmos.create_event(event)
 
     def get_and_create_entrants_for_event(self, event_id):
         event_entrants = self.api.get_ult_event_entrants(event_id)
@@ -79,26 +87,3 @@ class OperationsManager:
 
         self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} "
                         f"({entrants_added} added, {entrants_deleted} removed)")
-
-    def update_event(self, event_id):
-        existing_event = self.cosmos.get_event(event_id)
-        new_event_data = self.api.get_ult_event(event_id)["event"]
-
-        for key in ["state", "name", "startAt", "createdAt", "updatedAt", "slug", "numEntrants", "standings"]:
-            existing_event[key] = new_event_data[key]
-
-        self.cosmos.update_event(existing_event)
-
-    def update_tracked_entrants_for_event(self, event_id):
-        vanity_links = self.cosmos.get_vanity_links(event_id)
-
-        entrants = set()
-        for link in vanity_links:
-            entrants |= set(link["entrantIds"])
-
-        self.logger.log(f"Creating {len(entrants)} entrants based on vanity links for event {event_id}")
-
-        for entrant in entrants:
-            api_event, api_entrant = self.api.get_ult_entrant(entrant)
-
-            self.cosmos.create_entrant(api_entrant)

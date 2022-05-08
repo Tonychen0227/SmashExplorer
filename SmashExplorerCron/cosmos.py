@@ -31,14 +31,10 @@ class CosmosDB:
         return self.events.upsert_item(body=event)
 
     def create_event(self, event):
+        existing_event = self.get_event(event["id"])
+        event["setsLastUpdated"] = 1 if existing_event is None else existing_event["setsLastUpdated"]
+
         return self.__upsert_event(event)
-
-    def create_events(self, events):
-        for event in events:
-            existing_event = self.get_event(str(event["id"]))
-            event["setsLastUpdated"] = 1 if existing_event is None else existing_event["setsLastUpdated"]
-
-        return [self.create_event(event) for event in events]
 
     def get_event(self, event_id):
         try:
@@ -48,13 +44,10 @@ class CosmosDB:
 
         return response
 
-    def get_outstanding_events(self):
-        response = self.events.query_items(query="SELECT * FROM k WHERE k.state <> \"COMPLETED\"",
+    def get_outstanding_event_ids(self):
+        response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state <> \"COMPLETED\"",
                                            enable_cross_partition_query=True)
         return response
-
-    def update_event(self, new_event):
-        return self.__upsert_event(new_event)
 
     def update_event_sets_last_updated(self, event_id, last_updated):
         event = self.get_event(event_id)

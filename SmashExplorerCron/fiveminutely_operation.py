@@ -10,12 +10,13 @@ if __name__ == '__main__':
     logger.log("Starting Minutely Script")
 
     event_count = 1
-    open_events = list(operations.get_open_events())
-    for event in open_events:
-        logger.log(f"Minutely operation on {event['id']} ({event_count} of {len(open_events)})")
-        operations.update_event(event["id"])
-        # operations.update_tracked_entrants_for_event(event["id"])
-        operations.update_event_sets(event["id"])
+    event_ids = list(operations.get_open_event_ids())
+    events_size = len(event_ids)
+    for event_id in event_ids:
+        logger.log(f"Minutely operation on {event_id} ({event_count} of {events_size})")
+        operations.get_and_create_event(event_id)
+        operations.get_and_create_entrants_for_event(event_id)
+        operations.update_event_sets(event_id)
         event_count += 1
 
     logger.log("Minutely Script Complete")
