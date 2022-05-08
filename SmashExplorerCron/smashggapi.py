@@ -280,7 +280,7 @@ class API:
             {
                 "eventId": event_id,
                 "name": entrant["name"],
-                "placement": None if entrant["standing"] is None else entrant["standing"]["placement"],
+                "standing": None if entrant["standing"] is None else entrant["standing"]["placement"],
                 "id": str(entrant["id"]),
                 "seeding": entrant["initialSeedNum"],
                 "additionalInfo": [
@@ -299,7 +299,7 @@ class API:
               event(id:$eventId) {
                 id
                 slug
-                sets(page: $page, perPage: 50, sortType:ROUND, 
+                sets(page: $page, perPage: 20, sortType:ROUND, 
                   filters:{showByes:false, hideEmpty:true, updatedAfter: $updatedAfter}) {
                   pageInfo {
                     totalPages
@@ -314,6 +314,19 @@ class API:
                     round
                     wPlacement
                     lPlacement
+                    games {
+                      orderNum
+                      stage {
+                        name
+                      }
+                      selections{
+                        entrant {
+                          id
+                        }
+                        selectionType
+                        selectionValue
+                      }
+                    }
                     phaseGroup{
                       phase {
                         name
@@ -351,9 +364,16 @@ class API:
             {
                 "id": str(tournament_set["id"]),
                 "eventId": event_id,
+                "fullRoundText": tournament_set["fullRoundText"],
+                "displayScore": tournament_set["displayScore"],
+                "winnerId": tournament_set["winnerId"],
+                "round": tournament_set["round"],
+                "wPlacement": tournament_set["wPlacement"],
+                "lPlacement": tournament_set["lPlacement"],
                 "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
                 "phaseOrder": tournament_set["phaseGroup"]["phase"]["phaseOrder"],
                 "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
+                "games": tournament_set["games"],
                 "entrants":
                 [
                     {

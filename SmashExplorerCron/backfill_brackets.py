@@ -10,7 +10,7 @@ if __name__ == '__main__':
     logger.log("Starting Backfill")
 
     tournament_count = 1
-    new_tournament_slugs = operations.get_tournament_slugs(days_back=30, days_forward=0)
+    new_tournament_slugs = operations.get_tournament_slugs(days_back=7, days_forward=0)
     tournaments_size = len(new_tournament_slugs)
     for tournament_slug in new_tournament_slugs:
         logger.log(f"Daily operation creating new tournaments - {tournament_count} of {tournaments_size}")
