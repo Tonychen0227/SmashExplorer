@@ -1,5 +1,4 @@
-from copy import copy
-from datetime import datetime
+import datetime
 
 from azure.cosmos import CosmosClient, exceptions
 
@@ -15,8 +14,6 @@ class CosmosDB:
         self.logger = logger
 
     def __upsert_entrant(self, entrant):
-        entrant["lastUpdatedTime"] = datetime.utcnow().timestamp()
-
         return self.entrants.upsert_item(body=entrant)
 
     def create_entrant(self, event, entrant):
@@ -44,7 +41,6 @@ class CosmosDB:
             self.create_entrant(event, entrant)
 
     def __upsert_event(self, event):
-        event["lastUpdatedTime"] = datetime.utcnow().timestamp()
         return self.events.upsert_item(body=event)
 
     def get_event(self, event_id):

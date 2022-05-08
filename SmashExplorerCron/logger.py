@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import os
 
 
@@ -24,7 +24,7 @@ class Logger:
                 os.mkdir(current_root)
 
     def __write_log(self, log_string):
-        date_now = datetime.utcnow()
+        date_now = datetime.datetime.now(datetime.timezone.utc)
 
         path_root = f"{self.root_path}/{date_now.year}"
         file_name = f"{path_root}/{date_now.year}-{date_now.month}-{date_now.day}-{date_now.hour}.log"

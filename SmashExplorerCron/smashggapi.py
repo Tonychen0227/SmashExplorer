@@ -320,6 +320,8 @@ class API:
 
         while current_page <= total_pages:
             params = copy(params_root)
+            params["page"] = current_page
+
             results = self.__call_api("Get Sets For Event", query_string, params)
             sets.extend(results["event"]["sets"]["nodes"])
             total_pages = results["event"]["sets"]["pageInfo"]["totalPages"]

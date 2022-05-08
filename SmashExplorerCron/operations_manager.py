@@ -17,7 +17,7 @@ class OperationsManager:
         self.logger = logger
 
     def get_new_tournament_slugs(self):
-        date_now = datetime.datetime.utcnow()
+        date_now = datetime.datetime.now(datetime.timezone.utc)
 
         upcoming_tournaments = self.api.get_upcoming_ult_tournaments(date_now - datetime.timedelta(days=1), date_now + datetime.timedelta(weeks=1))
 
@@ -31,7 +31,7 @@ class OperationsManager:
         return upcoming_tournaments_slugs
 
     def update_event_sets(self, event_id):
-        start_time = int(datetime.datetime.utcnow().timestamp())
+        start_time = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
 
         event = self.cosmos.get_event(event_id)
         if start_time < event["setsLastUpdated"]:
@@ -39,7 +39,7 @@ class OperationsManager:
 
         self.cosmos.update_event_sets_last_updated(event_id, start_time)
 
-        sets = self.api.get_event_sets_updated_after_timestamp(event_id, start_time)
+        sets = self.api.get_event_sets_updated_after_timestamp(event_id, event["setsLastUpdated"])
 
         self.logger.log(f"Updating {len(sets)} sets for event {event_id}")
 
