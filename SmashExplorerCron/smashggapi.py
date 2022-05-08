@@ -1,9 +1,11 @@
 import time
 from copy import copy
 from datetime import datetime
+import logging
 
 from graphqlclient import GraphQLClient, json
 
+SMASH_MELEE_GAME_ID = 1
 SMASH_ULTIMATE_GAME_ID = 1386
 
 
@@ -33,7 +35,8 @@ class API:
                 return json.loads(result)["data"]
             except:
                 time.sleep(2)
-                self.logger.log(f"Error {json.loads(result)} occured calling query {description} with {params}")
+                logging.exception("")
+                self.logger.log(f"Error {result} occured calling query {description} with {params}")
                 num_retries += 1
 
         return None
