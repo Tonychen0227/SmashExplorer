@@ -23,10 +23,10 @@ class API:
 
         self.logger = logger
 
-    def __call_api(self, description, input, params):
+    def __call_api(self, description, input, params, should_retry=True):
         num_retries = 0
 
-        while num_retries < 10:
+        while num_retries < 10 and should_retry:
             result = None
             try:
                 result = self.__get_client().execute(input, params)
@@ -35,6 +35,8 @@ class API:
                 time.sleep(2)
                 self.logger.log(f"Error {json.loads(result)} occured calling query {description} with {params}")
                 num_retries += 1
+
+        return None
 
     def make_paginated_calls(self, query_string, keys_array, params_base):
         total_pages = None
@@ -80,7 +82,7 @@ class API:
         params = {"beforeDate": before_date, "afterDate": after_date}
 
         tournaments = self.make_paginated_calls(query_string, ["tournaments"], params)
-        return [x for x in tournaments if x["numAttendees"] is not None and x["numAttendees"] >= 16]
+        return [x for x in tournaments if x["numAttendees"] is not None and x["numAttendees"] >= 10]
 
     def get_ult_event(self, event_id):
         query_string = '''
@@ -121,6 +123,10 @@ class API:
                 countryCode
                 slug
                 name
+                images {
+                  url
+                  ratio
+                }
                 events(filter:{published:true, videogameId: [1386]}) {
                   id
               }}}
@@ -133,6 +139,10 @@ class API:
                 countryCode
                 slug
                 name
+                images {
+                  url
+                  ratio
+                }
                 events(filter:{published:true, videogameId: [1386]}) {
                   id
                   state
@@ -157,7 +167,7 @@ class API:
 
         params = {"slug": tournament_slug}
 
-        ret = self.__call_api("Get Ult Tournament Events", query_string, params)
+        ret = self.__call_api("Get Ult Tournament Events", query_string, params, should_retry=False)
 
         if ret is None:
             result = self.__call_api("Get Ult Tournament Events BACKUP", backup_query_string, params)
@@ -167,6 +177,7 @@ class API:
                     "countryCode": result["tournament"]["countryCode"],
                     "slug": result["tournament"]["slug"],
                     "name": result["tournament"]["name"],
+                    "images": result["tournament"]["images"]
                     "events": self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["events"]])
                 }
             }
@@ -184,7 +195,7 @@ class API:
                 "slug": event["slug"],
                 "numEntrants": event["numEntrants"],
                 "standings": event["standings"]["nodes"]
-            } for event in ret["tournament"]["events"]
+            } for event in ret["tournament"]["events"] if event["numEntrants"] >= 10
         ]
 
     def get_ult_entrant(self, entrant_id):
