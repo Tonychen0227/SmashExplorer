@@ -14,8 +14,6 @@ if __name__ == '__main__':
     events_size = len(event_ids)
     for event_id in event_ids:
         logger.log(f"Minutely operation on {event_id} ({event_count} of {events_size})")
-        operations.get_and_create_event(event_id)
-        operations.get_and_create_entrants_for_event(event_id)
         operations.update_event_sets(event_id)
         event_count += 1
 
