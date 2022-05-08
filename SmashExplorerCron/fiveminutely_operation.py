@@ -17,3 +17,5 @@ if __name__ == '__main__':
         # operations.update_tracked_entrants_for_event(event["id"])
         operations.update_event_sets(event["id"])
         event_count += 1
+
+    logger.log("Minutely Script Complete")

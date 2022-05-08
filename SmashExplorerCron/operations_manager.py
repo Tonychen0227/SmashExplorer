@@ -19,7 +19,7 @@ class OperationsManager:
     def get_open_events(self):
         return self.cosmos.get_outstanding_events()
 
-    def get_tournament_slugs(self, days_back=1, days_forward=7):
+    def get_tournament_slugs(self, days_back=0, days_forward=7):
         date_now = datetime.datetime.now(datetime.timezone.utc)
 
         start_time = date_now - datetime.timedelta(days=days_back)

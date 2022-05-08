@@ -27,3 +27,5 @@ if __name__ == '__main__':
         logger.log(f"Daily operation on {event['id']} - {event_count} of {events_size}")
         operations.get_and_create_entrants_for_event(event["id"])
         event_count += 1
+
+    logger.log("Daily Script Complete")
