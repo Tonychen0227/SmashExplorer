@@ -29,6 +29,9 @@ if __name__ == '__main__':
     event_ids = list(operations.get_open_event_ids())
     events_size = len(event_ids)
     for event_id in event_ids:
+        if event_id in new_events:
+            logger.log(f"Skipping event {event_id} as it was already discovered in the current run")
+            continue
         logger.log(f"Hourly operation on {event_id} ({events_count} of {events_size})")
         operations.get_and_create_event(event_id)
         operations.get_and_create_entrants_for_event(event_id)
