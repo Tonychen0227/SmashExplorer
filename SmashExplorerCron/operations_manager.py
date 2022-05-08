@@ -16,18 +16,24 @@ class OperationsManager:
         self.api = api
         self.logger = logger
 
-    def get_new_tournament_slugs(self):
+    def get_open_events(self):
+        return self.cosmos.get_outstanding_events()
+
+    def get_tournament_slugs(self, days_back=1, days_forward=7):
         date_now = datetime.datetime.now(datetime.timezone.utc)
 
-        upcoming_tournaments = self.api.get_upcoming_ult_tournaments(date_now - datetime.timedelta(days=1), date_now + datetime.timedelta(weeks=1))
+        start_time = date_now - datetime.timedelta(days=days_back)
+        end_time = date_now + datetime.timedelta(days=days_forward)
+
+        upcoming_tournaments = self.api.get_upcoming_ult_tournaments(start_time, end_time)
 
         upcoming_tournaments_slugs = [tournament["slug"] for tournament in upcoming_tournaments]
+        nominated_tournaments = [] if "NOMINATED_TOURNAMENTS" not in os.environ else os.environ["NOMINATED_TOURNAMENTS"].split(" ")
 
-        if "NOMINATED_TOURNAMENTS" in os.environ:
-            upcoming_tournaments_slugs.extend(os.environ["NOMINATED_TOURNAMENTS"].split(" "))
+        self.logger.log(f"Returned {len(upcoming_tournaments_slugs)} upcoming tournaments "
+                        f"and {len(nominated_tournaments)} nominated tournaments")
 
-        self.logger.log(f"Returned {len(upcoming_tournaments_slugs)} upcoming tournaments")
-
+        upcoming_tournaments_slugs.extend(nominated_tournaments)
         return upcoming_tournaments_slugs
 
     def update_event_sets(self, event_id):
@@ -44,37 +50,44 @@ class OperationsManager:
         self.logger.log(f"Updating {len(sets)} sets for event {event_id}")
 
         for tournament_set in sets:
-            self.cosmos.create_set(event, tournament_set)
+            self.cosmos.create_set(tournament_set)
 
     def get_and_create_events_for_tournament(self, tournament_slug):
-        tournament_events = self.api.get_ult_tournament_events(tournament_slug)
+        events = self.api.get_ult_tournament_events(tournament_slug)
 
-        self.logger.log(f"Creating events for tournament {tournament_slug}, found {len(tournament_events['tournament']['events'])} events")
+        self.logger.log(f"Creating {len(events)} events for tournament {tournament_slug}")
 
-        events = self.cosmos.create_events(tournament_events)
-
-        for event in events:
-            self.get_and_create_entrants_for_event(event["id"])
-            self.update_event_sets(event["id"])
-
-    def get_open_events(self):
-        return self.cosmos.get_outstanding_events()
+        return self.cosmos.create_events(events)
 
     def get_and_create_entrants_for_event(self, event_id):
         event_entrants = self.api.get_ult_event_entrants(event_id)
-        existing_entrant_ids = set([x["id"] for x in self.cosmos.get_event_entrants(event_id)])
+        event_entrant_ids = [entrant["id"] for entrant in event_entrants]
+        database_entrant_ids = [x["id"] for x in self.cosmos.get_event_entrants(event_id)]
 
-        entrants_to_add = []
+        entrants_added = 0
+        entrants_deleted = 0
 
-        for proposed_entrant in event_entrants:
-            if str(proposed_entrant["id"]) in existing_entrant_ids:
-                continue
+        for entrant in event_entrants:
+            if entrant["id"] not in database_entrant_ids:
+                self.cosmos.create_entrant(entrant)
+                entrants_added += 1
 
-            entrants_to_add.append(proposed_entrant)
+        for db_id in database_entrant_ids:
+            if db_id not in event_entrant_ids:
+                self.cosmos.delete_entrant(db_id)
+                entrants_deleted += 1
 
-        self.logger.log(f"Creating {len(entrants_to_add)} entrants for event {event_id}")
+        self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} "
+                        f"({entrants_added} added, {entrants_deleted} removed)")
 
-        self.cosmos.create_entrants(event_id, entrants_to_add)
+    def update_event(self, event_id):
+        existing_event = self.cosmos.get_event(event_id)
+        new_event_data = self.api.get_ult_event(event_id)["event"]
+
+        for key in ["state", "name", "startAt", "createdAt", "updatedAt", "slug", "numEntrants", "standings"]:
+            existing_event[key] = new_event_data[key]
+
+        self.cosmos.update_event(existing_event)
 
     def update_tracked_entrants_for_event(self, event_id):
         vanity_links = self.cosmos.get_vanity_links(event_id)
@@ -83,17 +96,9 @@ class OperationsManager:
         for link in vanity_links:
             entrants |= set(link["entrantIds"])
 
-        self.logger.log(f"Creating entrants based on vanity links for event {event_id} with {len(entrants)} entrants")
+        self.logger.log(f"Creating {len(entrants)} entrants based on vanity links for event {event_id}")
 
         for entrant in entrants:
             api_event, api_entrant = self.api.get_ult_entrant(entrant)
 
-            self.cosmos.create_entrant(api_event, api_entrant)
-
-    def update_event_with_new_data(self, event_id):
-        existing_event = self.cosmos.get_event(event_id)
-        new_event_data = self.api.get_ult_event(event_id)["event"]
-        for key in ["state", "name", "startAt", "createdAt", "updatedAt", "slug", "numEntrants", "standings"]:
-            existing_event[key] = new_event_data[key]
-
-        self.cosmos.update_event(existing_event)
+            self.cosmos.create_entrant(api_entrant)

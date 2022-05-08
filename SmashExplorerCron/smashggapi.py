@@ -36,9 +36,32 @@ class API:
                 self.logger.log(f"Error {json.loads(result)} occured calling query {description} with {params}")
                 num_retries += 1
 
-    def get_upcoming_ult_tournaments(self, start_after: datetime, start_before: datetime):
-        start_after = int(start_after.timestamp())
-        start_before = int(start_before.timestamp())
+    def make_paginated_calls(self, query_string, keys_array, params_base):
+        total_pages = None
+        current_page = 1
+
+        all_results = []
+
+        while total_pages is None or current_page <= total_pages:
+            params = copy(params_base)
+            params["page"] = current_page
+
+            results = self.__call_api(f"Get Upcoming Ult {keys_array}", query_string, params)
+
+            for key in keys_array:
+                results = results[key]
+
+            total_pages = results["pageInfo"]["totalPages"]
+
+            all_results.extend(results["nodes"])
+
+            current_page += 1
+
+        return all_results
+
+    def get_upcoming_ult_tournaments(self, start_time: datetime, end_time: datetime):
+        after_date = int(start_time.timestamp())
+        before_date = int(end_time.timestamp())
         query_string = '''
             query TournamentsQuery($beforeDate: Timestamp, $afterDate: Timestamp, $page: Int) {
               tournaments(query:{page: $page, perPage: 500, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1386], published:true, publiclySearchable:true}}) {
@@ -47,41 +70,17 @@ class API:
                   totalPages
                 }
                 nodes {
-                  city
-                  countryCode
                   slug
-                  name
-                  startAt
                   numAttendees
                 }
               }
             }
         '''
 
-        params = {"beforeDate": start_before, "afterDate": start_after}
+        params = {"beforeDate": before_date, "afterDate": after_date}
 
-        current_page = 1
-        total_pages = 2
-
-        tournaments = []
-
-        while current_page <= total_pages:
-            params_temp = copy(params)
-            params_temp["page"] = current_page
-
-            results = self.__call_api("Get Upcoming Ult Tournaments", query_string, params_temp)
-
-            def filter_events(tournament):
-                return tournament["numAttendees"] is not None and tournament["numAttendees"] >= 16
-
-            tournaments_filtered = list(filter(filter_events, results["tournaments"]["nodes"]))
-
-            tournaments.extend(tournaments_filtered)
-            total_pages = results["tournaments"]["pageInfo"]["totalPages"]
-
-            current_page += 1
-
-        return tournaments
+        tournaments = self.make_paginated_calls(query_string, ["tournaments"], params)
+        return [x for x in tournaments if x["numAttendees"] is not None and x["numAttendees"] >= 16]
 
     def get_ult_event(self, event_id):
         query_string = '''
@@ -112,37 +111,7 @@ class API:
         return self.__call_api("Get single event", query_string, {"eventId": event_id})
 
     def get_ult_events_one_by_one(self, event_ids):
-        query_string = '''
-          query EventQuery($eventId: ID) {
-            event(id: $eventId) {
-              id
-              state
-              createdAt
-              updatedAt
-              startAt
-              name
-              slug
-              numEntrants
-              standings(query: {perPage: 128}) {
-                nodes {
-                  placement
-                  entrant {
-                    name
-                    initialSeedNum
-                    isDisqualified
-                  }
-                }
-              }
-            }
-          }
-          '''
-
-        results = []
-
-        for event_id in event_ids:
-            results.append(self.get_ult_event(event_id)["event"])
-
-        return results
+        return [self.get_ult_event(event_id)["event"] for event_id in event_ids]
 
     def get_ult_tournament_events(self, tournament_slug):
         backup_query_string = '''
@@ -202,7 +171,21 @@ class API:
                 }
             }
 
-        return ret
+        return [
+            {
+                "tournamentName": ret["tournament"]["name"],
+                "tournamentLocation": f"{ret['tournament']['city']}, {ret['tournament']['countryCode']}",
+                "state": event["state"],
+                "id": str(event["id"]),
+                "name": event["name"],
+                "startAt": event["startAt"],
+                "createdAt": event["createdAt"],
+                "updatedAt": event["updatedAt"],
+                "slug": event["slug"],
+                "numEntrants": event["numEntrants"],
+                "standings": event["standings"]["nodes"]
+            } for event in ret["tournament"]["events"]
+        ]
 
     def get_ult_entrant(self, entrant_id):
         query_string = '''
@@ -277,20 +260,25 @@ class API:
             }
             '''
 
-        current_page = 1
-        total_pages = 2
+        params = {"eventId": event_id}
+        entrants = self.make_paginated_calls(query_string, ["event", "entrants"], params)
 
-        entrants = []
-
-        while current_page <= total_pages:
-            params = {"eventId": event_id, "page": current_page}
-            results = self.__call_api("Get Entrants For Event", query_string, params)
-            entrants.extend(results["event"]["entrants"]["nodes"])
-            total_pages = results["event"]["entrants"]["pageInfo"]["totalPages"]
-
-            current_page += 1
-
-        return entrants
+        return [
+            {
+                "eventId": event_id,
+                "name": entrant["name"],
+                "placement": None if entrant["standing"] is None else entrant["standing"]["placement"],
+                "id": str(entrant["id"]),
+                "seeding": entrant["initialSeedNum"],
+                "additionalInfo": [
+                    {
+                        "urls": [x for x in participant["user"]["authorizations"] if x is not None],
+                        "location": participant["user"]["location"]
+                    } if participant["user"] is not None else None
+                    for participant in entrant["participants"]
+                ]
+            } for entrant in entrants
+        ]
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
@@ -311,6 +299,8 @@ class API:
                     displayScore
                     winnerId
                     round
+                    wPlacement
+                    lPlacement
                     phaseGroup{
                       phase {
                         name
@@ -340,20 +330,26 @@ class API:
         if start_timestamp is None:
             start_timestamp = int(datetime.fromisocalendar(1971, 1, 1).timestamp())
 
-        params_root = {"eventId": event_id, "updatedAfter": start_timestamp}
-        current_page = 1
-        total_pages = 2
+        params = {"eventId": event_id, "updatedAfter": start_timestamp}
 
-        sets = []
+        sets = self.make_paginated_calls(query_string, ["event", "sets"], params)
 
-        while current_page <= total_pages:
-            params = copy(params_root)
-            params["page"] = current_page
-
-            results = self.__call_api("Get Sets For Event", query_string, params)
-            sets.extend(results["event"]["sets"]["nodes"])
-            total_pages = results["event"]["sets"]["pageInfo"]["totalPages"]
-
-            current_page += 1
-
-        return sets
+        return [
+            {
+                "id": str(tournament_set["id"]),
+                "eventId": event_id,
+                "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
+                "phaseOrder": tournament_set["phaseGroup"]["phase"]["phaseOrder"],
+                "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
+                "entrants":
+                [
+                    {
+                        "name": None if x["entrant"] is None else x["entrant"]["name"],
+                        "id": None if x["entrant"] is None else x["entrant"]["id"],
+                        "seeding": None if x["entrant"] is None else x["entrant"]["initialSeedNum"],
+                        "prereqId": x["prereqId"],
+                        "prereqType": x["prereqType"]
+                    } for x in tournament_set["slots"]
+                ]
+            } for tournament_set in sets
+        ]
