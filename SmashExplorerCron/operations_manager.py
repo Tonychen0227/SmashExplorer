@@ -69,8 +69,10 @@ class OperationsManager:
 
     def get_and_create_entrants_for_event(self, event_id):
         event_entrants = self.api.get_ult_event_entrants(event_id)
+        db_entrants = self.cosmos.get_event_entrants(event_id)
+
         event_entrant_ids = [entrant["id"] for entrant in event_entrants]
-        database_entrant_ids = [x["id"] for x in self.cosmos.get_event_entrants(event_id)]
+        database_entrant_ids = [entrant["id"] for entrant in db_entrants]
 
         entrants_added = 0
         entrants_deleted = 0
@@ -80,9 +82,9 @@ class OperationsManager:
                 self.cosmos.create_entrant(entrant)
                 entrants_added += 1
 
-        for db_id in database_entrant_ids:
-            if db_id not in event_entrant_ids:
-                self.cosmos.delete_entrant(db_id)
+        for entrant in db_entrants:
+            if entrant["id"] not in event_entrant_ids:
+                self.cosmos.delete_entrant(entrant)
                 entrants_deleted += 1
 
         self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} "

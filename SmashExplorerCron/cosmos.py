@@ -22,8 +22,8 @@ class CosmosDB:
                                              partition_key=event_id)
         return response
 
-    def delete_entrant(self, entrant_id):
-        self.entrants.delete_item(id=entrant_id, partition_key=entrant_id)
+    def delete_entrant(self, entrant):
+        self.entrants.delete_item(entrant, partition_key=entrant["id"])
     # endregion Entrants
 
     # region Events
