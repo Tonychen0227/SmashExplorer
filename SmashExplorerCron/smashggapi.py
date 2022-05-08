@@ -299,7 +299,7 @@ class API:
               event(id:$eventId) {
                 id
                 slug
-                sets(page: $page, perPage: 20, sortType:ROUND, 
+                sets(page: $page, perPage: 25, sortType:ROUND, 
                   filters:{showByes:false, hideEmpty:true, updatedAfter: $updatedAfter}) {
                   pageInfo {
                     totalPages
