@@ -61,6 +61,9 @@ class CosmosDB:
                                            enable_cross_partition_query=True)
         return response
 
+    def update_event(self, new_event):
+        return self.__upsert_event(new_event)
+
     def create_event(self, tournament, event, sets_last_updated):
         root_json = {
             "tournamentSlug": tournament["slug"],
@@ -92,6 +95,7 @@ class CosmosDB:
     def create_set(self, event, set):
         set["id"] = str(set["id"])
         set["eventId"] = str(event["id"])
+        set["bracketType"] = set["phaseGroup"]["phase"]["bracketType"]
         set["phaseOrder"] = set["phaseGroup"]["phase"]["phaseOrder"]
         set["phaseName"] = set["phaseGroup"]["phase"]["name"]
         set["entrants"] = [

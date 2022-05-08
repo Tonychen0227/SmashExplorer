@@ -89,3 +89,11 @@ class OperationsManager:
             api_event, api_entrant = self.api.get_ult_entrant(entrant)
 
             self.cosmos.create_entrant(api_event, api_entrant)
+
+    def update_event_with_new_data(self, event_id):
+        existing_event = self.cosmos.get_event(event_id)
+        new_event_data = self.api.get_ult_event(event_id)["event"]
+        for key in ["state", "name", "startAt", "createdAt", "updatedAt", "slug", "numEntrants", "standings"]:
+            existing_event[key] = new_event_data[key]
+
+        self.cosmos.update_event(existing_event)

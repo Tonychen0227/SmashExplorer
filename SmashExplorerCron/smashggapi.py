@@ -83,6 +83,34 @@ class API:
 
         return tournaments
 
+    def get_ult_event(self, event_id):
+        query_string = '''
+          query EventQuery($eventId: ID) {
+            event(id: $eventId) {
+              id
+              state
+              createdAt
+              updatedAt
+              startAt
+              name
+              slug
+              numEntrants
+              standings(query: {perPage: 128}) {
+                nodes {
+                  placement
+                  entrant {
+                    name
+                    initialSeedNum
+                    isDisqualified
+                  }
+                }
+              }
+            }
+          }
+          '''
+
+        return self.__call_api("Get single event", query_string, {"eventId": event_id})
+
     def get_ult_events_one_by_one(self, event_ids):
         query_string = '''
           query EventQuery($eventId: ID) {
@@ -112,8 +140,7 @@ class API:
         results = []
 
         for event_id in event_ids:
-            query_result = self.__call_api("Get single event", query_string, {"eventId": event_id})
-            results.append(query_result["event"])
+            results.append(self.get_ult_event(event_id)["event"])
 
         return results
 
@@ -288,6 +315,7 @@ class API:
                       phase {
                         name
                         phaseOrder
+                        bracketType
                       }
                     }
                     slots {

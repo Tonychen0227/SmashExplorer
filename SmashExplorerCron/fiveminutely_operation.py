@@ -13,6 +13,7 @@ if __name__ == '__main__':
     open_events = list(operations.get_open_events())
     for event in open_events:
         logger.log(f"Minutely operation on {event['id']} ({event_count} of {len(open_events)})")
+        operations.update_event_with_new_data(event["id"])
         operations.update_tracked_entrants_for_event(event["id"])
         operations.update_event_sets(event["id"])
         event_count += 1
