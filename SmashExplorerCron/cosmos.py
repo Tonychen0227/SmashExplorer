@@ -47,7 +47,7 @@ class CosmosDB:
     def get_outstanding_event_ids(self):
         response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state <> \"COMPLETED\"",
                                            enable_cross_partition_query=True)
-        return response
+        return [x["id"] for x in response]
 
     def update_event_sets_last_updated(self, event_id, last_updated):
         event = self.get_event(event_id)
