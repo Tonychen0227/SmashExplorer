@@ -177,7 +177,7 @@ class API:
                     "countryCode": result["tournament"]["countryCode"],
                     "slug": result["tournament"]["slug"],
                     "name": result["tournament"]["name"],
-                    "images": result["tournament"]["images"]
+                    "images": result["tournament"]["images"],
                     "events": self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["events"]])
                 }
             }
