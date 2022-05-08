@@ -86,7 +86,7 @@ class API:
     def get_ult_events_one_by_one(self, event_ids):
         query_string = '''
           query EventQuery($eventId: ID) {
-            event(filter:{published:true, videogameId: [1386]}) {
+            event(id: $eventId) {
               id
               state
               createdAt
@@ -113,7 +113,7 @@ class API:
 
         for event_id in event_ids:
             query_result = self.__call_api("Get single event", query_string, {"eventId": event_id})
-            results.append(query_result)
+            results.append(query_result["event"])
 
         return results
 
@@ -165,7 +165,15 @@ class API:
 
         if ret is None:
             result = self.__call_api("Get Ult Tournament Events BACKUP", backup_query_string, params)
-            ret = self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["events"]])
+            ret = {
+                "tournament": {
+                    "city": result["tournament"]["city"],
+                    "countryCode": result["tournament"]["countryCode"],
+                    "slug": result["tournament"]["slug"],
+                    "name": result["tournament"]["name"],
+                    "events": self.get_ult_events_one_by_one([x["id"] for x in result["tournament"]["events"]])
+                }
+            }
 
         return ret
 

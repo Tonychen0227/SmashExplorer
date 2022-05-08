@@ -49,7 +49,7 @@ class OperationsManager:
     def get_and_create_events_for_tournament(self, tournament_slug):
         tournament_events = self.api.get_ult_tournament_events(tournament_slug)
 
-        self.logger.log(f"Creating events for tournament {tournament_slug}, found {len(tournament_events)} events")
+        self.logger.log(f"Creating events for tournament {tournament_slug}, found {len(tournament_events['tournament']['events'])} events")
 
         events = self.cosmos.create_events(tournament_events)
 
