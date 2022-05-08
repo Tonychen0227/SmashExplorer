@@ -184,8 +184,10 @@ class API:
 
         return [
             {
+                "tournamentSlug": ret["tournament"]["slug"],
                 "tournamentName": ret["tournament"]["name"],
                 "tournamentLocation": f"{ret['tournament']['city']}, {ret['tournament']['countryCode']}",
+                "tournamentImages": ret["tournament"]["images"],
                 "state": event["state"],
                 "id": str(event["id"]),
                 "name": event["name"],
