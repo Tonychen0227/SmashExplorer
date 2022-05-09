@@ -5,7 +5,7 @@ from operations_manager import OperationsManager
 
 
 if __name__ == '__main__':
-    logger = Logger(f"{os.environ['SMASH_EXPLORER_LOG_ROOT']}/daily_operation")
+    logger = Logger(f"{os.environ['SMASH_EXPLORER_LOG_ROOT']}/hourly")
     operations = OperationsManager(logger)
     logger.log("Starting Hourly Script")
 
