@@ -15,8 +15,8 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="inputSlug">Tournament slug</label>
-                @Html.TextBoxFor(model => model.Slug, new { @class = "form-control", placeholder = "Enter tournament slug" })
-                <small class="form-text text-muted">E.g. genesis or genesis-8 for https://smash.gg/tournaments/genesis-8</small>
+                @Html.TextBoxFor(model => model.Slug, new { @class = "form-control", placeholder = "Enter tournament slug/URL" })
+                <small class="form-text text-muted">E.g. https://smash.gg/tournament/genesis-8 or "genesis-8". Dates will be ignored if you pass in URL.</small>
             </div>
             <div class="form-group">
                 <label for="startAt">Starts after (UTC)</label>
@@ -34,7 +34,8 @@
             }
             <button type="submit" onclick="updateChosenEventId(null)" class="btn btn-primary">Submit</button>
         </div>
-        <div class="col-md-8" style="overflow-y: scroll; height:350px">
+        var height = string.IsNullOrEmpty(Model.ChosenEventId) ? "350px" : "100px";
+        <div class="col-md-8" style="overflow-y: scroll; height: @height ">
             <table class="table table-hover">
                 <tr>
                     <th>Event</th>
@@ -89,7 +90,7 @@
     </div>
     <div class="col-md-4">
         <h2>Upset Thread</h2>
-        <p>See what upsets happened so far at this tournament.</p>
+        <p>See what upsets happened so far at this tournament. Notable sets also included - sets that went to last game, but the upset was not completed.</p>
         @if (string.IsNullOrEmpty(Model.ChosenEventId))
         {
             @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })

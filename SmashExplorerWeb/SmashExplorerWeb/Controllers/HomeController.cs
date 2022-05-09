@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 
@@ -41,13 +42,34 @@ namespace SmashExplorerWeb.Controllers
                 return View(filterModel);
             }
 
+            var StartTrackingDate = DateTime.ParseExact(filterModel.StartTrackingDate, DATE_FORMAT, null);
+            var EndTrackingDate = DateTime.ParseExact(filterModel.EndTrackingDate, DATE_FORMAT, null);
+
+            var startAtAfter = DateTime.ParseExact(filterModel.StartAtAfter, DATE_FORMAT, null);
+            var startAtBefore = DateTime.ParseExact(filterModel.StartAtBefore, DATE_FORMAT, null);
+
             filterModel.Events = DefaultEvents;
+            filterModel.Slug = string.Join("-", filterModel.Slug.Split(' ')) ?? String.Empty;
 
-            DateTime StartTrackingDate = DateTime.ParseExact(filterModel.StartTrackingDate, DATE_FORMAT, null);
-            DateTime EndTrackingDate = DateTime.ParseExact(filterModel.EndTrackingDate, DATE_FORMAT, null);
+            if (filterModel.Slug.Contains("smash.gg"))
+            {
+                try
+                {
+                    var slugArray = filterModel.Slug.Split('/').ToList();
+                    var index = slugArray.FindIndex(x => x.Contains("tournament"));
 
-            DateTime startAtAfter = DateTime.ParseExact(filterModel.StartAtAfter, DATE_FORMAT, null);
-            DateTime startAtBefore = DateTime.ParseExact(filterModel.StartAtBefore, DATE_FORMAT, null);
+                    if (index + 1 >= slugArray.Count)
+                        throw new ArgumentNullException();
+
+                    filterModel.Slug = slugArray[index + 1];
+                    startAtAfter = StartTrackingDate;
+                    startAtBefore = EndTrackingDate;
+                } catch (ArgumentNullException)
+                {
+                    filterModel.ErrorMessage = "Invalid smash.gg URL detected. Returning default events.";
+                    return View(filterModel);
+                }
+            }
 
             if (startAtAfter > EndTrackingDate || startAtBefore < StartTrackingDate)
             {
