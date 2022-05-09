@@ -6,7 +6,7 @@
 </div>
 
 <div class="row">
-    @using (Html.BeginForm("Index", "Home", FormMethod.Post))
+    @using (Html.BeginForm(null, null, FormMethod.Post))
     {
         @Html.HiddenFor(model => model.StartTrackingDate)
         @Html.HiddenFor(model => model.EndTrackingDate)

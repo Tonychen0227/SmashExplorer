@@ -7,7 +7,7 @@ namespace SmashExplorerWeb.Controllers
     {
         public async Task<ActionResult> Index(string id)
         {
-            ViewBag.Title = $"Select Entrants for event {id}";
+            ViewBag.Title = $"Smash Explorer - Select Entrants {id}";
 
             return View();
         }

@@ -19,7 +19,7 @@ namespace SmashExplorerWeb.Controllers
                 DefaultEvents = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync();
             }
 
-            ViewBag.Title = "Home Page";
+            ViewBag.Title = "Smash Explorer";
 
             var startingModel = new TournamentFilterModel()
             {
@@ -36,6 +36,8 @@ namespace SmashExplorerWeb.Controllers
         [HttpPost]
         public async Task<ActionResult> Index(TournamentFilterModel filterModel)
         {
+            ViewBag.Title = "Smash Explorer";
+
             if (filterModel.ChosenEventId != null)
             {
                 filterModel.Events = new List<Event>() { await SmashExplorerDatabase.Instance.GetEvent(filterModel.ChosenEventId) };
