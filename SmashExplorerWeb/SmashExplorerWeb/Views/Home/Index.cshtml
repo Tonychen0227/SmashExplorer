@@ -6,17 +6,13 @@
 </div>
 
 <div class="row">
-    <div class="col-md-4">
-        @using (Html.BeginForm("Index", "Home", FormMethod.Post))
-        {
-            for (int i = 0; i < Model.Events.Count; i++)
-            {
-                @Html.HiddenFor(model => Model.Events[i])
-            }
-            @Html.HiddenFor(model => model.ChosenEventId)
-            @Html.HiddenFor(model => model.StartTrackingDate)
-            @Html.HiddenFor(model => model.EndTrackingDate)
-            @Html.HiddenFor(model => model.ErrorMessage)
+    @using (Html.BeginForm("Index", "Home", FormMethod.Post))
+    {
+        @Html.HiddenFor(model => model.StartTrackingDate)
+        @Html.HiddenFor(model => model.EndTrackingDate)
+        @Html.HiddenFor(model => model.ErrorMessage)
+        @Html.HiddenFor(model => model.ChosenEventId, new { id = "chosenEventId" })
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="inputSlug">Tournament slug</label>
                 @Html.TextBoxFor(model => model.Slug, new { @class = "form-control", placeholder = "Enter tournament slug" })
@@ -31,45 +27,13 @@
                 @Html.TextBoxFor(model => model.StartAtBefore, new { type = "date", @class = "form-control" })
                 <small class="form-text text-muted">Currently tracking: @Model.StartTrackingDate to @Model.EndTrackingDate </small>
             </div>
-            if (Model.ErrorMessage != null)
+            @if (Model.ErrorMessage != null)
             {
                 <p style="color:red">@Model.ErrorMessage</p>
 
             }
-            <button type="submit" class="btn btn-primary">Submit</button>
-        }
-    </div>
-    @using (Html.BeginForm("Index", "Home", FormMethod.Post))
-    {
-        for (int i = 0; i < Model.Events.Count; i++)
-        {
-            @Html.HiddenFor(model => Model.Events[i].Id)
-            @Html.HiddenFor(model => Model.Events[i].State)
-            @Html.HiddenFor(model => Model.Events[i].TournamentName)
-            @Html.HiddenFor(model => Model.Events[i].TournamentSlug)
-            @Html.HiddenFor(model => Model.Events[i].TournamentLocation.City)
-            @Html.HiddenFor(model => Model.Events[i].TournamentLocation.AddrState)
-            @Html.HiddenFor(model => Model.Events[i].TournamentLocation.CountryCode)
-            for (int x = 0; x < Model.Events[i].TournamentImages.Count; x++)
-            {
-                @Html.HiddenFor(model => Model.Events[i].TournamentImages[x].url)
-                @Html.HiddenFor(model => Model.Events[i].TournamentImages[x].ratio)
-            }
-            @Html.HiddenFor(model => Model.Events[i].Name)
-            @Html.HiddenFor(model => Model.Events[i].StartAt)
-            @Html.HiddenFor(model => Model.Events[i].CreatedAt)
-            @Html.HiddenFor(model => Model.Events[i].UpdatedAt)
-            @Html.HiddenFor(model => Model.Events[i].Slug)
-            @Html.HiddenFor(model => Model.Events[i].NumEntrants)
-
-        }
-        @Html.HiddenFor(model => model.StartTrackingDate)
-        @Html.HiddenFor(model => model.EndTrackingDate)
-        @Html.HiddenFor(model => model.ErrorMessage)
-        @Html.HiddenFor(model => model.Slug)
-        @Html.HiddenFor(model => model.StartAtAfter)
-        @Html.HiddenFor(model => model.StartAtBefore)
-        @Html.HiddenFor(model => model.ChosenEventId, new { id = "chosenEventId" })
+            <button type="submit" onclick="updateChosenEventId(null)" class="btn btn-primary">Submit</button>
+        </div>
         <div class="col-md-8" style="overflow-y: scroll; height:350px">
             <table class="table table-hover">
                 <tr>
@@ -100,7 +64,7 @@
                             @DateTimeOffset.FromUnixTimeSeconds(returnedEvent.StartAt).ToString("g") UTC
                         </td>
                         <td>@returnedEvent.NumEntrants</td>
-                        <td><button onclick="error_text(@returnedEvent.Id)" type="submit" class="btn btn-primary">Select</button></td>
+                        <td><button onclick="updateChosenEventId(@returnedEvent.Id)" type="submit" class="btn btn-primary">Select</button></td>
                     </tr>
                 }
             </table>
@@ -110,11 +74,13 @@
 <div class="row">
     <div class="col-md-8">
         <h2>Selected Tournament</h2>
-        @Model.ChosenEventId
         @if (Model.ChosenEventId != null)
-            {
-                <p>@Model.ChosenEventId</p>
-            }
+        {
+            <p>@Model.ChosenEventId</p>
+        } else
+        {
+            <p>No Tournament Chosen</p>
+        }
     </div>
 </div>
 <div class="row">
@@ -123,17 +89,41 @@
         <p>
             Allows you to select entrants (next page) and then generate a link to follow your selected entrants through the rest of the tournament.
         </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301870">Explore</a></p>
+        @if (string.IsNullOrEmpty(Model.ChosenEventId))
+        {
+            @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })
+        }
+        else
+        {
+            @Html.ActionLink("Explore Entrants", null, "SelectEntrants", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", id = Model.ChosenEventId })
+
+        }
     </div>
     <div class="col-md-4">
         <h2>Upset Thread</h2>
         <p>See what upsets happened so far at this tournament.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301871">Get Upsets</a></p>
+        @if (string.IsNullOrEmpty(Model.ChosenEventId))
+        {
+            @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })
+        }
+        else
+        {
+            @Html.ActionLink("Check Upsets", null, "Upsets", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", id = Model.ChosenEventId })
+
+        }
     </div>
     <div class="col-md-4">
         <h2>Seed Visualizer</h2>
         <p>Check out how well the event was seeded. SPR = how many farther (in terms of rounds) someone went vs what they were seeded to get. Top 128 Only.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301872">Seed Visualizer</a></p>
+        @if (string.IsNullOrEmpty(Model.ChosenEventId))
+        {
+            @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })
+        }
+        else
+        {
+            @Html.ActionLink("Seed Visualizer", null, "VisualizeSeeds", new { id = Model.ChosenEventId }, new { @class = "btn btn-default" })
+
+        }
     </div>
 </div>
 

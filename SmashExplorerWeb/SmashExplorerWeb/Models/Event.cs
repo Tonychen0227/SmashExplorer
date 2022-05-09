@@ -8,7 +8,19 @@ public class Event
     public string TournamentName { get; set; }
     public string TournamentSlug { get; set; }
     public Location TournamentLocation { get; set; }
-    public List<Image> TournamentImages { get; set; }
+    private List<Image> tournamentImages { get; set; }
+    public List<Image> TournamentImages
+    {
+        get
+        {
+            return tournamentImages;
+        }
+
+        set
+        {
+            tournamentImages = value ?? new List<Image>();
+        }
+    }
     public string Name { get; set; }
     public long StartAt { get; set; }
     public long CreatedAt { get; set; }
@@ -16,5 +28,17 @@ public class Event
     public string Slug { get; set; }
     public int NumEntrants { get; set; }
     public long SetsLastUpdated { get; set; }
-    public List<Standing> Standings { get; set; }
+    private List<Standing> standings { get; set; }
+    public List<Standing> Standings
+    {
+        get
+        {
+            return standings;
+        }
+
+        set
+        {
+            standings = value ?? new List<Standing>();
+        }
+    }
 }

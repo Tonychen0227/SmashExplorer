@@ -37,14 +37,11 @@ namespace SmashExplorerWeb.Controllers
         {
             if (filterModel.ChosenEventId != null)
             {
+                filterModel.Events = new List<Event>() { await SmashExplorerDatabase.Instance.GetEvent(filterModel.ChosenEventId) };
                 return View(filterModel);
             }
 
-            if (filterModel.Slug.Length < 4)
-            {
-                filterModel.ErrorMessage = "Slug must be at least size 4";
-                return View(filterModel);
-            }
+            filterModel.Events = DefaultEvents;
 
             DateTime StartTrackingDate = DateTime.ParseExact(filterModel.StartTrackingDate, DATE_FORMAT, null);
             DateTime EndTrackingDate = DateTime.ParseExact(filterModel.EndTrackingDate, DATE_FORMAT, null);
@@ -54,12 +51,19 @@ namespace SmashExplorerWeb.Controllers
 
             if (startAtAfter > EndTrackingDate || startAtBefore < StartTrackingDate)
             {
-                filterModel.ErrorMessage = "Filter dates must be between tracking dates";
+                filterModel.ErrorMessage = "Filter dates must be between tracking dates. Returning default events.";
                 return View(filterModel);
             }
 
-            filterModel.Events = await SmashExplorerDatabase.Instance.GetEventsBySlugAndDatesAsync(filterModel.Slug.ToLower(), startAtAfter, startAtBefore);
+            var queriedEvents = await SmashExplorerDatabase.Instance.GetEventsBySlugAndDatesAsync(filterModel.Slug?.ToLower() ?? "", startAtAfter, startAtBefore);
 
+            if (queriedEvents.Count == 0)
+            {
+                filterModel.ErrorMessage = "Filter returned no entries. Returning default events.";
+                return View(filterModel);
+            }
+
+            filterModel.Events = queriedEvents;
             return View(filterModel);
         }
     }

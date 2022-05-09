@@ -75,6 +75,11 @@ public class SmashExplorerDatabase
         return results;
     }
 
+    public async Task<Event> GetEvent(string eventId)
+    {
+        return await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
+    }
+
     public async Task<List<Event>> GetEventsBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
     {
         var results = new List<Event>();
