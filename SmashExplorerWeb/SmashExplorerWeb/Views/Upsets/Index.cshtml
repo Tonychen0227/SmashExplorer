@@ -1,3 +1,36 @@
-﻿<div class="jumbotron">
-    <h1>Upsets</h1>
+﻿@model UpsetsModel
+
+<div class="jumbotron">
+    <h1>Upsets Thread</h1>
+    <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
+</div>
+
+<div class="row">
+    
+    @for (var index = 0; index < 4; index++)
+    {
+        var items = new List<Dictionary<string, List<Upset>>>() { Model.WinnersUpsets, Model.LosersUpsets, Model.WinnersNotable, Model.LosersNotable };
+        var descriptions = new List<string>() { "Upsets - Winners", "Upsets - Losers", "Notable - Winners", "Notable - Losers" };
+        var item = items[index];
+        <div class="col-md-6" style="overflow-y: scroll; height: 500px ">
+            <h3>@descriptions[index]</h3>
+            @foreach (var phase in item.Keys.Reverse())
+            {
+                <h4>@phase</h4>
+                <table class="table table-hover">
+                    <tr>
+                        <th>Score</th>
+                        <th>Upset Factor</th>
+                    </tr>
+                    @foreach (var upset in item[phase])
+                    {
+                        <tr>
+                            <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                            <td  class="col-md-3">@upset.UpsetFactor</td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+    }
 </div>

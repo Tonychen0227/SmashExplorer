@@ -103,7 +103,7 @@
     </div>
     <div class="col-md-4">
         <h2>Seed Visualizer</h2>
-        <p>Check out how well the event was seeded. SPR = how many farther (in terms of rounds) someone went vs what they were seeded to get. Top 128 Only.</p>
+        <p>Check out how well the event was seeded. SPR = how much farther (in terms of rounds) someone went vs what they were seeded to get. Top 128 Only.</p>
         @if (string.IsNullOrEmpty(Model.ChosenEventId))
         {
             @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })

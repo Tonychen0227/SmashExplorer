@@ -8,6 +8,8 @@ from graphqlclient import GraphQLClient, json
 SMASH_MELEE_GAME_ID = 1
 SMASH_ULTIMATE_GAME_ID = 1386
 
+KEY_PLACEMENTS = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097]
+
 
 class API:
     def __get_client(self):
@@ -24,6 +26,13 @@ class API:
             self.clients.append(client)
 
         self.logger = logger
+        self.placement_to_round = {}
+
+        for index in range(0, len(KEY_PLACEMENTS) - 1):
+            bottom_placement = KEY_PLACEMENTS[index]
+            top_placement = KEY_PLACEMENTS[index + 1]
+            for placement in range(bottom_placement, top_placement):
+                self.placement_to_round[placement] = index
 
     def __call_api(self, description, input, params):
         num_retries = 0
@@ -259,6 +268,50 @@ class API:
             } for entrant in entrants
         ]
 
+    def enrich_with_upsets_details(self, tournament_set):
+        tournament_set["isUpsetOrNotable"] = False
+
+        if tournament_set["winnerId"] is None:
+            return tournament_set
+
+        if len(tournament_set["entrants"]) != 2:
+            return tournament_set
+
+        winner_seed = [x["seeding"] for x in tournament_set["entrants"] if x["id"] == tournament_set["winnerId"]][0]
+        winner_seed_round = self.placement_to_round[winner_seed]
+
+        loser_seed = [x["seeding"] for x in tournament_set["entrants"] if x["id"] != tournament_set["winnerId"]][0]
+        loser_seed_round = self.placement_to_round[loser_seed]
+
+        if loser_seed_round == winner_seed_round:
+            return tournament_set
+
+        if winner_seed_round > loser_seed_round:
+            tournament_set["isUpsetOrNotable"] = True
+            return tournament_set
+
+        if tournament_set["displayScore"] == "DQ":
+            return tournament_set
+
+        display_score = tournament_set["displayScore"]
+        display_score = display_score.replace(tournament_set["entrants"][0]["name"], f"\"{tournament_set['entrants'][0]['id']}\":")
+        display_score = display_score.replace(tournament_set["entrants"][1]["name"], f"\"{tournament_set['entrants'][1]['id']}\":")
+        display_score = "{" + display_score + "}"
+        display_score = display_score.replace(" - ", ", ")
+        display_score = display_score.replace("W", "\"W\"")
+        display_score = display_score.replace("L", "\"L\"")
+
+        score = json.loads(display_score)
+
+        if (score[str(tournament_set["winnerId"])]) == "W":
+            return tournament_set
+
+        if abs(list(score.values())[0] - list(score.values())[1]) != 1:
+            return tournament_set
+
+        tournament_set["isUpsetOrNotable"] = True
+        return tournament_set
+
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
             query EventSetsQuery($eventId: ID, $page: Int, $updatedAfter: Timestamp) {
@@ -328,12 +381,12 @@ class API:
         sets = self.make_paginated_calls(query_string, ["event", "sets"], params)
 
         return [
-            {
+            self.enrich_with_upsets_details({
                 "id": str(tournament_set["id"]),
                 "eventId": event_id,
                 "fullRoundText": tournament_set["fullRoundText"],
                 "displayScore": tournament_set["displayScore"],
-                "winnerId": tournament_set["winnerId"],
+                "winnerId": str(tournament_set["winnerId"]),
                 "round": tournament_set["round"],
                 "wPlacement": tournament_set["wPlacement"],
                 "lPlacement": tournament_set["lPlacement"],
@@ -345,12 +398,12 @@ class API:
                 [
                     {
                         "name": None if x["entrant"] is None else x["entrant"]["name"],
-                        "id": None if x["entrant"] is None else x["entrant"]["id"],
+                        "id": None if x["entrant"] is None else str(x["entrant"]["id"]),
                         "seeding": None if x["entrant"] is None else x["entrant"]["initialSeedNum"],
                         "prereqId": x["prereqId"],
                         "prereqType": x["prereqType"]
                     } for x in tournament_set["slots"]
                 ],
                 "stream": tournament_set["stream"]
-            } for tournament_set in sets
+            }) for tournament_set in sets
         ]

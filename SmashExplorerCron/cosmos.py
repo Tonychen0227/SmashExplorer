@@ -36,6 +36,10 @@ class CosmosDB:
 
         return self.__upsert_event(event)
 
+    def get_all_events(self):
+        return self.events.query_items(query="SELECT * FROM k",
+                                       enable_cross_partition_query=True)
+
     def get_event(self, event_id):
         try:
             response = self.events.read_item(item=str(event_id), partition_key=str(event_id))
@@ -59,6 +63,10 @@ class CosmosDB:
     # region Sets
     def __upsert_set(self, tournament_set):
         return self.sets.upsert_item(body=tournament_set)
+
+    def get_all_sets(self, event_id):
+        return self.sets.query_items(query=f"SELECT * FROM k WHERE k.eventId = \"{event_id}\"",
+                                     partition_key=event_id)
 
     def create_set(self, tournament_set):
         self.__upsert_set(tournament_set)

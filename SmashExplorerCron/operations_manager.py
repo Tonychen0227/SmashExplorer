@@ -16,6 +16,12 @@ class OperationsManager:
         self.api = api
         self.logger = logger
 
+    def get_all_events_from_db(self):
+        return self.cosmos.get_all_events()
+
+    def get_all_sets_from_db(self, event_id):
+        return self.cosmos.get_all_sets(event_id)
+
     def get_event_from_db(self, event_id):
         return self.cosmos.get_event(event_id)
 

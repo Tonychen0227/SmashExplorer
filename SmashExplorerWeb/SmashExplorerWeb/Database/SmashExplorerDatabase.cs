@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,7 @@ public class SmashExplorerDatabase
 
             for (var placement = currentPlacement; placement < nextKeyPlacement; placement++)
             {
-                PlacementToRounds[currentPlacement] = index;
+                PlacementToRounds[placement] = index;
             }
         }
     }
@@ -169,27 +170,82 @@ public class SmashExplorerDatabase
         return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(eventId));
     }
 
-    private bool IsUpset(Set set)
+    private Upset IsUpset(Set set)
     {
-        if (set.DisplayScore == "DQ" || set.WinnerId == null || set.Entrants.Count != 2) return false;
+        if (set.DisplayScore == "DQ" || set.WinnerId == null || set.Entrants.Count != 2) return null;
 
         int winnerSeeding = set.Entrants.Where(x => x.Id == set.WinnerId.ToString()).Select(x => x.Seeding).Single() ?? -1;
-        int winnerRoundPlacement;
-        PlacementToRounds.TryGetValue(winnerSeeding, out winnerRoundPlacement);
+        int winnerRoundSeedingPlacement;
+        PlacementToRounds.TryGetValue(winnerSeeding, out winnerRoundSeedingPlacement);
 
         int loserSeeding = set.Entrants.Where(x => x.Id != set.WinnerId.ToString()).Select(x => x.Seeding).Single() ?? -1;
-        int loserRoundPlacement;
-        PlacementToRounds.TryGetValue(loserSeeding, out loserRoundPlacement);
+        int loserRoundSeedingPlacement;
+        PlacementToRounds.TryGetValue(loserSeeding, out loserRoundSeedingPlacement);
 
-        if (winnerRoundPlacement > loserRoundPlacement) return true;
+        if (winnerRoundSeedingPlacement == loserRoundSeedingPlacement)
+            return null;
 
-        return false;
+        int upsetFactor = Math.Abs(winnerRoundSeedingPlacement - loserRoundSeedingPlacement);
+
+        var entrantScores = set.DisplayScore;
+        entrantScores = entrantScores.Replace(set.Entrants[0].Name, set.Entrants[0].Id + ": ");
+        entrantScores = entrantScores.Replace(set.Entrants[1].Name, set.Entrants[1].Id + ": ");
+        entrantScores = "{" + entrantScores.Replace(" - ", ", ") + "}";
+        entrantScores = entrantScores.Replace("W", "\"W\"");
+        entrantScores = entrantScores.Replace("L", "\"L\"");
+
+        Dictionary<string, string> scoresMappingString;
+
+        try
+        {
+            scoresMappingString = JsonConvert.DeserializeObject<Dictionary<string, string>>(entrantScores);
+        } catch (JsonReaderException ex)
+        {
+            return null;
+        }
+
+        var newDisplayScore = $"{set.Entrants.Where(x => x.Id == set.WinnerId.ToString()).Select(x => x.Name).Single()} {scoresMappingString[set.WinnerId]}-" +
+                                $"{scoresMappingString[scoresMappingString.Keys.Where(x => x != set.WinnerId).Single()]} " +
+                                $"{set.Entrants.Where(x => x.Id != set.WinnerId.ToString()).Select(x => x.Name).Single()}";
+
+        if (winnerRoundSeedingPlacement > loserRoundSeedingPlacement)
+            return new Upset()
+            {
+                Set = set,
+                CompletedUpset = true,
+                UpsetFactor = upsetFactor,
+                NewDisplayScore = newDisplayScore
+            };
+
+        try
+        {
+            var scoresMapping = JsonConvert.DeserializeObject<Dictionary<string, int>>(entrantScores);
+
+            if (Math.Abs(scoresMapping[set.Entrants[0].Id] - scoresMapping[set.Entrants[1].Id]) != 1)
+                return null;
+        }
+        catch (JsonReaderException ex)
+        {
+            if (ex.Message.Contains("Unexpected character encountered while parsing value: W") ||
+                ex.Message.Contains("Unexpected character encountered while parsing value: L"))
+                return null;
+
+            return null;
+        }
+
+        return new Upset()
+        {
+            Set = set,
+            CompletedUpset = false,
+            UpsetFactor = upsetFactor,
+            NewDisplayScore = newDisplayScore
+        };
     }
 
-    public async Task<List<Set>> GetUpsetsAsync(string eventId)
+    public async Task<List<Upset>> GetUpsetsAsync(string eventId)
     {
         var sets = await GetSetsAsync(eventId);
 
-        return sets.Where(set => IsUpset(set)).ToList();
+        return sets.Select(set => IsUpset(set)).Where(x => x != null).ToList();
     }
 }
