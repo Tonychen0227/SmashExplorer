@@ -349,6 +349,7 @@ class API:
                         "prereqId": x["prereqId"],
                         "prereqType": x["prereqType"]
                     } for x in tournament_set["slots"]
-                ]
+                ],
+                "stream": tournament_set["stream"]
             } for tournament_set in sets
         ]
