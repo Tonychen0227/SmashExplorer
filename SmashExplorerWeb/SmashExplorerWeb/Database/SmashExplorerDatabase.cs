@@ -1,6 +1,4 @@
-﻿using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,25 +75,22 @@ public class SmashExplorerDatabase
         return results;
     }
 
-    public async Task<List<Event>> GetEventsBySlugAsync(string slug)
+    public async Task<List<Event>> GetEventsBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
     {
         var results = new List<Event>();
 
-        TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-        int secondsSinceEpoch = (int)t.TotalSeconds;
+        int startAtEpoch = (int) (startAt - new DateTime(1970, 1, 1)).TotalSeconds;
+        int endAtEpoch = (int) (endAt - new DateTime(1970, 1, 1)).TotalSeconds;
 
-        using (var iterator = EventsContainer.GetItemQueryIterator<Event>($"SELECT * FROM c WHERE CONTAINS(c.slug, {slug}) ORDER BY c.numEntrants DESC"))
+        using (var iterator = EventsContainer.GetItemQueryIterator<Event>($"SELECT * FROM c WHERE CONTAINS(c.slug, \"{slug}\") " +
+                                                                          $"AND c.startAt > {startAtEpoch} AND c.startAt < {endAtEpoch} " +
+                                                                          $"ORDER BY c.numEntrants DESC OFFSET 0 LIMIT 50"))
         {
             while (iterator.HasMoreResults)
             {
                 foreach (var item in await iterator.ReadNextAsync())
                 {
                     results.Add(item);
-                }
-
-                if (results.Count > 50)
-                {
-                    break;
                 }
             }
         }

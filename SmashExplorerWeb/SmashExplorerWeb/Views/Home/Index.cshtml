@@ -1,24 +1,145 @@
-﻿<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+﻿@model TournamentFilterModel
+
+<div class="jumbotron">
+    <h1>Smash Explorer</h1>
+    <p class="lead">Welcome to Smash Explorer! Select an event to get started.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        @using (Html.BeginForm("Index", "Home", FormMethod.Post))
+        {
+            for (int i = 0; i < Model.Events.Count; i++)
+            {
+                @Html.HiddenFor(model => Model.Events[i])
+            }
+            @Html.HiddenFor(model => model.ChosenEventId)
+            @Html.HiddenFor(model => model.StartTrackingDate)
+            @Html.HiddenFor(model => model.EndTrackingDate)
+            @Html.HiddenFor(model => model.ErrorMessage)
+            <div class="form-group">
+                <label for="inputSlug">Tournament slug</label>
+                @Html.TextBoxFor(model => model.Slug, new { @class = "form-control", placeholder = "Enter tournament slug" })
+                <small class="form-text text-muted">E.g. genesis or genesis-8 for https://smash.gg/tournaments/genesis-8</small>
+            </div>
+            <div class="form-group">
+                <label for="startAt">Starts after (UTC)</label>
+                @Html.TextBoxFor(model => model.StartAtAfter, new { type = "date", @class = "form-control" })
+            </div>
+            <div class="form-group">
+                <label for="startBefore">Starts before (UTC)</label>
+                @Html.TextBoxFor(model => model.StartAtBefore, new { type = "date", @class = "form-control" })
+                <small class="form-text text-muted">Currently tracking: @Model.StartTrackingDate to @Model.EndTrackingDate </small>
+            </div>
+            if (Model.ErrorMessage != null)
+            {
+                <p style="color:red">@Model.ErrorMessage</p>
+
+            }
+            <button type="submit" class="btn btn-primary">Submit</button>
+        }
+    </div>
+    @using (Html.BeginForm("Index", "Home", FormMethod.Post))
+    {
+        for (int i = 0; i < Model.Events.Count; i++)
+        {
+            @Html.HiddenFor(model => Model.Events[i].Id)
+            @Html.HiddenFor(model => Model.Events[i].State)
+            @Html.HiddenFor(model => Model.Events[i].TournamentName)
+            @Html.HiddenFor(model => Model.Events[i].TournamentSlug)
+            @Html.HiddenFor(model => Model.Events[i].TournamentLocation.City)
+            @Html.HiddenFor(model => Model.Events[i].TournamentLocation.AddrState)
+            @Html.HiddenFor(model => Model.Events[i].TournamentLocation.CountryCode)
+            for (int x = 0; x < Model.Events[i].TournamentImages.Count; x++)
+            {
+                @Html.HiddenFor(model => Model.Events[i].TournamentImages[x].url)
+                @Html.HiddenFor(model => Model.Events[i].TournamentImages[x].ratio)
+            }
+            @Html.HiddenFor(model => Model.Events[i].Name)
+            @Html.HiddenFor(model => Model.Events[i].StartAt)
+            @Html.HiddenFor(model => Model.Events[i].CreatedAt)
+            @Html.HiddenFor(model => Model.Events[i].UpdatedAt)
+            @Html.HiddenFor(model => Model.Events[i].Slug)
+            @Html.HiddenFor(model => Model.Events[i].NumEntrants)
+
+        }
+        @Html.HiddenFor(model => model.StartTrackingDate)
+        @Html.HiddenFor(model => model.EndTrackingDate)
+        @Html.HiddenFor(model => model.ErrorMessage)
+        @Html.HiddenFor(model => model.Slug)
+        @Html.HiddenFor(model => model.StartAtAfter)
+        @Html.HiddenFor(model => model.StartAtBefore)
+        @Html.HiddenFor(model => model.ChosenEventId, new { id = "chosenEventId" })
+        <div class="col-md-8" style="overflow-y: scroll; height:350px">
+            <table class="table table-hover">
+                <tr>
+                    <th>Event</th>
+                    <th>Location</th>
+                    <th>Start Time</th>
+                    <th>Entrants</th>
+                </tr>
+                @foreach (Event returnedEvent in Model.Events)
+                {
+                    <tr>
+                        <td>
+                            <a href="https://www.smash.gg/@returnedEvent.Slug" target="_blank">@returnedEvent.TournamentName - @returnedEvent.Name</a>
+                        </td>
+                        @if (returnedEvent.TournamentLocation.City == null)
+                        {
+                            <td>
+                                No location
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                @returnedEvent.TournamentLocation.City, @returnedEvent.TournamentLocation.AddrState, @returnedEvent.TournamentLocation.CountryCode
+                            </td>
+                        }
+                        <td>
+                            @DateTimeOffset.FromUnixTimeSeconds(returnedEvent.StartAt).ToString("g") UTC
+                        </td>
+                        <td>@returnedEvent.NumEntrants</td>
+                        <td><button onclick="error_text(@returnedEvent.Id)" type="submit" class="btn btn-primary">Select</button></td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <h2>Selected Tournament</h2>
+        @Model.ChosenEventId
+        @if (Model.ChosenEventId != null)
+            {
+                <p>@Model.ChosenEventId</p>
+            }
+    </div>
 </div>
 <div class="row">
     <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
-        a broad range of clients, including browsers and mobile devices. ASP.NET Web API
-        is an ideal platform for building RESTful applications on the .NET Framework.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301870">Learn more &raquo;</a></p>
+        <h2>Explore</h2>
+        <p>
+            Allows you to select entrants (next page) and then generate a link to follow your selected entrants through the rest of the tournament.
+        </p>
+        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301870">Explore</a></p>
     </div>
     <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301871">Learn more &raquo;</a></p>
+        <h2>Upset Thread</h2>
+        <p>See what upsets happened so far at this tournament.</p>
+        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301871">Get Upsets</a></p>
     </div>
     <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301872">Learn more &raquo;</a></p>
+        <h2>Seed Visualizer</h2>
+        <p>Check out how well the event was seeded. SPR = how many farther (in terms of rounds) someone went vs what they were seeded to get. Top 128 Only.</p>
+        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301872">Seed Visualizer</a></p>
     </div>
 </div>
+
+
+<script>
+    function updateChosenEventId(eventId) {
+        document.getElementById("chosenEventId").value = eventId;
+    }
+</script>

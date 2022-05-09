@@ -10,10 +10,6 @@ namespace SmashExplorerWeb.Controllers
         {
             ViewBag.Title = "Upsets";
 
-            var events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync();
-            var vanityLink = await SmashExplorerDatabase.Instance.CreateVanityLinkAsync("20230", "Redx Vanity Link", new List<string>() { "Test" });
-            vanityLink = await SmashExplorerDatabase.Instance.GetDataForVanityLinkAsync(vanityLink.Id, vanityLink.EventId);
-
             return View();
         }
     }
