@@ -282,6 +282,7 @@ class API:
                     lPlacement
                     games {
                       orderNum
+                      winnerId
                       stage {
                         name
                       }
