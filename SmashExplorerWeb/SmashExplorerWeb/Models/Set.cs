@@ -1,0 +1,18 @@
+﻿using System.Collections.Generic;
+
+public class Set
+{
+    public string Id { get; set; }
+    public string FullRoundText { get; set; }
+    public string DisplayScore { get; set; }
+    public string WinnerId { get; set; }
+    public int? Round { get; set; }
+    public int? WPlacement { get; set; }
+    public int? LPlacement { get; set; }
+    public List<Game> Games { get; set; }
+    public List<SetEntrant> Entrants { get; set; }
+    public string BracketType { get; set; }
+    public int? PhaseOrder { get; set; }
+    public string PhaseName { get; set; }
+    public Stream Stream { get; set; }
+}

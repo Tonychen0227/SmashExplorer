@@ -1,3 +1,11 @@
 .idea
 /python-cron/.idea
-/SmashExplorerCron/__pycache__/*
+/SmashExplorerCron/__pycache__/*'
+*/.vs/*
+/SmashExplorerWeb/packages/*
+/SmashExplorerWeb/SmashExplorerWeb/bin/*
+/SmashExplorerWeb/SmashExplorerWeb/obj/*
+/SmashExplorerWeb/SmashExplorerWeb/Scripts/*
+/SmashExplorerWeb/SmashExplorerWeb/fonts/*
+/SmashExplorerWeb/SmashExplorerWeb/Properties/*
+/SmashExplorerWeb/SmashExplorerWeb/Content/*
