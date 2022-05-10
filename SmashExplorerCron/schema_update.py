@@ -1,3 +1,5 @@
+import logging
+
 from logger import Logger
 from operations_manager import OperationsManager
 
@@ -23,6 +25,9 @@ if __name__ == '__main__':
             set_count += 1
             if set_count % 50 == 0:
                 logger.log(f"Sets upgrade progress: {set_count} of {total_sets}")
-            set_from_smash_gg = operations.api.get_set(set_id)
-            #operations.cosmos.create_set(updated_set)
-
+            try:
+                set_from_smash_gg = operations.api.get_set(set_id)
+                operations.cosmos.create_set(set_from_smash_gg)
+            except:
+                logging.exception("")
+                logger.log(f"WARNING: Failed to update set {set_id}")
