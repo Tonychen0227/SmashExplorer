@@ -108,7 +108,7 @@ public class SmashExplorerDatabase
     {
         var results = new List<Entrant>();
 
-        using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"select * from t where t.eventId = \"{eventId}\" order by t.name"))
+        using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"select * from t where t.eventId = \"{eventId}\""))
         {
             while (iterator.HasMoreResults)
             {
@@ -126,7 +126,25 @@ public class SmashExplorerDatabase
     {
         var results = new List<Set>();
 
-        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" order by t.wPlacement ASC"))
+        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\""))
+        {
+            while (iterator.HasMoreResults)
+            {
+                foreach (var item in await iterator.ReadNextAsync())
+                {
+                    results.Add(item);
+                }
+            }
+        }
+
+        return results;
+    }
+
+    public async Task<List<Set>> GetUpsetsAndNotableAsync(string eventId)
+    {
+        var results = new List<Set>();
+
+        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" and t.isUpsetOrNotable"))
         {
             while (iterator.HasMoreResults)
             {
@@ -244,7 +262,15 @@ public class SmashExplorerDatabase
 
     public async Task<List<Upset>> GetUpsetsAsync(string eventId)
     {
+        DateTime start = DateTime.UtcNow;
+
         var sets = await GetSetsAsync(eventId);
+
+        TimeSpan timespan1 = DateTime.UtcNow - start; 
+
+        var upsets = await GetUpsetsAndNotableAsync(eventId);
+
+        TimeSpan timespan2 = DateTime.UtcNow - start - timespan1;
 
         return sets.Select(set => IsUpset(set)).Where(x => x != null).ToList();
     }

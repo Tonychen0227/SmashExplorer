@@ -268,49 +268,72 @@ class API:
             } for entrant in entrants
         ]
 
-    def enrich_with_upsets_details(self, tournament_set):
+    def schema_migration_for_sets(self, tournament_set):
+        tournament_set["entrantIds"] = [str(x["id"]) for x in tournament_set["entrants"]]
         tournament_set["isUpsetOrNotable"] = False
+        tournament_set["detailedScore"] = None
 
-        if tournament_set["winnerId"] is None:
-            return tournament_set
+        try:
+            if tournament_set["winnerId"] is None or tournament_set["displayScore"] == "Bye":
+                return tournament_set
 
-        if len(tournament_set["entrants"]) != 2:
-            return tournament_set
+            tournament_set["winnerId"] = str(tournament_set["winnerId"])
 
-        winner_seed = [x["seeding"] for x in tournament_set["entrants"] if x["id"] == tournament_set["winnerId"]][0]
-        winner_seed_round = self.placement_to_round[winner_seed]
+            if len(tournament_set["entrants"]) != 2:
+                self.logger.log(f"WTF {tournament_set}")
+                return tournament_set
 
-        loser_seed = [x["seeding"] for x in tournament_set["entrants"] if x["id"] != tournament_set["winnerId"]][0]
-        loser_seed_round = self.placement_to_round[loser_seed]
+            winner = [x for x in tournament_set["entrants"] if str(tournament_set["winnerId"]) == str(x["id"])][0]
+            loser = [x for x in tournament_set["entrants"] if str(tournament_set["winnerId"]) != str(x["id"])][0]
 
-        if loser_seed_round == winner_seed_round:
-            return tournament_set
+            if tournament_set["displayScore"] == "DQ":
+                tournament_set["detailedScore"] = {
+                    str(winner["id"]): "W",
+                    str(loser["id"]): "DQ"
+                }
+            else:
+                display_score = tournament_set["displayScore"]
+                display_score_parts = display_score.split(" - ")
 
-        if winner_seed_round > loser_seed_round:
+                if len(display_score_parts) != 2:
+                    self.logger.log(f"WTF {tournament_set}")
+                    return tournament_set
+
+                if winner["name"] in display_score_parts[0] and loser["name"] in display_score_parts[1]:
+                    winner_score, loser_score = display_score_parts[0], display_score_parts[1]
+                else:
+                    loser_score, winner_score = display_score_parts[0], display_score_parts[1]
+
+                tournament_set["detailedScore"] = {
+                    str(winner["id"]): winner_score[-1],
+                    str(loser["id"]): loser_score[-1]
+                }
+
+            winner_seed_round = self.placement_to_round[winner["seeding"]]
+            loser_seed_round = self.placement_to_round[loser["seeding"]]
+
+            if loser_seed_round == winner_seed_round:
+                return tournament_set
+
+            if winner_seed_round > loser_seed_round:
+                tournament_set["isUpsetOrNotable"] = True
+                return tournament_set
+
+            if tournament_set["displayScore"] == "DQ":
+                return tournament_set
+
+            if tournament_set["detailedScore"][str(winner["id"])] == "W":
+                return tournament_set
+
+            if abs(int(tournament_set["detailedScore"][str(winner["id"])]) + int(tournament_set["detailedScore"][str(loser["id"])])) != 1:
+                return tournament_set
+
             tournament_set["isUpsetOrNotable"] = True
             return tournament_set
-
-        if tournament_set["displayScore"] == "DQ":
+        except:
+            logging.exception("")
+            self.logger.log(tournament_set)
             return tournament_set
-
-        display_score = tournament_set["displayScore"]
-        display_score = display_score.replace(tournament_set["entrants"][0]["name"], f"\"{tournament_set['entrants'][0]['id']}\":")
-        display_score = display_score.replace(tournament_set["entrants"][1]["name"], f"\"{tournament_set['entrants'][1]['id']}\":")
-        display_score = "{" + display_score + "}"
-        display_score = display_score.replace(" - ", ", ")
-        display_score = display_score.replace("W", "\"W\"")
-        display_score = display_score.replace("L", "\"L\"")
-
-        score = json.loads(display_score)
-
-        if (score[str(tournament_set["winnerId"])]) == "W":
-            return tournament_set
-
-        if abs(list(score.values())[0] - list(score.values())[1]) != 1:
-            return tournament_set
-
-        tournament_set["isUpsetOrNotable"] = True
-        return tournament_set
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
@@ -381,7 +404,7 @@ class API:
         sets = self.make_paginated_calls(query_string, ["event", "sets"], params)
 
         return [
-            self.enrich_with_upsets_details({
+            self.schema_migration_for_sets({
                 "id": str(tournament_set["id"]),
                 "eventId": event_id,
                 "fullRoundText": tournament_set["fullRoundText"],
