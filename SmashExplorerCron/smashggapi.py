@@ -69,7 +69,7 @@ class API:
             for key in keys_array:
                 results = results[key]
                 if results is None:
-                    self.logger.log(f"WTF: Breaking early on Paginated Calls {query_string[:20]} with {params}")
+                    self.logger.log(f"WTF: Breaking early on Paginated Calls {query_string.replace(' ', '')[:20]} with {params}")
                     return all_results
 
             total_pages = results["pageInfo"]["totalPages"]
@@ -84,7 +84,7 @@ class API:
         after_date = int(start_time.timestamp())
         before_date = int(end_time.timestamp())
         query_string = '''
-            query TournamentsQuery($beforeDate: Timestamp, $afterDate: Timestamp, $page: Int) {
+            query TournamentEvents($beforeDate: Timestamp, $afterDate: Timestamp, $page: Int) {
               tournaments(query:{page: $page, perPage: 200, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1, 1386], published:true, publiclySearchable:true}}) {
                 pageInfo{
                   perPage
@@ -174,7 +174,7 @@ class API:
 
     def get_ult_tournament_events(self, tournament_slug):
         query_string = '''
-            query TournamentQuery($slug: String) {
+            query TournamentEventsQuery($slug: String) {
               tournament(slug: $slug) {
                 events(filter:{published:true, videogameId: [1, 1386]}) {
                   id
