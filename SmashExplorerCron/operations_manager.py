@@ -99,9 +99,9 @@ class OperationsManager:
                 self.cosmos.create_entrant(entrant)
                 entrants_added += 1
 
-        for entrant in db_entrants:
-            if entrant["id"] not in event_entrant_ids:
-                self.cosmos.delete_entrant(entrant)
+        for entrant_id in database_entrant_ids:
+            if entrant_id not in event_entrant_ids:
+                self.cosmos.delete_entrant(event_id, entrant_id)
                 entrants_deleted += 1
 
         self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} "

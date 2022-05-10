@@ -24,8 +24,12 @@ class CosmosDB:
                                              partition_key=event_id)
         return response
 
-    def delete_entrant(self, entrant):
-        self.entrants.delete_item(entrant, partition_key=entrant["id"])
+    def get_entrants(self, entrant_id):
+        response = self.entrants.read_item(item=str(entrant_id), partition_key=entrant_id)
+        return response
+
+    def delete_entrant(self, event_id, entrant_id):
+        self.entrants.delete_item(item=entrant_id, partition_key=event_id)
     # endregion Entrants
 
     # region Events
@@ -51,7 +55,7 @@ class CosmosDB:
         return response
 
     def delete_event(self, event_id):
-        return self.events.delete_item(self.get_event(event_id), partition_key=event_id)
+        return self.events.delete_item(item=event_id, partition_key=event_id)
 
     def get_active_event_ids(self):
         date_now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
