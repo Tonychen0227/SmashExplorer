@@ -44,7 +44,7 @@ class Logger:
             method = "a"
 
         with open(file_name, method) as infile:
-            infile.write(final_log_string)
+            infile.write(final_log_string + "\n")
             print(final_log_string)
 
     def log(self, log_string):
