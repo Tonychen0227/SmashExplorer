@@ -1,3 +1,4 @@
+import re
 import time
 from copy import copy
 from datetime import datetime
@@ -268,79 +269,156 @@ class API:
             } for entrant in entrants
         ]
 
-    def schema_migration_for_sets(self, tournament_set):
-        tournament_set["entrantIds"] = [str(x["id"]) for x in tournament_set["entrants"]]
-        tournament_set["isUpsetOrNotable"] = False
-        tournament_set["detailedScore"] = None
+    def __process_set(self, event_id, tournament_set):
+        return_set = {
+            "id": str(tournament_set["id"]),
+            "eventId": str(event_id),
+            "fullRoundText": tournament_set["fullRoundText"],
+            "displayScore": tournament_set["displayScore"],
+            "winnerId": str(tournament_set["winnerId"]),
+            "round": tournament_set["round"],
+            "wPlacement": tournament_set["wPlacement"],
+            "lPlacement": tournament_set["lPlacement"],
+            "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
+            "phaseOrder": tournament_set["phaseGroup"]["phase"]["phaseOrder"],
+            "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
+            "games": tournament_set["games"],
+            "entrants":
+                [
+                    {
+                        "name": None if x["entrant"] is None else x["entrant"]["name"],
+                        "id": None if x["entrant"] is None else str(x["entrant"]["id"]),
+                        "initialSeedNum": None if x["entrant"] is None else x["entrant"]["initialSeedNum"],
+                        "prereqId": x["prereqId"],
+                        "prereqType": x["prereqType"]
+                    } for x in tournament_set["slots"]
+                ],
+            "entrantIds": [str(x["entrant"]["id"]) for x in tournament_set["slots"] if x["entrant"] is not None],
+            "stream": tournament_set["stream"],
+            "isUpsetOrNotable": False,
+            "detailedScore": None
+        }
+
+        if return_set["displayScore"] is None or return_set["winnerId"] is None \
+                or return_set["displayScore"] == "Bye" or return_set["displayScore"] == "DQ":
+            return return_set
+
+        if len(return_set["entrants"]) != 2:
+            self.logger.log(f"WTF: Not 2 entrants {return_set}")
+            return return_set
+
+        winner = [x for x in return_set["entrants"] if str(return_set["winnerId"]) == str(x["id"])][0]
+        loser = [x for x in return_set["entrants"] if str(return_set["winnerId"]) != str(x["id"])][0]
+
+        display_score = return_set["displayScore"]
+        display_score_end = display_score[:-2]
+
+        test_1 = display_score.startswith(winner['name']) and not display_score_end.endswith(winner['name'])
+        test_2 = display_score.startswith(loser['name']) and not display_score_end.endswith(loser['name'])
+
+        if test_1 and test_2:
+            self.logger.log(f"WTF: Both Regex Matched {return_set}")
+        elif test_1:
+            display_score = display_score.replace(f"{winner['name']} ", "", 1)
+            display_score = display_score.replace(f"{loser['name']} ", "", 1)
+            display_score = display_score.split(" - ")
+            return_set["detailedScore"] = {
+                winner["id"]: display_score[0],
+                loser["id"]: display_score[1]
+            }
+        elif test_2:
+            display_score = display_score.replace(f"{loser['name']} ", "", 1)
+            display_score = display_score.replace(f"{winner['name']} ", "", 1)
+            display_score = display_score.split(" - ")
+            return_set["detailedScore"] = {
+                winner["id"]: display_score[1],
+                loser["id"]: display_score[0]
+            }
+        else:
+            self.logger.log(f"WTF: No Regex Matching {return_set}")
+            return return_set
+
+        winner_round_seed = self.placement_to_round[winner["initialSeedNum"]]
+        loser_round_seed = self.placement_to_round[loser["initialSeedNum"]]
+
+        if winner_round_seed == loser_round_seed:
+            return return_set
+
+        if winner_round_seed > loser_round_seed:
+            return_set["isUpsetOrNotable"] = True
+            return return_set
 
         try:
-            if tournament_set["winnerId"] is None or tournament_set["displayScore"] == "Bye":
-                return tournament_set
+            if abs(int(display_score[0]) - int(display_score[1])) == 1:
+                return_set["isUpsetOrNotable"] = True
+                return return_set
+        except ValueError:
+            pass
 
-            tournament_set["winnerId"] = str(tournament_set["winnerId"])
+        return return_set
 
-            if len(tournament_set["entrants"]) != 2:
-                self.logger.log(f"WTF {tournament_set}")
-                return tournament_set
-
-            winner = [x for x in tournament_set["entrants"] if str(tournament_set["winnerId"]) == str(x["id"])][0]
-            loser = [x for x in tournament_set["entrants"] if str(tournament_set["winnerId"]) != str(x["id"])][0]
-
-            if tournament_set["displayScore"] == "DQ":
-                tournament_set["detailedScore"] = {
-                    str(winner["id"]): "W",
-                    str(loser["id"]): "DQ"
+    def get_set(self, set_id):
+        query_string = '''
+            query SetQuery($id: ID!) {
+              set(id: $id) {
+                id
+                fullRoundText
+                displayScore
+                winnerId
+                round
+                wPlacement
+                lPlacement
+                event {
+                  id
                 }
-            else:
-                display_score = tournament_set["displayScore"]
-                display_score_parts = display_score.split(" - ")
-
-                if len(display_score_parts) != 2:
-                    self.logger.log(f"WTF {tournament_set}")
-                    return tournament_set
-
-                if winner["name"] in display_score_parts[0] and loser["name"] in display_score_parts[1]:
-                    winner_score, loser_score = display_score_parts[0], display_score_parts[1]
-                else:
-                    loser_score, winner_score = display_score_parts[0], display_score_parts[1]
-
-                tournament_set["detailedScore"] = {
-                    str(winner["id"]): winner_score[-1],
-                    str(loser["id"]): loser_score[-1]
+                games {
+                  orderNum
+                  winnerId
+                  stage {
+                    name
+                  }
+                  selections{
+                    entrant {
+                      id
+                    }
+                    selectionType
+                    selectionValue
+                  }
                 }
+                phaseGroup{
+                  phase {
+                    name
+                    phaseOrder
+                    bracketType
+                  }
+                }
+                slots {
+                  entrant{
+                    id
+                    name
+                    initialSeedNum
+                  }
+                  prereqId
+                  prereqType
+                }
+                stream {
+                  streamSource
+                  streamId
+                }
+              }
+            }
+        '''
 
-            winner_seed_round = self.placement_to_round[winner["seeding"]]
-            loser_seed_round = self.placement_to_round[loser["seeding"]]
+        params = {"id": set_id}
 
-            if loser_seed_round == winner_seed_round:
-                return tournament_set
-
-            if winner_seed_round > loser_seed_round:
-                tournament_set["isUpsetOrNotable"] = True
-                return tournament_set
-
-            if tournament_set["displayScore"] == "DQ":
-                return tournament_set
-
-            if tournament_set["detailedScore"][str(winner["id"])] == "W":
-                return tournament_set
-
-            if abs(int(tournament_set["detailedScore"][str(winner["id"])]) + int(tournament_set["detailedScore"][str(loser["id"])])) != 1:
-                return tournament_set
-
-            tournament_set["isUpsetOrNotable"] = True
-            return tournament_set
-        except:
-            logging.exception("")
-            self.logger.log(tournament_set)
-            return tournament_set
+        result = self.__call_api("Get Set", query_string, params)
+        return self.__process_set(str(result["set"]["event"]["id"]), result["set"])
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
             query EventSetsQuery($eventId: ID, $page: Int, $updatedAfter: Timestamp) {
               event(id:$eventId) {
                 id
-                slug
                 sets(page: $page, perPage: 25, sortType:ROUND, 
                   filters:{showByes:false, hideEmpty:true, updatedAfter: $updatedAfter}) {
                   pageInfo {
@@ -403,30 +481,4 @@ class API:
 
         sets = self.make_paginated_calls(query_string, ["event", "sets"], params)
 
-        return [
-            self.schema_migration_for_sets({
-                "id": str(tournament_set["id"]),
-                "eventId": event_id,
-                "fullRoundText": tournament_set["fullRoundText"],
-                "displayScore": tournament_set["displayScore"],
-                "winnerId": str(tournament_set["winnerId"]),
-                "round": tournament_set["round"],
-                "wPlacement": tournament_set["wPlacement"],
-                "lPlacement": tournament_set["lPlacement"],
-                "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
-                "phaseOrder": tournament_set["phaseGroup"]["phase"]["phaseOrder"],
-                "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
-                "games": tournament_set["games"],
-                "entrants":
-                [
-                    {
-                        "name": None if x["entrant"] is None else x["entrant"]["name"],
-                        "id": None if x["entrant"] is None else str(x["entrant"]["id"]),
-                        "seeding": None if x["entrant"] is None else x["entrant"]["initialSeedNum"],
-                        "prereqId": x["prereqId"],
-                        "prereqType": x["prereqType"]
-                    } for x in tournament_set["slots"]
-                ],
-                "stream": tournament_set["stream"]
-            }) for tournament_set in sets
-        ]
+        return [self.__process_set(event_id, tournament_set) for tournament_set in sets]
