@@ -1,3 +1,5 @@
+import datetime
+
 from azure.cosmos import CosmosClient, exceptions
 
 
@@ -47,6 +49,18 @@ class CosmosDB:
             response = None
 
         return response
+
+    def delete_event(self, event_id):
+        return self.events.delete_item(self.get_event(event_id), partition_key=event_id)
+
+    def get_active_event_ids(self):
+        date_now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+        date_now_1_day = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)).timestamp())
+
+        response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state = \"ACTIVE\""
+                                                 f"OR (k.startAt > {date_now} and k.startAt < {date_now_1_day})",
+                                           enable_cross_partition_query=True)
+        return [x["id"] for x in response]
 
     def get_outstanding_event_ids(self):
         response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state <> \"COMPLETED\"",

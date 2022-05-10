@@ -10,7 +10,7 @@ if __name__ == '__main__':
     logger.log("Starting Minutely Script")
 
     event_count = 1
-    event_ids = list(operations.get_open_event_ids())
+    event_ids = list(operations.get_active_event_ids())
     events_size = len(event_ids)
     for event_id in event_ids:
         logger.log(f"Minutely operation on {event_id} ({event_count} of {events_size})")

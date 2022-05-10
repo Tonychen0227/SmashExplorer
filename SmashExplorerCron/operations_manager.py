@@ -25,6 +25,9 @@ class OperationsManager:
     def get_event_from_db(self, event_id):
         return self.cosmos.get_event(event_id)
 
+    def get_active_event_ids(self):
+        return self.cosmos.get_active_event_ids()
+
     def get_open_event_ids(self):
         return self.cosmos.get_outstanding_event_ids()
 
@@ -69,9 +72,17 @@ class OperationsManager:
     def get_events_for_tournament(self, tournament_slug):
         return self.api.get_ult_tournament_events(tournament_slug)
 
+    def delete_event(self, event_id):
+        self.cosmos.delete_event(event_id)
+
     def get_and_create_event(self, event_id):
         event = self.api.get_event(event_id)
-        self.cosmos.create_event(event)
+
+        if event is None:
+            self.logger.log(f"WTF: {event_id} no longer exists")
+            return None
+
+        return self.cosmos.create_event(event)
 
     def get_and_create_entrants_for_event(self, event_id):
         event_entrants = self.api.get_ult_event_entrants(event_id)

@@ -52,7 +52,7 @@ class API:
         return None
 
     def make_paginated_calls(self, query_string, keys_array, params_base):
-        total_pages = None
+        total_pages = 1
         current_page = 1
 
         all_results = []
@@ -63,8 +63,14 @@ class API:
 
             results = self.__call_api(f"Get Upcoming Ult {keys_array}", query_string, params)
 
+            if results is None:
+                continue
+
             for key in keys_array:
                 results = results[key]
+                if results is None:
+                    self.logger.log(f"WTF: Breaking early on Paginated Calls {query_string[:20]} with {params}")
+                    return all_results
 
             total_pages = results["pageInfo"]["totalPages"]
 
@@ -142,6 +148,9 @@ class API:
         result = self.__call_api("Get single event", query_string, {"eventId": event_id})
         tournament = result["event"]["tournament"]
         event = result["event"]
+
+        if event is None:
+            return None
 
         return {
                 "tournamentSlug": tournament["slug"],
@@ -310,50 +319,54 @@ class API:
         winner = [x for x in return_set["entrants"] if str(return_set["winnerId"]) == str(x["id"])][0]
         loser = [x for x in return_set["entrants"] if str(return_set["winnerId"]) != str(x["id"])][0]
 
-        display_score = return_set["displayScore"]
-        display_score_end = display_score[:-2]
-
-        test_1 = display_score.startswith(winner['name']) and not display_score_end.endswith(winner['name'])
-        test_2 = display_score.startswith(loser['name']) and not display_score_end.endswith(loser['name'])
-
-        if test_1 and test_2:
-            self.logger.log(f"WTF: Both Regex Matched {return_set}")
-        elif test_1:
-            display_score = display_score.replace(f"{winner['name']} ", "", 1)
-            display_score = display_score.replace(f"{loser['name']} ", "", 1)
-            display_score = display_score.split(" - ")
-            return_set["detailedScore"] = {
-                winner["id"]: display_score[0],
-                loser["id"]: display_score[1]
-            }
-        elif test_2:
-            display_score = display_score.replace(f"{loser['name']} ", "", 1)
-            display_score = display_score.replace(f"{winner['name']} ", "", 1)
-            display_score = display_score.split(" - ")
-            return_set["detailedScore"] = {
-                winner["id"]: display_score[1],
-                loser["id"]: display_score[0]
-            }
-        else:
-            self.logger.log(f"WTF: No Regex Matching {return_set}")
-            return return_set
-
         winner_round_seed = self.placement_to_round[winner["initialSeedNum"]]
         loser_round_seed = self.placement_to_round[loser["initialSeedNum"]]
 
-        if winner_round_seed == loser_round_seed:
-            return return_set
-
         if winner_round_seed > loser_round_seed:
             return_set["isUpsetOrNotable"] = True
+
+        display_score = return_set["displayScore"]
+        display_score_end = display_score[:-2]
+
+        test_1 = (display_score.startswith(winner['name']) and not display_score.startswith(loser['name'])) or \
+                 (display_score_end.endswith(loser['name']) and not display_score_end.endswith(winner['name']))
+        test_2 = (display_score.startswith(loser['name']) and not display_score.startswith(winner['name'])) or \
+                 (display_score_end.endswith(winner['name']) and not display_score_end.endswith(loser['name']))
+
+        try:
+            if test_1 and test_2:
+                self.logger.log(f"WTF: Both Regex Matched {return_set}")
+                return return_set
+            elif test_1:
+                display_score = display_score.replace(f"{winner['name']} ", "", 1)
+                display_score = display_score.replace(f"{loser['name']} ", "", 1)
+                display_score = display_score.split(" - ")
+                return_set["detailedScore"] = {
+                    winner["id"]: display_score[0],
+                    loser["id"]: display_score[1]
+                }
+            elif test_2:
+                display_score = display_score.replace(f"{loser['name']} ", "", 1)
+                display_score = display_score.replace(f"{winner['name']} ", "", 1)
+                display_score = display_score.split(" - ")
+                return_set["detailedScore"] = {
+                    winner["id"]: display_score[1],
+                    loser["id"]: display_score[0]
+                }
+            else:
+                raise IndexError()
+        except IndexError:
+            self.logger.log(f"WTF: No Regex Matching {return_set}")
             return return_set
 
+        if winner_round_seed == loser_round_seed:
+            return return_set
         try:
             if abs(int(display_score[0]) - int(display_score[1])) == 1:
                 return_set["isUpsetOrNotable"] = True
                 return return_set
         except ValueError:
-            pass
+            return return_set
 
         return return_set
 
