@@ -51,7 +51,7 @@ namespace SmashExplorerWeb.Controllers
             var startAtBefore = DateTime.ParseExact(filterModel.StartAtBefore, DATE_FORMAT, null);
 
             filterModel.Events = DefaultEvents;
-            filterModel.Slug = string.Join("-", filterModel.Slug.Split(' ')) ?? String.Empty;
+            filterModel.Slug = !string.IsNullOrWhiteSpace(filterModel.Slug) ? string.Join("-", filterModel.Slug.Split(' ')) : string.Empty;
 
             if (filterModel.Slug.Contains("smash.gg"))
             {

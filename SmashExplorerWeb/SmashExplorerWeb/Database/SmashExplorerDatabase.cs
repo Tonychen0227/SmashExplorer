@@ -262,15 +262,7 @@ public class SmashExplorerDatabase
 
     public async Task<List<Upset>> GetUpsetsAsync(string eventId)
     {
-        DateTime start = DateTime.UtcNow;
-
         var sets = await GetSetsAsync(eventId);
-
-        TimeSpan timespan1 = DateTime.UtcNow - start; 
-
-        var upsets = await GetUpsetsAndNotableAsync(eventId);
-
-        TimeSpan timespan2 = DateTime.UtcNow - start - timespan1;
 
         return sets.Select(set => IsUpset(set)).Where(x => x != null).ToList();
     }

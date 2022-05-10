@@ -33,42 +33,49 @@
 
             }
             <button type="submit" onclick="updateChosenEventId(null)" class="btn btn-primary">Submit</button>
+            @Html.ActionLink("Reset To Default", null, null, null, new { @class = "btn btn-default" })
         </div>
-        var height = string.IsNullOrEmpty(Model.ChosenEventId) ? "350px" : "100px";
-        <div class="col-md-8" style="overflow-y: scroll; height: @height ">
-            <table class="table table-hover">
-                <tr>
-                    <th>Event</th>
-                    <th>Location</th>
-                    <th>Start Time</th>
-                    <th>Entrants</th>
-                </tr>
-                @foreach (Event returnedEvent in Model.Events)
-                {
+        var height = string.IsNullOrEmpty(Model.ChosenEventId) ? "350px" : "150px";
+        <div class="col-md-8">
+            <div style="overflow-y: scroll; height: @height ">
+                <table class="table table-hover">
                     <tr>
-                        <td>
-                            <a href="https://www.smash.gg/@returnedEvent.Slug" target="_blank">@returnedEvent.TournamentName - @returnedEvent.Name</a>
-                        </td>
-                        @if (returnedEvent.TournamentLocation.City == null)
-                        {
-                            <td>
-                                No location
-                            </td>
-                        }
-                        else
-                        {
-                            <td>
-                                @returnedEvent.TournamentLocation.City, @returnedEvent.TournamentLocation.AddrState, @returnedEvent.TournamentLocation.CountryCode
-                            </td>
-                        }
-                        <td>
-                            @DateTimeOffset.FromUnixTimeSeconds(returnedEvent.StartAt).ToString("g") UTC
-                        </td>
-                        <td>@returnedEvent.NumEntrants</td>
-                        <td><button onclick="updateChosenEventId(@returnedEvent.Id)" type="submit" class="btn btn-primary">Select</button></td>
+                        <th>Event</th>
+                        <th>Location</th>
+                        <th>Start Time</th>
+                        <th>Entrants</th>
                     </tr>
+                    @foreach (Event returnedEvent in Model.Events)
+                    {
+                        <tr>
+                            <td>
+                                <a href="https://www.smash.gg/@returnedEvent.Slug" target="_blank">@returnedEvent.TournamentName - @returnedEvent.Name</a>
+                            </td>
+                            @if (returnedEvent.TournamentLocation.City == null)
+                            {
+                                <td>
+                                    No location
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    @returnedEvent.TournamentLocation.City, @returnedEvent.TournamentLocation.AddrState, @returnedEvent.TournamentLocation.CountryCode
+                                </td>
+                            }
+                            <td>
+                                @DateTimeOffset.FromUnixTimeSeconds(returnedEvent.StartAt).ToString("g") UTC
+                            </td>
+                            <td>@returnedEvent.NumEntrants</td>
+                            <td><button onclick="updateChosenEventId(@returnedEvent.Id)" type="submit" class="btn btn-primary">Select</button></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+                            @if (!string.IsNullOrEmpty(Model.ChosenEventId))
+                {
+                    <p>You have chosen event <strong>@Model.ChosenEventId</strong></p>
                 }
-            </table>
         </div>
     }
 </div>
@@ -84,7 +91,7 @@
         }
         else
         {
-            @Html.ActionLink("Explore Entrants", null, "SelectEntrants", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", id = Model.ChosenEventId })
+            @Html.ActionLink("Explore Entrants", null, "SelectEntrants", new { id = Model.ChosenEventId }, new { @class = "btn btn-default" })
 
         }
     </div>
@@ -97,8 +104,7 @@
         }
         else
         {
-            @Html.ActionLink("Check Upsets", null, "Upsets", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", id = Model.ChosenEventId })
-
+            @Html.ActionLink("Check Upsets", null, "Upsets", new { id = Model.ChosenEventId }, new { @class = "btn btn-default" })
         }
     </div>
     <div class="col-md-4">
