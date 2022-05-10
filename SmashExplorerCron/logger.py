@@ -38,7 +38,7 @@ class Logger:
 
         file_name = f"{self.root_path}/{date_now.year}-{date_now.month}-{date_now.day}-{date_now.hour}.log"
 
-        if os.path.exists(file_name):
+        if not os.path.exists(file_name):
             method = "w+"
         else:
             method = "a"
