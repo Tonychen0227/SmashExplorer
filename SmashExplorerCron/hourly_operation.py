@@ -14,7 +14,7 @@ if __name__ == '__main__':
     events_size = len(new_events)
     for event_id in new_events:
         events_count += 1
-        logger.log(f"Hourly operation creating new events - {events_count} of {events_size}")
+        logger.log(f"Hourly discovery creating new events - {events_count} of {events_size}")
         existing_event = operations.get_event_from_db(event_id)
 
         if existing_event is not None:
