@@ -417,6 +417,7 @@ class API:
                 stream {
                   streamSource
                   streamId
+                  streamName
                 }
               }
             }
@@ -480,6 +481,7 @@ class API:
                     stream {
                       streamSource
                       streamId
+                      streamName
                     }
                   }
                 }

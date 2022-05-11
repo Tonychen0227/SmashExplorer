@@ -82,14 +82,10 @@ class CosmosDB:
     def __upsert_set(self, tournament_set):
         return self.sets.upsert_item(body=tournament_set)
 
-    def get_all_sets(self, event_id):
+    def get_event_sets(self, event_id):
         return self.sets.query_items(query=f"SELECT * FROM k WHERE k.eventId = \"{event_id}\"",
                                      partition_key=event_id)
 
     def create_set(self, tournament_set):
         self.__upsert_set(tournament_set)
     # endregion Sets
-
-    def get_vanity_links(self, event_id):
-        response = self.vanityLinks.query_items(query=f"SELECT * FROM r WHERE r.eventId = \"{event_id}\"", partition_key=event_id)
-        return response
