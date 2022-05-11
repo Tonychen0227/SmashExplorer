@@ -36,7 +36,6 @@ if __name__ == '__main__':
         logger.log(f"Hourly operation on {event_id} ({events_count} of {events_size})")
         if operations.get_and_create_event(event_id) is None:
             logger.log(f"Event {event_id} has been deleted")
-            operations.delete_event(event_id)
             continue
         operations.get_and_create_entrants_for_event(event_id)
         operations.update_event_sets(event_id)

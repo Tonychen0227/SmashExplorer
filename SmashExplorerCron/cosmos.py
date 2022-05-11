@@ -24,12 +24,17 @@ class CosmosDB:
                                              partition_key=event_id)
         return response
 
-    def get_entrants(self, entrant_id):
+    def get_entrant(self, entrant_id):
         response = self.entrants.read_item(item=str(entrant_id), partition_key=entrant_id)
         return response
 
     def delete_entrant(self, event_id, entrant_id):
         self.entrants.delete_item(item=entrant_id, partition_key=event_id)
+
+    def delete_entrants(self, event_id):
+        for entrant in self.get_event_entrants(event_id):
+            self.delete_entrant(event_id, entrant["id"])
+
     # endregion Entrants
 
     # region Events
@@ -88,4 +93,11 @@ class CosmosDB:
 
     def create_set(self, tournament_set):
         self.__upsert_set(tournament_set)
+
+    def delete_set(self, event_id, set_id):
+        self.sets.delete_item(item=set_id, partition_key=event_id)
+
+    def delete_sets(self, event_id):
+        for db_set in self.get_event_sets(event_id):
+            self.delete_set(event_id, db_set)
     # endregion Sets

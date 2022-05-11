@@ -74,6 +74,9 @@ class OperationsManager:
 
     def delete_event(self, event_id):
         self.cosmos.delete_event(event_id)
+        self.cosmos.delete_entrants(event_id)
+        self.cosmos.delete_sets(event_id)
+
 
     def get_and_create_event(self, event_id):
         event = self.api.get_event(event_id)
