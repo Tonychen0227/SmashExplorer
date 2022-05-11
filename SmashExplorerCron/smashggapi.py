@@ -288,6 +288,8 @@ class API:
             "displayScore": tournament_set["displayScore"],
             "winnerId": str(tournament_set["winnerId"]),
             "round": tournament_set["round"],
+            "createdAt": tournament_set["createdAt"],
+            "completedAt": tournament_set["completedAt"],
             "wPlacement": tournament_set["wPlacement"],
             "lPlacement": tournament_set["lPlacement"],
             "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
@@ -379,6 +381,8 @@ class API:
                 id
                 fullRoundText
                 displayScore
+                completedAt
+                createdAt
                 winnerId
                 round
                 wPlacement
@@ -447,6 +451,8 @@ class API:
                     fullRoundText
                     displayScore
                     winnerId
+                    completedAt
+                    createdAt
                     round
                     wPlacement
                     lPlacement

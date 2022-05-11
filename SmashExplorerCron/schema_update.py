@@ -17,7 +17,7 @@ if __name__ == '__main__':
         event_count += 1
         try:
             cosmos_sets = list(operations.cosmos.get_event_sets(event_id))
-            sets = [x for x in cosmos_sets if "stream" in x.keys() and x["stream"] is not None]
+            sets = [x for x in cosmos_sets if "stream" in x.keys() and not x["id"].startswith("preview")]
 
             logger.log(f"Schema upgrade progress ({event_id}): {event_count} of {total_events}, found {len(sets)} sets")
 
