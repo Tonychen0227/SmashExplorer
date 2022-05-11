@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Web.Mvc;
 
 public class UpsetsModel
 {
@@ -7,4 +8,8 @@ public class UpsetsModel
     public Dictionary<string, List<Upset>> LosersUpsets { get; set; }
     public Dictionary<string, List<Upset>> LosersNotable { get; set; }
     public Event Event { get; set; }
+    public int MinimumUpsetFactor { get; set; }
+    public int MaximumUpsetFactor { get; set; }
+    public List<SelectListItem> AvailablePhases { get; set; }
+    public List<string> SelectedPhases { get; set; }
 }

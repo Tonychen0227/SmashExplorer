@@ -20,17 +20,36 @@ namespace SmashExplorerWeb.Controllers
             return View(model);
         }
 
-        private UpsetsModel OrganizeUpsets(List<Upset> upsets)
+        [HttpPost]
+        public async Task<ActionResult> Index(string id, UpsetsModel model)
         {
+            ViewBag.Title = $"Smash Explorer - Upsets {id}";
+
+            if (string.IsNullOrWhiteSpace(id)) return View();
+
+            model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id), model.MinimumUpsetFactor, model.SelectedPhases);
+            model.Event = await SmashExplorerDatabase.Instance.GetEvent(id);
+
+            return View(model);
+        }
+
+        private UpsetsModel OrganizeUpsets(IEnumerable<Upset> upsets, int minimumUpsetFactor = 1, List<string> selectedPhases = null)
+        {
+            selectedPhases = selectedPhases ?? upsets.Select(x => x.Set.PhaseName).Distinct().ToList();
+            upsets = upsets.OrderByDescending(x => x.Set.PhaseOrder);
+
             var upsetsModel = new UpsetsModel()
             {
                 WinnersNotable = new Dictionary<string, List<Upset>>(),
                 WinnersUpsets = new Dictionary<string, List<Upset>>(),
                 LosersNotable = new Dictionary<string, List<Upset>>(),
-                LosersUpsets = new Dictionary<string, List<Upset>>()
+                LosersUpsets = new Dictionary<string, List<Upset>>(),
+                MaximumUpsetFactor = upsets.Max(x => x.UpsetFactor),
+                AvailablePhases = upsets.Select(x => x.Set.PhaseName).Distinct().Select(x => new SelectListItem { Text = x, Value = x }).ToList(),
+                SelectedPhases = selectedPhases
             };
 
-            foreach (var upset in upsets.OrderBy(x => x.Set.PhaseOrder))
+            foreach (var upset in upsets.Where(x => x.UpsetFactor >= minimumUpsetFactor).Where(x => selectedPhases.Contains(x.Set.PhaseName)))
             {
                 if (upset.Set.Round > 0)
                 {

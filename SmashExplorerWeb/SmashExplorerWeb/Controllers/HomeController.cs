@@ -10,7 +10,6 @@ namespace SmashExplorerWeb.Controllers
     {
         private static readonly string DATE_FORMAT = "yyyy-MM-dd";
         private static DateTime DefaultEventsFetched = DateTime.UtcNow;
-        private static List<Event> DefaultEvents;
 
         public async Task<ActionResult> Index()
         {
@@ -45,7 +44,7 @@ namespace SmashExplorerWeb.Controllers
             var startAtAfter = DateTime.ParseExact(filterModel.StartAtAfter, DATE_FORMAT, null);
             var startAtBefore = DateTime.ParseExact(filterModel.StartAtBefore, DATE_FORMAT, null);
 
-            filterModel.Events = DefaultEvents;
+            filterModel.Events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync();
             filterModel.Slug = !string.IsNullOrWhiteSpace(filterModel.Slug) ? string.Join("-", filterModel.Slug.Split(' ')) : string.Empty;
 
             if (filterModel.Slug.Contains("smash.gg"))

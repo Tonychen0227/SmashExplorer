@@ -26,7 +26,7 @@ public class SmashExplorerDatabase
     private Dictionary<string, Tuple<DateTime, List<Set>>> SetsCache = new Dictionary<string, Tuple<DateTime, List<Set>>>();
     private static readonly int SetsCacheTTLSeconds = 30;
 
-    private Dictionary<string, Tuple<DateTime, List<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, List<Upset>>>();
+    private Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>>();
     private static readonly int UpsetsCacheTTLSeconds = 120;
 
     private Container GetContainer(string containerName)
@@ -215,14 +215,14 @@ public class SmashExplorerDatabase
         return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(eventId));
     }
 
-    public async Task<List<Upset>> GetUpsetsAndNotableAsync(string eventId)
+    public async Task<IEnumerable<Upset>> GetUpsetsAndNotableAsync(string eventId)
     {
         if (!UpsetsCache.ContainsKey(eventId))
         {
-            UpsetsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Upset>()));
+            UpsetsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Upset>().AsEnumerable()));
         }
 
-        Tuple<DateTime, List<Upset>> cachedUpsets = UpsetsCache[eventId];
+        Tuple<DateTime, IEnumerable<Upset>> cachedUpsets = UpsetsCache[eventId];
 
         if (DateTime.UtcNow - cachedUpsets.Item1 < TimeSpan.FromSeconds(UpsetsCacheTTLSeconds))
         {
@@ -242,7 +242,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        var ret = results.Select(set => MapToUpset(set)).ToList();
+        var ret = results.Select(set => MapToUpset(set));
 
         UpsetsCache[eventId] = Tuple.Create(DateTime.UtcNow, ret);
 

@@ -8,10 +8,12 @@
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-inverse navbar-fixed-top" style="background-color:#3f80ff">
         <div class="container">
-            <div class="navbar-header">
-                @Html.ActionLink("Smash Explorer", null, "Home", new { area = "" }, new { @class = "navbar-brand" })
+            <div class="navbar-header" style="border:none">
+                <a href="@Url.Action(null, "Home")" title="Smash Explorer" class="links">
+                    <img style="width:50%;margin-top:10px" alt="Smash Explorer" src="@Url.Content("https://media.discordapp.net/attachments/853701979187445760/973835836342829056/logo.png")">
+                </a>
             </div>
         </div>
     </div>
