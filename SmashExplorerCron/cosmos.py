@@ -59,7 +59,7 @@ class CosmosDB:
 
     def get_active_event_ids(self):
         date_now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
-        date_now_1_day = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)).timestamp())
+        date_now_1_day = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)).timestamp())
 
         response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state = \"ACTIVE\""
                                                  f"OR (k.startAt > {date_now} and k.startAt < {date_now_1_day})",
