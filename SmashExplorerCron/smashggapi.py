@@ -146,11 +146,13 @@ class API:
           '''
 
         result = self.__call_api("Get single event", query_string, {"eventId": event_id})
-        tournament = result["event"]["tournament"]
+
         event = result["event"]
 
         if event is None:
             return None
+
+        tournament = result["event"]["tournament"]
 
         return {
                 "tournamentSlug": tournament["slug"],
