@@ -261,7 +261,6 @@
     <Compile Include="Models\GameSelection.cs" />
     <Compile Include="Models\Image.cs" />
     <Compile Include="Models\Set.cs" />
-    <Compile Include="Models\SetEntrant.cs" />
     <Compile Include="Models\Stage.cs" />
     <Compile Include="Models\Standing.cs" />
     <Compile Include="Models\Stream.cs" />

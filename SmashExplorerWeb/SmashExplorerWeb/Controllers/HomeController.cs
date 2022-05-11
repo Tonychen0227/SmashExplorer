@@ -14,18 +14,13 @@ namespace SmashExplorerWeb.Controllers
 
         public async Task<ActionResult> Index()
         {
-            if (DefaultEvents == null || DefaultEventsFetched.AddMinutes(1) < DateTime.UtcNow)
-            {
-                DefaultEvents = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync();
-            }
-
             ViewBag.Title = "Smash Explorer";
 
             var startingModel = new TournamentFilterModel()
             {
                 StartAtBefore = DateTime.UtcNow.AddDays(7).ToString(DATE_FORMAT),
                 StartAtAfter = DateTime.UtcNow.ToString(DATE_FORMAT),
-                Events = DefaultEvents,
+                Events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync(),
                 StartTrackingDate = new DateTime(2022, 4, 10).ToString(DATE_FORMAT),
                 EndTrackingDate = DateTime.UtcNow.AddDays(7).ToString(DATE_FORMAT)
             };

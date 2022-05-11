@@ -17,6 +17,18 @@ public class SmashExplorerDatabase
 
     private static readonly Lazy<SmashExplorerDatabase> lazy = new Lazy<SmashExplorerDatabase>(() => new SmashExplorerDatabase());
 
+    private Tuple<DateTime, List<Event>> UpcomingEventsCache = new Tuple<DateTime, List<Event>>(DateTime.MinValue, new List<Event>());
+    private static readonly int UpcomingEventsCacheTTLSeconds = 60;
+
+    private Dictionary<string, Tuple<DateTime, List<Entrant>>> EntrantsCache = new Dictionary<string, Tuple<DateTime, List<Entrant>>>();
+    private static readonly int EntrantsCacheTTLSeconds = 60;
+
+    private Dictionary<string, Tuple<DateTime, List<Set>>> SetsCache = new Dictionary<string, Tuple<DateTime, List<Set>>>();
+    private static readonly int SetsCacheTTLSeconds = 30;
+
+    private Dictionary<string, Tuple<DateTime, List<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, List<Upset>>>();
+    private static readonly int UpsetsCacheTTLSeconds = 120;
+
     private Container GetContainer(string containerName)
     {
         var dbName = "smash-explorer-database";
@@ -57,11 +69,14 @@ public class SmashExplorerDatabase
 
     public async Task<List<Event>> GetUpcomingEventsAsync()
     {
+        if (DateTime.UtcNow - UpcomingEventsCache.Item1 < TimeSpan.FromSeconds(UpcomingEventsCacheTTLSeconds))
+        {
+            return UpcomingEventsCache.Item2;
+        }
+
         var results = new List<Event>();
 
-        TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-        int secondsSinceEpoch = (int)t.TotalSeconds;
-
+        int secondsSinceEpoch = (int) (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
         using (var iterator = EventsContainer.GetItemQueryIterator<Event>($"SELECT * FROM c WHERE c.startAt > {secondsSinceEpoch} ORDER BY c.numEntrants DESC OFFSET 0 LIMIT 10"))
         {
             while (iterator.HasMoreResults)
@@ -72,6 +87,8 @@ public class SmashExplorerDatabase
                 }
             }
         }
+
+        UpcomingEventsCache = Tuple.Create(DateTime.UtcNow, results);
 
         return results;
     }
@@ -106,6 +123,18 @@ public class SmashExplorerDatabase
 
     public async Task<List<Entrant>> GetEntrantsAsync(string eventId)
     {
+        if (!EntrantsCache.ContainsKey(eventId))
+        {
+            EntrantsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Entrant>()));
+        }
+
+        Tuple<DateTime, List<Entrant>> cachedEntrants = EntrantsCache[eventId];
+
+        if (DateTime.UtcNow - cachedEntrants.Item1 < TimeSpan.FromSeconds(EntrantsCacheTTLSeconds))
+        {
+            return cachedEntrants.Item2;
+        }
+
         var results = new List<Entrant>();
 
         using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"select * from t where t.eventId = \"{eventId}\""))
@@ -119,11 +148,25 @@ public class SmashExplorerDatabase
             }
         }
 
+        EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, results);
+
         return results;
     }
 
     public async Task<List<Set>> GetSetsAsync(string eventId)
     {
+        if (!SetsCache.ContainsKey(eventId))
+        {
+            SetsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Set>()));
+        }
+
+        Tuple<DateTime, List<Set>> cachedSets = SetsCache[eventId];
+
+        if (DateTime.UtcNow - cachedSets.Item1 < TimeSpan.FromSeconds(SetsCacheTTLSeconds))
+        {
+            return cachedSets.Item2;
+        }
+
         var results = new List<Set>();
 
         using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\""))
@@ -137,23 +180,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        return results;
-    }
-
-    public async Task<List<Set>> GetUpsetsAndNotableAsync(string eventId)
-    {
-        var results = new List<Set>();
-
-        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" and t.isUpsetOrNotable"))
-        {
-            while (iterator.HasMoreResults)
-            {
-                foreach (var item in await iterator.ReadNextAsync())
-                {
-                    results.Add(item);
-                }
-            }
-        }
+        SetsCache[eventId] = Tuple.Create(DateTime.UtcNow, results);
 
         return results;
     }
@@ -188,82 +215,71 @@ public class SmashExplorerDatabase
         return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(eventId));
     }
 
-    private Upset IsUpset(Set set)
+    public async Task<List<Upset>> GetUpsetsAndNotableAsync(string eventId)
     {
-        if (set.DisplayScore == "DQ" || set.WinnerId == null || set.Entrants.Count != 2) return null;
+        if (!UpsetsCache.ContainsKey(eventId))
+        {
+            UpsetsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Upset>()));
+        }
 
-        int winnerSeeding = set.Entrants.Where(x => x.Id == set.WinnerId.ToString()).Select(x => x.Seeding).Single() ?? -1;
+        Tuple<DateTime, List<Upset>> cachedUpsets = UpsetsCache[eventId];
+
+        if (DateTime.UtcNow - cachedUpsets.Item1 < TimeSpan.FromSeconds(UpsetsCacheTTLSeconds))
+        {
+            return cachedUpsets.Item2;
+        }
+
+        var results = new List<Set>();
+
+        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" and t.isUpsetOrNotable"))
+        {
+            while (iterator.HasMoreResults)
+            {
+                foreach (var item in await iterator.ReadNextAsync())
+                {
+                    results.Add(item);
+                }
+            }
+        }
+
+        var ret = results.Select(set => MapToUpset(set)).ToList();
+
+        UpsetsCache[eventId] = Tuple.Create(DateTime.UtcNow, ret);
+
+        return ret;
+    }
+
+    private Upset MapToUpset(Set set)
+    {
+        Entrant winner = set.Entrants.Where(x => x.Id == set.WinnerId).Single();
+        Entrant loser = set.Entrants.Where(x => x.Id != set.WinnerId).Single();
+
         int winnerRoundSeedingPlacement;
-        PlacementToRounds.TryGetValue(winnerSeeding, out winnerRoundSeedingPlacement);
+        PlacementToRounds.TryGetValue(winner.InitialSeedNum ?? -1, out winnerRoundSeedingPlacement);
 
-        int loserSeeding = set.Entrants.Where(x => x.Id != set.WinnerId.ToString()).Select(x => x.Seeding).Single() ?? -1;
         int loserRoundSeedingPlacement;
-        PlacementToRounds.TryGetValue(loserSeeding, out loserRoundSeedingPlacement);
-
-        if (winnerRoundSeedingPlacement == loserRoundSeedingPlacement)
-            return null;
+        PlacementToRounds.TryGetValue(loser.InitialSeedNum ?? -1, out loserRoundSeedingPlacement);
 
         int upsetFactor = Math.Abs(winnerRoundSeedingPlacement - loserRoundSeedingPlacement);
 
-        var entrantScores = set.DisplayScore;
-        entrantScores = entrantScores.Replace(set.Entrants[0].Name, set.Entrants[0].Id + ": ");
-        entrantScores = entrantScores.Replace(set.Entrants[1].Name, set.Entrants[1].Id + ": ");
-        entrantScores = "{" + entrantScores.Replace(" - ", ", ") + "}";
-        entrantScores = entrantScores.Replace("W", "\"W\"");
-        entrantScores = entrantScores.Replace("L", "\"L\"");
-
-        Dictionary<string, string> scoresMappingString;
-
-        try
+        if (set.DisplayScore == "DQ")
         {
-            scoresMappingString = JsonConvert.DeserializeObject<Dictionary<string, string>>(entrantScores);
-        } catch (JsonReaderException ex)
-        {
-            return null;
-        }
-
-        var newDisplayScore = $"{set.Entrants.Where(x => x.Id == set.WinnerId.ToString()).Select(x => x.Name).Single()} {scoresMappingString[set.WinnerId]}-" +
-                                $"{scoresMappingString[scoresMappingString.Keys.Where(x => x != set.WinnerId).Single()]} " +
-                                $"{set.Entrants.Where(x => x.Id != set.WinnerId.ToString()).Select(x => x.Name).Single()}";
-
-        if (winnerRoundSeedingPlacement > loserRoundSeedingPlacement)
-            return new Upset()
+            set.DetailedScore = new Dictionary<string, string>()
             {
-                Set = set,
-                CompletedUpset = true,
-                UpsetFactor = upsetFactor,
-                NewDisplayScore = newDisplayScore
+                { winner.Id, "W" },
+                { loser.Id, "DQ" }
             };
-
-        try
-        {
-            var scoresMapping = JsonConvert.DeserializeObject<Dictionary<string, int>>(entrantScores);
-
-            if (Math.Abs(scoresMapping[set.Entrants[0].Id] - scoresMapping[set.Entrants[1].Id]) != 1)
-                return null;
         }
-        catch (JsonReaderException ex)
-        {
-            if (ex.Message.Contains("Unexpected character encountered while parsing value: W") ||
-                ex.Message.Contains("Unexpected character encountered while parsing value: L"))
-                return null;
 
-            return null;
-        }
+        var newDisplayScore = $"{winner.Name} ({winner.InitialSeedNum} seed) {set.DetailedScore[winner.Id]}-{set.DetailedScore[loser.Id]} " +
+                              $"{loser.Name} ({loser.InitialSeedNum} seed)";
 
         return new Upset()
         {
             Set = set,
-            CompletedUpset = false,
+            CompletedUpset = winnerRoundSeedingPlacement > loserRoundSeedingPlacement,
             UpsetFactor = upsetFactor,
             NewDisplayScore = newDisplayScore
         };
-    }
-
-    public async Task<List<Upset>> GetUpsetsAsync(string eventId)
-    {
-        var sets = await GetSetsAsync(eventId);
-
-        return sets.Select(set => IsUpset(set)).Where(x => x != null).ToList();
     }
 }

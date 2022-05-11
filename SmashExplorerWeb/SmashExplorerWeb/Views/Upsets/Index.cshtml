@@ -23,7 +23,7 @@
                             <th>Score</th>
                             <th>Upset Factor</th>
                         </tr>
-                        @foreach (var upset in item[phase])
+                        @foreach (var upset in item[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => Math.Abs(x.Set.Round ?? -1)))
                         {
                             <tr>
                                 <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>

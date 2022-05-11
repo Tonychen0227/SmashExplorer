@@ -9,10 +9,14 @@ public class Set
     public int? Round { get; set; }
     public int? WPlacement { get; set; }
     public int? LPlacement { get; set; }
+    public int? StartAt { get; set; }
+    public int? CreatedAt { get; set; }
     public List<Game> Games { get; set; }
-    public List<SetEntrant> Entrants { get; set; }
+    public List<Entrant> Entrants { get; set; }
     public string BracketType { get; set; }
     public int? PhaseOrder { get; set; }
     public string PhaseName { get; set; }
     public Stream Stream { get; set; }
+    public Dictionary<string, string> DetailedScore { get; set; }
+    public bool IsUpsetOrNotable { get; set; }
 }

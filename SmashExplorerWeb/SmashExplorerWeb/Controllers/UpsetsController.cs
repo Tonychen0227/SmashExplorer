@@ -14,7 +14,7 @@ namespace SmashExplorerWeb.Controllers
 
             if (string.IsNullOrWhiteSpace(id)) return View();
 
-            var model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAsync(id));
+            var model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id));
             model.Event = await SmashExplorerDatabase.Instance.GetEvent(id);
 
             return View(model);
@@ -30,7 +30,7 @@ namespace SmashExplorerWeb.Controllers
                 LosersUpsets = new Dictionary<string, List<Upset>>()
             };
 
-            foreach (var upset in upsets.OrderByDescending(x => x.UpsetFactor))
+            foreach (var upset in upsets.OrderBy(x => x.Set.PhaseOrder))
             {
                 if (upset.Set.Round > 0)
                 {
