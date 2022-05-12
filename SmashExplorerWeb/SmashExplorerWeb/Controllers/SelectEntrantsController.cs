@@ -9,6 +9,9 @@ namespace SmashExplorerWeb.Controllers
         {
             ViewBag.Title = $"Smash Explorer - Select Entrants {id}";
 
+            var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
+            var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
+
             return View();
         }
     }

@@ -17,11 +17,11 @@ namespace SmashExplorerWeb.Controllers
 
             var startingModel = new TournamentFilterModel()
             {
-                StartAtBefore = DateTime.UtcNow.AddDays(7).ToString(DATE_FORMAT),
-                StartAtAfter = DateTime.UtcNow.ToString(DATE_FORMAT),
+                StartAtBefore = DateTime.UtcNow.AddDays(14).ToString(DATE_FORMAT),
+                StartAtAfter = DateTime.UtcNow.AddDays(-7).ToString(DATE_FORMAT),
                 Events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync(),
-                StartTrackingDate = new DateTime(2022, 4, 10).ToString(DATE_FORMAT),
-                EndTrackingDate = DateTime.UtcNow.AddDays(7).ToString(DATE_FORMAT)
+                StartTrackingDate = new DateTime(2022, 2, 1).ToString(DATE_FORMAT),
+                EndTrackingDate = DateTime.UtcNow.AddDays(14).ToString(DATE_FORMAT)
             };
 
             return View(startingModel);
