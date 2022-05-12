@@ -28,7 +28,7 @@ public class Event
     public string Slug { get; set; }
     public int NumEntrants { get; set; }
     public long SetsLastUpdated { get; set; }
-    private List<Standing> standings { get; set; }
+    public List<Standing> standings { get; set; }
     public List<Standing> Standings
     {
         get

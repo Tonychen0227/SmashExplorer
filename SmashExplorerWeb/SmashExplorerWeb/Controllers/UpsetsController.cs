@@ -17,7 +17,7 @@ namespace SmashExplorerWeb.Controllers
             UpsetsModel model = new UpsetsModel();
 
             var upsets = await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id);
-            var db_event = await SmashExplorerDatabase.Instance.GetEvent(id);
+            var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
             if (upsets.Count() == 0)
             {
@@ -40,7 +40,7 @@ namespace SmashExplorerWeb.Controllers
             if (string.IsNullOrWhiteSpace(id)) return View();
 
             model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id), model.MinimumUpsetFactor, model.SelectedPhases);
-            model.Event = await SmashExplorerDatabase.Instance.GetEvent(id);
+            model.Event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
             return View(model);
         }

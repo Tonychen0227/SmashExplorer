@@ -34,7 +34,7 @@ namespace SmashExplorerWeb.Controllers
 
             if (filterModel.ChosenEventId != null)
             {
-                filterModel.Events = new List<Event>() { await SmashExplorerDatabase.Instance.GetEvent(filterModel.ChosenEventId) };
+                filterModel.Events = new List<Event>() { await SmashExplorerDatabase.Instance.GetEventAsync(filterModel.ChosenEventId) };
                 return View(filterModel);
             }
 

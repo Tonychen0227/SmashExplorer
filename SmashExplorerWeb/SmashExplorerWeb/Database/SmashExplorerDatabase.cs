@@ -13,7 +13,7 @@ public class SmashExplorerDatabase
     private readonly Container VanityLinksContainer;
     private readonly Container EventsContainer;
 
-    private Dictionary<int, int> PlacementToRounds;
+    public static Dictionary<int, int> PlacementToRounds;
 
     private static readonly Lazy<SmashExplorerDatabase> lazy = new Lazy<SmashExplorerDatabase>(() => new SmashExplorerDatabase());
 
@@ -93,7 +93,7 @@ public class SmashExplorerDatabase
         return results;
     }
 
-    public async Task<Event> GetEvent(string eventId)
+    public async Task<Event> GetEventAsync(string eventId)
     {
         return await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
     }

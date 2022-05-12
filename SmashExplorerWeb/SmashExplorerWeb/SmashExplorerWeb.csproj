@@ -167,6 +167,7 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.DataVisualization" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -253,6 +254,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ActivityState.cs" />
+    <Compile Include="Models\DataPoint.cs" />
     <Compile Include="Models\Entrant.cs" />
     <Compile Include="Models\EntrantInfo.cs" />
     <Compile Include="Models\EntrantLocation.cs" />
@@ -274,6 +276,7 @@
     </Compile>
     <Compile Include="WebModels\TournamentFilterModel.cs" />
     <Compile Include="WebModels\UpsetsModel.cs" />
+    <Compile Include="WebModels\VisualizeSeedsModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />
