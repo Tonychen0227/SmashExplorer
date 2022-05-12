@@ -137,7 +137,8 @@ public class SmashExplorerDatabase
 
         var results = new List<Entrant>();
 
-        using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"select * from t where t.eventId = \"{eventId}\""))
+        using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"select * from t where t.eventId = \"{eventId}\"",
+                                                                              requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(eventId) }))
         {
             while (iterator.HasMoreResults)
             {
@@ -169,7 +170,8 @@ public class SmashExplorerDatabase
 
         var results = new List<Set>();
 
-        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\""))
+        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\"",
+                                                                      requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(eventId) }))
         {
             while (iterator.HasMoreResults)
             {
@@ -231,7 +233,8 @@ public class SmashExplorerDatabase
 
         var results = new List<Set>();
 
-        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" and t.isUpsetOrNotable"))
+        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" and t.isUpsetOrNotable",
+                                                                      requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(eventId) }))
         {
             while (iterator.HasMoreResults)
             {
