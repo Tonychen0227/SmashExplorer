@@ -3,45 +3,55 @@
 <div class="jumbotron">
     <h1>Upsets Thread</h1>
     <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
-    @using (Html.BeginForm(null, null, FormMethod.Post))
+    @if (string.IsNullOrWhiteSpace(Model.Message))
     {
-        @Html.DropDownListFor(x => x.MinimumUpsetFactor, new SelectList(Enumerable.Range(1, Model.MaximumUpsetFactor)), "Minimum Upset Factor",
-        new { @class = "form-control col-md-2", @style = "height: 60px;" })
-        @Html.ListBoxFor(m => m.SelectedPhases, Model.AvailablePhases, new { DropDownStyle = "DropdownList", 
-        @style = "overflow-y: scroll; height: 60px; margin-left:10px", @class = "listbox col-md-3" })
-        <button type="submit" style="margin-left:10px;display:inline-block" class="btn btn-primary">Submit</button>
+        using (Html.BeginForm(null, null, FormMethod.Post))
+        {
+            @Html.DropDownListFor(x => x.MinimumUpsetFactor, new SelectList(Enumerable.Range(1, Model.MaximumUpsetFactor)), "Minimum Upset Factor",
+            new { @class = "form-control col-md-2", @style = "height: 60px;" })
+            @Html.ListBoxFor(m => m.SelectedPhases, Model.AvailablePhases, new
+            {
+                DropDownStyle = "DropdownList",
+            @style = "overflow-y: scroll; height: 60px; margin-left:10px",
+                @class = "listbox col-md-3"
+            })
+            <button type="submit" style="margin-left:10px;display:inline-block" class="btn btn-primary">Submit</button>
+        }
     }
-
 </div>
 
 <div class="row">
-
-    @for (var index = 0; index < 4; index++)
+    @if (string.IsNullOrWhiteSpace(Model.Message))
     {
-        var items = new List<Dictionary<string, List<Upset>>>() { Model.WinnersUpsets, Model.LosersUpsets, Model.WinnersNotable, Model.LosersNotable };
-        var descriptions = new List<string>() { "Upsets - Winners", "Upsets - Losers", "Notable - Winners", "Notable - Losers" };
-        var item = items[index];
-        <div class="col-md-6">
-            <h3>@descriptions[index]</h3>
-            <div style="overflow-y: scroll; height: 500px ">
-                @foreach (var phase in item.Keys)
-                {
-                    <h4>@phase</h4>
-                    <table class="table table-hover">
-                        <tr>
-                            <th>Score</th>
-                            <th>Upset Factor</th>
-                        </tr>
-                        @foreach (var upset in item[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => Math.Abs(x.Set.Round ?? -1)))
-                        {
+        for (var index = 0; index < 4; index++)
+        {
+            var items = new List<Dictionary<string, List<Upset>>>() { Model.WinnersUpsets, Model.LosersUpsets, Model.WinnersNotable, Model.LosersNotable };
+            var descriptions = new List<string>() { "Upsets - Winners", "Upsets - Losers", "Notable - Winners", "Notable - Losers" };
+            var item = items[index];
+            <div class="col-md-6">
+                <h3>@descriptions[index]</h3>
+                <div style="overflow-y: scroll; height: @Math.Min(75 + item.Values.Sum(x => x.Count)*90, 500)px ">
+                    @foreach (var phase in item.Keys)
+                    {
+                        <h4>@phase</h4>
+                        <table class="table table-hover">
                             <tr>
-                                <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
-                                <td class="col-md-3">@upset.UpsetFactor</td>
+                                <th>Score</th>
+                                <th>Upset Factor</th>
                             </tr>
-                        }
-                    </table>
-                }
+                            @foreach (var upset in item[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => Math.Abs(x.Set.Round ?? -1)))
+                            {
+                                <tr>
+                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td class="col-md-3">@upset.UpsetFactor</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
             </div>
-        </div>
+        }
+    } else { 
+        <h1>No upsets reported so far. Come back later!</h1>
     }
 </div>

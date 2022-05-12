@@ -12,4 +12,5 @@ public class UpsetsModel
     public int MaximumUpsetFactor { get; set; }
     public List<SelectListItem> AvailablePhases { get; set; }
     public List<string> SelectedPhases { get; set; }
+    public string Message { get; set; }
 }

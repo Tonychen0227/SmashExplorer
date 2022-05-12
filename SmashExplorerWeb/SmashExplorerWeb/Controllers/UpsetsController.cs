@@ -14,8 +14,20 @@ namespace SmashExplorerWeb.Controllers
 
             if (string.IsNullOrWhiteSpace(id)) return View();
 
-            var model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id));
-            model.Event = await SmashExplorerDatabase.Instance.GetEvent(id);
+            UpsetsModel model = new UpsetsModel();
+
+            var upsets = await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id);
+            var db_event = await SmashExplorerDatabase.Instance.GetEvent(id);
+
+            if (upsets.Count() == 0)
+            {
+                model.Event = db_event;
+                model.Message = "No upsets returned! Come back later.";
+                return View(model);
+            }
+
+            model = OrganizeUpsets(upsets);
+            model.Event = db_event;
 
             return View(model);
         }
