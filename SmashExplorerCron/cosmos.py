@@ -87,6 +87,10 @@ class CosmosDB:
     def __upsert_set(self, tournament_set):
         return self.sets.upsert_item(body=tournament_set)
 
+    def get_all_sets(self):
+        return self.sets.query_items(query="SELECT * FROM k",
+                                       enable_cross_partition_query=True)
+
     def get_event_sets(self, event_id):
         return self.sets.query_items(query=f"SELECT * FROM k WHERE k.eventId = \"{event_id}\"",
                                      partition_key=event_id)

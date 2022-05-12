@@ -366,7 +366,7 @@ class API:
         if winner_round_seed == loser_round_seed:
             return return_set
         try:
-            if abs(int(display_score[0]) - int(display_score[1])) == 1:
+            if abs(int(winner_score) - int(loser_score)) == 1:
                 return_set["isUpsetOrNotable"] = True
                 return return_set
         except ValueError:

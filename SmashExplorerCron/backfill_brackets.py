@@ -5,13 +5,13 @@ from operations_manager import OperationsManager
 
 
 if __name__ == '__main__':
-    logger = Logger(f"{os.environ['SMASH_EXPLORER_LOG_ROOT']}/backfill")
+    logger = Logger(f"backfill")
     operations = OperationsManager(logger)
     logger.log("Starting Backfill")
 
     events_count = 1
-    new_events = operations.get_new_events(days_back=45, days_forward=1)
-    events_size = len(new_events)
+    new_events = operations.get_new_events(days_back=120, days_forward=-40)
+    events_size = 1
     for event_id in new_events:
         events_count += 1
         logger.log(f"Backfill operation creating new events - {events_count} of {events_size}")
