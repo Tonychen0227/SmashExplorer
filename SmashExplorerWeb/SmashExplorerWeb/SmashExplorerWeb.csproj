@@ -248,7 +248,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SelectEntrantsController.cs" />
     <Compile Include="Controllers\UpsetsController.cs" />
-    <Compile Include="Controllers\VisualizeSeedsController.cs" />
+    <Compile Include="Controllers\SeedVisualizerController.cs" />
     <Compile Include="Database\SmashExplorerDatabase.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -320,7 +320,7 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Upsets\Index.cshtml" />
-    <Content Include="Views\VisualizeSeeds\Index.cshtml" />
+    <Content Include="Views\SeedVisualizer\Index.cshtml" />
     <Content Include="Views\SelectEntrants\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

@@ -9,4 +9,5 @@ public class VisualizeSeedDataPoint
 	public int SPR { get; set; }
 
 	public string Name { get; set; }
+	public string PlacementOrdinal { get; set; }
 }

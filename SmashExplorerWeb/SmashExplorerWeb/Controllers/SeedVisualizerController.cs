@@ -6,9 +6,9 @@ using System.Web.Mvc;
 
 namespace SmashExplorerWeb.Controllers
 {
-    public class VisualizeSeedsController : Controller
+    public class SeedVisualizerController : Controller
     {
-        public VisualizeSeedsController()
+        public SeedVisualizerController()
         {
 
         }
@@ -19,7 +19,8 @@ namespace SmashExplorerWeb.Controllers
 
             var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
-            IEnumerable<VisualizeSeedDataPoint> dataPoints = db_event.Standings.Where(x => x.Entrant.InitialSeedNum != null).Select(x =>
+            IEnumerable<VisualizeSeedDataPoint> dataPoints = db_event.Standings
+                .Where(x => x.Entrant.InitialSeedNum != null && !(x.Entrant.IsDisqualified ?? false)).Select(x =>
             {
                 return new VisualizeSeedDataPoint()
                 {
@@ -27,7 +28,8 @@ namespace SmashExplorerWeb.Controllers
                     Placement = x.Placement,
                     SPR = GetSPR(x),
                     Name = x.Entrant.Name,
-                    Seed = x.Entrant.InitialSeedNum ?? -1
+                    Seed = x.Entrant.InitialSeedNum ?? -1,
+                    PlacementOrdinal = SmashExplorerDatabase.Instance.GetStringOrdinal(x.Placement)
                 };
             });
 

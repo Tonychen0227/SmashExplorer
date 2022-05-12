@@ -249,7 +249,7 @@ public class SmashExplorerDatabase
         return ret;
     }
 
-    private string GetStringOrdinal(int num)
+    public string GetStringOrdinal(int num)
     {
         if (num <= 0) return num.ToString();
 

@@ -9,14 +9,15 @@
 
         @foreach (var dataPoint in Model.DataPoints)
         {
-            @:dataPoints.push({ x: @dataPoint.NormalizedPlacement.ToString(), y: @dataPoint.SPR});
+            @:dataPoints.push({ x: @dataPoint.NormalizedPlacement.ToString(), y: @dataPoint.SPR, title: "@dataPoint.PlacementOrdinal (@dataPoint.SPR SPR)", label: "@dataPoint.Name - @dataPoint.Seed seed" });
         }
 
         const data = {
             datasets: [{
                 label: 'SPR',
                 data: dataPoints,
-                backgroundColor: 'rgb(255, 39, 104)'
+                backgroundColor: 'rgb(255, 39, 104)',
+                pointRadius: 5
             }],
         };
 
@@ -24,6 +25,19 @@
             type: 'scatter',
             data: data,
             options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function (tooltipItem, data) {
+                                console.log(tooltipItem);
+                                return tooltipItem[0].raw.title;
+                            },
+                            label: function (tooltipItem, data) {
+                                return tooltipItem.raw.label;
+                            }
+                        }
+                    }
+                },
                 scales: {
                     x: {
                         type: 'linear',
@@ -65,6 +79,9 @@
                                 lineHeight: 1.2,
                             },
                             padding: { top: 20, left: 0, right: 0 }
+                        },
+                        ticks: {
+                            stepSize: 1
                         }
                     }
                 }
@@ -80,14 +97,14 @@
 </head>
 <body>
     <div class="jumbotron">
-        <h1>Visualize Seeds</h1>
+        <h1>Seed Visualizer</h1>
         <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName<sup>Top 128 only</sup></h3>
         <p>SPR = <a href="https://www.pgstats.com/articles/introducing-spr-and-uf" target="_blank">Seed Performance Rating</a></p>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @if (string.IsNullOrWhiteSpace(Model.Message))
     {
-        <canvas id="myChart" class="col-sm-12" style="height:@((Model.DataPoints.Max(x => x.SPR) - @Model.DataPoints.Min(x => x.SPR))*50)px"></canvas>
+        <canvas id="myChart" class="col-sm-12" style="height:@((Model.DataPoints.Max(x => x.SPR) - @Model.DataPoints.Min(x => x.SPR))*60)px"></canvas>
         <div class="col-sm-12">
             <h3>Standings and SPR (Top 128 only)</h3>
             <div style="overflow-y: scroll; height: 500px; margin-top: 30px">
