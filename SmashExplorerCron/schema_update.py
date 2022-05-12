@@ -10,7 +10,8 @@ if __name__ == '__main__':
     logger.log("Starting Schema Upgrade")
 
     event_count = 0
-    event_ids = [x["id"] for x in list(operations.get_all_events_from_db())]
+    #event_ids = [x["id"] for x in list(operations.get_all_events_from_db())]
+    event_ids = []
     total_events = len(event_ids)
 
     for event_id in [str(x) for x in event_ids]:
@@ -29,13 +30,13 @@ if __name__ == '__main__':
                     logger.log(f"Sets upgrade progress: {set_count} of {total_sets}")
 
                 try:
-                    operations.cosmos.create_set(operations.api.get_set(db_set["id"]))
+                    operations.cosmos.create_set(operations.api.get_set(db_set["id"], event_id))
                 except:
                     logger.log(f"Failed to upgrade set {db_set['id']}")
         except:
             logging.exception("")
             logger.log(f"Failed to update sets for {event_id}")
 
-    set_ids = []
+    set_ids = [46371992]
     for set_id in [str(x) for x in set_ids]:
         operations.cosmos.create_set(operations.api.get_set(set_id))

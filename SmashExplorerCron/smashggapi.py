@@ -343,19 +343,19 @@ class API:
                 return return_set
             elif test_1:
                 display_score = display_score.replace(f"{winner['name']} ", "", 1)
-                display_score = display_score.replace(f"{loser['name']} ", "", 1)
-                display_score = display_score.split(" - ")
+                winner_score = display_score[:1]
+                loser_score = display_score[-1:]
                 return_set["detailedScore"] = {
-                    winner["id"]: display_score[0],
-                    loser["id"]: display_score[1]
+                    winner["id"]: winner_score,
+                    loser["id"]: loser_score
                 }
             elif test_2:
                 display_score = display_score.replace(f"{loser['name']} ", "", 1)
-                display_score = display_score.replace(f"{winner['name']} ", "", 1)
-                display_score = display_score.split(" - ")
+                loser_score = display_score[:1]
+                winner_score = display_score[-1:]
                 return_set["detailedScore"] = {
-                    winner["id"]: display_score[1],
-                    loser["id"]: display_score[0]
+                    winner["id"]: winner_score,
+                    loser["id"]: loser_score
                 }
             else:
                 raise IndexError()
@@ -374,7 +374,7 @@ class API:
 
         return return_set
 
-    def get_set(self, set_id):
+    def get_set(self, set_id, event_id=None):
         query_string = '''
             query SetQuery($id: ID!) {
               set(id: $id) {
@@ -432,7 +432,10 @@ class API:
         params = {"id": set_id}
 
         result = self.__call_api("Get Set", query_string, params)
-        return self.__process_set(str(result["set"]["event"]["id"]), result["set"])
+
+        if event_id is None:
+            event_id = str(result["set"]["event"]["id"])
+        return self.__process_set(event_id, result["set"])
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''

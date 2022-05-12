@@ -286,6 +286,16 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\logo.png" />
     <Content Include="Content\SmashBall.png" />
+    <Content Include="Content\Zook1.png" />
+    <Content Include="Content\Zook10.png" />
+    <Content Include="Content\Zook2.png" />
+    <Content Include="Content\Zook3.png" />
+    <Content Include="Content\Zook4.png" />
+    <Content Include="Content\Zook5.png" />
+    <Content Include="Content\Zook6.png" />
+    <Content Include="Content\Zook7.png" />
+    <Content Include="Content\Zook8.png" />
+    <Content Include="Content\Zook9.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -307,7 +317,7 @@
     <Content Include="ThirdPartyNotice.txt" />
     <Content Include="Views\Shared\logo.png" />
     <Content Include="Views\Shared\SmashBall.png" />
-    <Content Include="Views\Shared\Supremacy.png" />
+    <Content Include="Content\Supremacy.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
