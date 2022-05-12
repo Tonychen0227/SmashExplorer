@@ -245,6 +245,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ZookaloozaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SelectEntrantsController.cs" />
     <Compile Include="Controllers\UpsetsController.cs" />
@@ -306,6 +307,7 @@
     <Content Include="ThirdPartyNotice.txt" />
     <Content Include="Views\Shared\logo.png" />
     <Content Include="Views\Shared\SmashBall.png" />
+    <Content Include="Views\Shared\Supremacy.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -322,6 +324,7 @@
     <Content Include="Views\Upsets\Index.cshtml" />
     <Content Include="Views\SeedVisualizer\Index.cshtml" />
     <Content Include="Views\SelectEntrants\Index.cshtml" />
+    <Content Include="Views\Zookalooza\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
