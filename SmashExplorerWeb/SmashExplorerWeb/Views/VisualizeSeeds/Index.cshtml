@@ -9,10 +9,8 @@
 
         @foreach (var dataPoint in Model.DataPoints)
         {
-            @:dataPoints.push({ x: @dataPoint.Placement.ToString(), y: @dataPoint.SPR});
+            @:dataPoints.push({ x: @dataPoint.NormalizedPlacement.ToString(), y: @dataPoint.SPR});
         }
-
-        console.log(@Model.DataPoints.Count());
 
         const data = {
             datasets: [{
@@ -66,7 +64,7 @@
                                 weight: 'bold',
                                 lineHeight: 1.2,
                             },
-                            padding: { top: 20, left: 0, right: 0, bottom: 0 }
+                            padding: { top: 20, left: 0, right: 0 }
                         }
                     }
                 }
@@ -82,11 +80,40 @@
 </head>
 <body>
     <div class="jumbotron">
-        <h1>Visualize Zeeds</h1>
-        <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
+        <h1>Visualize Seeds</h1>
+        <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName<sup>Top 128 only</sup></h3>
         <p>SPR = <a href="https://www.pgstats.com/articles/introducing-spr-and-uf" target="_blank">Seed Performance Rating</a></p>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <canvas id="myChart"></canvas>
+    @if (string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <canvas id="myChart" class="col-sm-12" style="height:@((Model.DataPoints.Max(x => x.SPR) - @Model.DataPoints.Min(x => x.SPR))*50)px"></canvas>
+        <div class="col-sm-12">
+            <h3>Standings and SPR (Top 128 only)</h3>
+            <div style="overflow-y: scroll; height: 500px; margin-top: 30px">
+                <table class="table table-hover">
+                    <tr>
+                        <th>Entrant</th>
+                        <th>Placement</th>
+                        <th>Seed</th>
+                        <th>SPR</th>
+                    </tr>
+                    @foreach (var dataPoint in Model.DataPoints)
+                    {
+                        <tr>
+                            <td>@dataPoint.Name</td>
+                            <td>@dataPoint.Placement</td>
+                            <td>@dataPoint.Seed</td>
+                            <td>@dataPoint.SPR</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1>@Model.Message</h1>
+    }
 </body>
 </html>

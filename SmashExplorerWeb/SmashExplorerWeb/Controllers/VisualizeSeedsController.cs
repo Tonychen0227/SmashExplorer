@@ -23,13 +23,16 @@ namespace SmashExplorerWeb.Controllers
             {
                 return new VisualizeSeedDataPoint()
                 {
-                    Placement = FlattenPlacement(x.Placement),
+                    NormalizedPlacement = FlattenPlacement(x.Placement),
+                    Placement = x.Placement,
                     SPR = GetSPR(x),
-                    Name = x.Entrant.Name
+                    Name = x.Entrant.Name,
+                    Seed = x.Entrant.InitialSeedNum ?? -1
                 };
             });
 
-			return View(new VisualizeSeedsModel() { Event = db_event, DataPoints = dataPoints });
+			return View(new VisualizeSeedsModel() { Event = db_event, DataPoints = dataPoints, 
+                Message = dataPoints.Count() == 0 ? "No standings published. Come back later!" : ""});
         }
 
         private int GetSPR(Standing standing)
