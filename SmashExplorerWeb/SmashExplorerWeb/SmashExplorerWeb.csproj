@@ -245,6 +245,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ExploreController.cs" />
     <Compile Include="Controllers\ZookaloozaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SelectEntrantsController.cs" />
@@ -268,6 +269,7 @@
     <Compile Include="Models\Standing.cs" />
     <Compile Include="Models\Stream.cs" />
     <Compile Include="Models\TournamentLocation.cs" />
+    <Compile Include="Models\Url.cs" />
     <Compile Include="Models\VanityLink.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -275,6 +277,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="WebModels\SelectEntrantsModel.cs" />
     <Compile Include="WebModels\TournamentFilterModel.cs" />
     <Compile Include="WebModels\UpsetsModel.cs" />
     <Compile Include="WebModels\VisualizeSeedsModel.cs" />
@@ -285,7 +288,8 @@
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\logo.png" />
-    <Content Include="Content\SmashBall.png" />
+    <Content Include="Content\SmashExplorer.png" />
+    <Content Include="Content\SmashExplorerSmashBall.png" />
     <Content Include="Content\Zook1.png" />
     <Content Include="Content\Zook10.png" />
     <Content Include="Content\Zook2.png" />
@@ -335,6 +339,7 @@
     <Content Include="Views\SeedVisualizer\Index.cshtml" />
     <Content Include="Views\SelectEntrants\Index.cshtml" />
     <Content Include="Views\Zookalooza\Index.cshtml" />
+    <Content Include="Views\Explore\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

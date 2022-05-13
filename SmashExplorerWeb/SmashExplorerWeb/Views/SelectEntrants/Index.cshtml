@@ -1,3 +1,157 @@
-﻿<div class="jumbotron">
+﻿@model SelectEntrantsModel
+
+<div class="jumbotron">
     <h1>Select Entrants</h1>
+    <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
 </div>
+<div class="row">
+    @using (Html.BeginForm(null, "SelectEntrants", null, FormMethod.Post))
+    {
+        @Html.HiddenFor(model => model.EventId)
+        for (var x = 0; x < Model.SelectedEntrantIds.Count; x++)
+        {
+            @Html.HiddenFor(model => model.SelectedEntrantIds[x])
+        }
+        @Html.HiddenFor(model => model.ToModifyEntrantId, new { id = "toModifyEntrantId" })
+        @Html.HiddenFor(model => model.IsAddEntrant, new { id = "isAddEntrant" })
+        @Html.HiddenFor(model => model.IsFinal, new { id = "isFinalSubmission" })
+        <div class="row">
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.Title, new { style = "display:inline-block", @class = "form-control", @maxlength = "64", placeholder = "Enter Desired Explore Title" })
+                <button style="display:inline-block" onclick="finalize()" type="submit" class="btn btn-primary">Finalize</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h3>Selected Entrants</h3>
+            <div style="overflow-y: scroll; height: 500px">
+                <table class="table table-hover">
+                    <tr>
+                        <th>Name</th>
+                        <th>Delete</th>
+                    </tr>
+                    @foreach (Entrant entrant in Model.SelectedEntrants)
+                    {
+                        <tr>
+                            <td>@entrant.Name</td>
+                            <td><button onclick="removeEntrant(@entrant.Id)" class="btn btn-warning">Remove</button></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                <h3 style="display:inline-block;margin-right: 20px">Entrants</h3>
+                @Html.HiddenFor(model => model.EntrantsFilterText, new { id = "modelEntrantsFilter" })
+                <input type="text" style="display:inline-block" onkeyup="filterEntrants()" id="entrantsFilter" placeholder="Filter entrants..." class="form-control" />
+                <button id="foo" style="display:inline-block" type="button" class="btn btn-light" onclick="clearFilter()">Clear Filter</button>
+            </div>
+            <div style="overflow-y: scroll; height: 500px">
+                <table class="table table-hover" id="entrantsTable">
+                    <tr>
+                        <th>Seed</th>
+                        <th>Entrant Name</th>
+                        <th>Entrant Location</th>
+                        <th>Socials</th>
+                        <th>Add</th>
+                    </tr>
+                    @foreach (Entrant entrant in Model.Entrants.OrderBy(x => x.Seeding))
+                    {
+                        <tr>
+                            <td>@entrant.Seeding</td>
+                            <td style="display:none;">@entrant.Name</td>
+                            <td>
+                                <a href="https://www.smash.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank">@entrant.Name</a>
+                            </td>
+                            <td>
+                                @foreach (EntrantInfo info in entrant.AdditionalInfo)
+                                {
+                                    @info.LocationString
+                                }
+                            </td>
+                            <td>
+                                @foreach (EntrantInfo info in entrant.AdditionalInfo)
+                                {
+                                    foreach (string url in info.Urls.Select(x => x.Url))
+                                    {
+                                        <a href="@url" target="_blank">@url</a>
+                                    }
+                                }
+                            </td>
+                            <td><button onclick="addEntrant(@entrant.Id)" class="btn btn-success">Add</button></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function finalize() {
+        document.getElementById("toModifyEntrantId").value = null;
+        document.getElementById("isFinalSubmission").value = true;
+    }
+
+    function addEntrant(id) {
+        document.getElementById("toModifyEntrantId").value = id;
+        document.getElementById("isAddEntrant").value = true;
+        document.getElementById("modelEntrantsFilter").value = document.getElementById("entrantsFilter").value;
+    }
+
+    function removeEntrant(id) {
+        document.getElementById("toModifyEntrantId").value = id;
+        document.getElementById("isAddEntrant").value = false;
+        document.getElementById("modelEntrantsFilter").value = document.getElementById("entrantsFilter").value;
+    }
+
+    function filterEntrants() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("entrantsFilter");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("entrantsTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+    function clearFilter() {
+        document.getElementById("entrantsFilter").value = "";
+        filterEntrants();
+    }
+</script>
+<script>
+    window.onload = function () {
+        document.getElementById("entrantsFilter").value = document.getElementById("modelEntrantsFilter").value;
+
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("entrantsFilter");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("entrantsTable");
+        tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows, and hide those who don't match the search query
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
