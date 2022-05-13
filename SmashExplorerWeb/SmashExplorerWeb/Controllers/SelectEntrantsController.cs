@@ -34,7 +34,7 @@ namespace SmashExplorerWeb.Controllers
                 VanityLink vanityLink 
                     = await SmashExplorerDatabase.Instance.CreateVanityLinkAsync(model.EventId, model.Title, model.SelectedEntrantIds);
 
-
+                return RedirectToAction("Index", "Explore", new { id = vanityLink.Id });
             }
 
             ViewBag.Title = $"Smash Explorer - Select Entrants {model.EventId}";

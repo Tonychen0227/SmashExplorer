@@ -277,6 +277,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="WebModels\ExploreModel.cs" />
     <Compile Include="WebModels\SelectEntrantsModel.cs" />
     <Compile Include="WebModels\TournamentFilterModel.cs" />
     <Compile Include="WebModels\UpsetsModel.cs" />

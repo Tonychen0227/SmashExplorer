@@ -18,8 +18,21 @@
         <div class="row">
             <div class="col-md-4">
                 @Html.TextBoxFor(model => model.Title, new { style = "display:inline-block", @class = "form-control", @maxlength = "64", placeholder = "Enter Desired Explore Title" })
-                <button style="display:inline-block" onclick="finalize()" type="submit" class="btn btn-primary">Finalize</button>
+                @if (Model.SelectedEntrants.Count <= 0)
+                {
+                    <p>Select at least 1 entrant</p>
+                }
+                else
+                {
+                    <button style="display:inline-block" onclick="finalize()" type="submit" class="btn btn-primary">Finalize</button>
+                }
             </div>
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="col-md-4">
+                    <p style="color:red">@Model.ErrorMessage</p>
+                </div>
+            }
         </div>
         <div class="col-md-4">
             <h3>Selected Entrants</h3>
@@ -43,7 +56,7 @@
             <div class="row">
                 <h3 style="display:inline-block;margin-right: 20px">Entrants</h3>
                 @Html.HiddenFor(model => model.EntrantsFilterText, new { id = "modelEntrantsFilter" })
-                <input type="text" style="display:inline-block" onkeyup="filterEntrants()" id="entrantsFilter" placeholder="Filter entrants..." class="form-control" />
+                <input type="text" style="display:inline-block" onkeyup="filterEntrants()" id="entrantsFilter" placeholder="Filter entrants name or location" class="form-control" />
                 <button id="foo" style="display:inline-block" type="button" class="btn btn-light" onclick="clearFilter()">Clear Filter</button>
             </div>
             <div style="overflow-y: scroll; height: 500px">
@@ -74,7 +87,7 @@
                                 {
                                     foreach (string url in info.Urls.Select(x => x.Url))
                                     {
-                                        <a href="@url" target="_blank">@url</a>
+                                        <a href="@url" target="_blank">@url</a><br/>
                                     }
                                 }
                             </td>
@@ -113,16 +126,28 @@
         tr = table.getElementsByTagName("tr");
 
         // Loop through all table rows, and hide those who don't match the search query
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[1];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
+        for (i = 1; i < tr.length; i++) {
+            td_name = tr[i].getElementsByTagName("td")[1];
+            td_location = tr[i].getElementsByTagName("td")[3];
+
+            if (td_name) {
+                txtValue = td_name.textContent || td_name.innerText;
+                console.log(txtValue);
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
+                    continue;
                 }
             }
+
+            if (td_location) {
+                txtValue = td_location.textContent || td_location.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    continue;
+                }
+            }
+
+            tr[i].style.display = "none";
         }
     }
 
@@ -142,16 +167,28 @@
         tr = table.getElementsByTagName("tr");
 
         // Loop through all table rows, and hide those who don't match the search query
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[1];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
+        for (i = 1; i < tr.length; i++) {
+            td_name = tr[i].getElementsByTagName("td")[1];
+            td_location = tr[i].getElementsByTagName("td")[3];
+
+            if (td_name) {
+                txtValue = td_name.textContent || td_name.innerText;
+                console.log(txtValue);
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
+                    continue;
                 }
             }
+
+            if (td_location) {
+                txtValue = td_location.textContent || td_location.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    continue;
+                }
+            }
+
+            tr[i].style.display = "none";
         }
     }
 </script>

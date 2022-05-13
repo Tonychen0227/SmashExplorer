@@ -64,10 +64,11 @@ class CosmosDB:
 
     def get_active_event_ids(self):
         date_now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
-        date_now_1_day = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=2)).timestamp())
+        date_now_minus_1_week = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)).timestamp())
+        date_now_plus_1_day = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1)).timestamp())
 
-        response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state = \"ACTIVE\""
-                                                 f"OR (k.startAt > {date_now} and k.startAt < {date_now_1_day})",
+        response = self.events.query_items(query=f"SELECT k.id FROM k WHERE (k.state = \"ACTIVE\" AND k.startAt > {date_now_minus_1_week})"
+                                                 f"OR (k.startAt > {date_now} and k.startAt < {date_now_plus_1_day})",
                                            enable_cross_partition_query=True)
         return [x["id"] for x in response]
 

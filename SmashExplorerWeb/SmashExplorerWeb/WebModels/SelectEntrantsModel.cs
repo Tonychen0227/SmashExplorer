@@ -12,4 +12,5 @@ public class SelectEntrantsModel
     public bool IsFinal { get; set; }
     public bool IsAddEntrant { get; set; }
     public string ToModifyEntrantId { get; set; }
+    public string ErrorMessage { get; set; }
 }

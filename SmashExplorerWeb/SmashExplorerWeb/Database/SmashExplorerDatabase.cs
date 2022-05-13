@@ -212,9 +212,9 @@ public class SmashExplorerDatabase
         };
     }
 
-    public async Task<VanityLink> GetDataForVanityLinkAsync(string id, string eventId)
+    public async Task<VanityLink> GetVanityLinkAsync(string id)
     {
-        return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(eventId));
+        return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(id));
     }
 
     public async Task<IEnumerable<Upset>> GetUpsetsAndNotableAsync(string eventId)
