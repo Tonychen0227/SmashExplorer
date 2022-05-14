@@ -1,11 +1,9 @@
-import logging
-
 from logger import Logger
 from operations_manager import OperationsManager
 
 
 if __name__ == '__main__':
-    logger = Logger("schema_update")
+    logger = Logger("datafix")
     operations = OperationsManager(logger)
     logger.log("Starting Datafix")
 
