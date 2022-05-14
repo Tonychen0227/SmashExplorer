@@ -204,7 +204,7 @@ class API:
               }
               participants {
                 user {
-                  authorizations(types: [TWITCH, DISCORD]) {
+                  authorizations(types: [TWITTER, TWITCH]) {
                     url
                   }
                   address {
@@ -244,7 +244,7 @@ class API:
                     }
                     participants {
                       user {
-                        authorizations(types: [TWITCH, DISCORD]) {
+                        authorizations(types: [TWITTER, TWITCH]) {
                           url
                         }
                         location {
