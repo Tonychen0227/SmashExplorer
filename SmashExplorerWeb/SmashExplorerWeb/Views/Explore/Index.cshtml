@@ -44,7 +44,7 @@
                                         opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
                                     }
                                 }
-                                if (firstPreviewSet.PhaseId != null && firstPreviewSet.PhaseId.Split('_').Length >= 2) { 
+                                if (firstPreviewSet.PhaseId != null && firstPreviewSet.Id.Split('_').Length >= 2) { 
                                     <h5><strong>Preview Set:</strong> 
                                 <a href="https://www.smash.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
                                 } else { 
