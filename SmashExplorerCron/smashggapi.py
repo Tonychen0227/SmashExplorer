@@ -293,8 +293,10 @@ class API:
             "wPlacement": tournament_set["wPlacement"],
             "lPlacement": tournament_set["lPlacement"],
             "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
+            "phaseIdentifier": tournament_set["phaseGroup"]["displayIdentifier"],
             "phaseOrder": tournament_set["phaseGroup"]["phase"]["phaseOrder"],
             "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
+            "phaseId": tournament_set["phaseGroup"]["phase"]["id"],
             "games": tournament_set["games"],
             "entrants":
                 [
@@ -405,10 +407,12 @@ class API:
                   }
                 }
                 phaseGroup{
+                  identifier
                   phase {
                     name
                     phaseOrder
                     bracketType
+                    id
                   }
                 }
                 slots {
@@ -474,10 +478,12 @@ class API:
                       }
                     }
                     phaseGroup{
+                      identifier
                       phase {
                         name
                         phaseOrder
                         bracketType
+                        id
                       }
                     }
                     slots {
