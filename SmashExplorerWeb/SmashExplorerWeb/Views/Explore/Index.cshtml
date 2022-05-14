@@ -29,9 +29,11 @@
                         </p>
                         @{
                             var sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenBy(x => x.CreatedAt);
-                            if (sets.Any(x => x.Id.StartsWith("preview")) && !sets.Any(x => !x.Id.StartsWith("preview")))
+                            var highestPhase = sets.Max(x => x.PhaseOrder);
+                            if (sets.Any(x => x.Id.StartsWith("preview") && x.PhaseOrder == highestPhase) 
+                                && !sets.Any(x => !x.Id.StartsWith("preview") && x.PhaseOrder == highestPhase))
                             {
-                                var firstPreviewSet = sets.OrderBy(x => x.CreatedAt).Where(x => x.Id.StartsWith("preview")).FirstOrDefault();
+                                var firstPreviewSet = sets.OrderBy(x => x.CreatedAt).Where(x => x.PhaseOrder == highestPhase && x.Id.StartsWith("preview")).FirstOrDefault();
                                 var targetOpponent = firstPreviewSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                 string opponentName;
                                 if (!string.IsNullOrEmpty(targetOpponent.Name)) {
@@ -45,10 +47,10 @@
                                     }
                                 }
                                 if (firstPreviewSet.PhaseId != null && firstPreviewSet.Id.Split('_').Length >= 2) { 
-                                    <h5><strong>Preview Set:</strong> 
+                                    <h5><strong>Upcoming Set:</strong> 
                                 <a href="https://www.smash.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
                                 } else { 
-                                    <h5><strong>Preview Set:</strong> vs @opponentName</h5>
+                                    <h5><strong>Upcoming Set:</strong> vs @opponentName</h5>
                                 }
                             }
                             var upcomingSet = sets.Where(x => !x.Id.StartsWith("preview") && (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None")).FirstOrDefault();
@@ -90,11 +92,11 @@
                                     }
                                     string url = "";
                                     if (!string.IsNullOrEmpty(set.PhaseId) && !string.IsNullOrEmpty(set.PhaseGroupId)) {
-                                        url = $"https://www.smash.gg/{Model.Event.Slug}/brackets/{set.PhaseGroupId}/{set.PhaseId}";
+                                        url = $"https://www.smash.gg/{Model.Event.Slug}/brackets/{set.PhaseId}/{set.PhaseGroupId}";
                                     } else {
                                         url = $"https://www.smash.gg/{Model.Event.Slug}/set/{set.Id}";
                                     }
-                                    <a href="url" target="_blank">
+                                    <a href="@url" target="_blank">
                                         @if (set.WinnerId == entrant.Id)
                                         {
                                             @:W @detailedScore
