@@ -4,17 +4,19 @@
 </div>
 <h3>So, how do I use this site?</h3>
 <p>
-    The site currently has three features - <strong>Explore</strong>, <strong>Upsets Viewer</strong>, <strong>Seed Visualizer.</strong>To use any of these three features, select a tournament
+    The site currently has three features - <strong>Explore</strong>, <strong>Upsets Viewer</strong>, <strong>Seed Visualizer.</strong> To use any of these three features, select a tournament
     from the home page and navigate to the appropriate page for the feature. Features summarized:
 </p>
 <ul>
-    <li><strong>Explore</strong> - Select a list of entrants, and you generate a link that you can use to keep up to date on their progress throughout the rest of the tournament. Share the link with your friends! Links are good for 3 months. @Html.ActionLink("Example!", "Index", "Explore", new { id = "9db0b307" }, new { target = "_blank" })</li>
+    <li><strong>Explore</strong> - Select a list of entrants, and you generate a link <strong>with updating real-time data</strong> to track them throughout the rest of the tournament. Share the link with your friends! Links are good for 3 months. @Html.ActionLink("Example!", "Index", "Explore", new { id = "9db0b307" }, new { target = "_blank" })</li>
     <li><strong>Upsets Thread</strong> - Shows you all upsets that's happened at a tournament. @Html.ActionLink("Example!", "Index", "Upsets", new { id = "400198" }, new { target = "_blank" })</li>
     <li><strong>Seed Visualizer</strong> - View a placement to <a href="https://www.pgstats.com/articles/introducing-spr-and-uf" target="_blank">Seed Performance Ranking (SPR)</a> chart for Top 128 at the event. @Html.ActionLink("Example!", "Index", "SeedVisualizer", new { id = "677796" }, new { target = "_blank" })</li>
 </ul>
-<h3>How often are events refreshed?</h3>
+<h3>How often are events and sets refreshed?</h3>
 <p>
-    Our script currently has events from 2022-01-01 to 14 days forward from today. Events are refreshed hourly - alongside their entrants. <strong>Only events with 10 or more entrants are captured.</strong> Active events, or events starting in the next 24 hours, will have
+    Our script currently has events from 2022-01-01 to 14 days forward from today. Events are refreshed hourly - alongside their entrants. <strong>Only events with 10 or more entrants are captured.</strong> 
+    <br/>
+    Active events, or events starting in the next 24 hours, will have
     their sets updated every 3 minutes.
 </p>
 <h3>I have a tournament much farther in advance that I'd like you guys to track. Is there any way about this?</h3>

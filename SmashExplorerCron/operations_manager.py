@@ -60,9 +60,9 @@ class OperationsManager:
         if start_time < event["setsLastUpdated"]:
             return
 
-        self.cosmos.update_event_sets_last_updated(event_id, start_time)
-
         sets = self.api.get_event_sets_updated_after_timestamp(event_id, event["setsLastUpdated"])
+
+        self.cosmos.update_event_sets_last_updated(event_id, start_time)
 
         self.logger.log(f"Updating {len(sets)} sets {[x['id'] for x in sets]} for event {event_id} with timestamp {event['setsLastUpdated']}")
 
