@@ -4,12 +4,34 @@
 <html>
 <head>
 <script>
+    var config = null;
+    var chart = null;
+
     window.onload = function () {
+        Chart.register(ChartDataLabels);
+
         var dataPoints = []
 
         @foreach (var dataPoint in Model.DataPoints)
         {
-            @:dataPoints.push({ x: @dataPoint.NormalizedPlacement.ToString(), y: @dataPoint.SPR, title: "@dataPoint.PlacementOrdinal (@dataPoint.SPR SPR)", label: "@dataPoint.Name - @dataPoint.Seed seed" });
+            @:dataPoints.push({ x: @dataPoint.NormalizedPlacement.ToString(), y: @dataPoint.SPR, title: "@dataPoint.PlacementOrdinal (@dataPoint.SPR SPR)", label: "@dataPoint.Name (@dataPoint.Seed)" });
+        }
+
+        var lowestSPR = null;
+        var highestX = null;
+        for (var i = 0; i < dataPoints.length; i++) {
+            var dataPoint = dataPoints[i];
+            if (lowestSPR == null) {
+                lowestSPR = dataPoint.y;
+            } else if (lowestSPR > dataPoint.y) {
+                lowestSPR = dataPoint.y;
+            }
+
+            if (highestX == null) {
+                highestX = dataPoint.x;
+            } else if (highestX < dataPoint.x) {
+                highestX = dataPoint.x;
+            }
         }
 
         const data = {
@@ -18,18 +40,35 @@
                 data: dataPoints,
                 backgroundColor: 'rgb(255, 39, 104)',
                 pointRadius: 5
-            }],
+            }]
         };
 
-        const config = {
+        config = {
             type: 'scatter',
             data: data,
             options: {
                 plugins: {
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        color: '#3f80ff',
+                        display: 'auto',
+                        align: function (context) {
+                            var dataPoint = dataPoints[context.dataIndex];
+                            if (dataPoint.x == highestX) {
+                                return 'left';
+                            }
+                            if (dataPoint.y == lowestSPR) {
+                                return 'top';
+                            }
+                            return 'bottom';
+                        },
+                        offset: 3
+                    },
                     tooltip: {
                         callbacks: {
                             title: function (tooltipItem, data) {
-                                console.log(tooltipItem);
                                 return tooltipItem[0].raw.title;
                             },
                             label: function (tooltipItem, data) {
@@ -88,25 +127,37 @@
             }
         };
 
-        const myChart = new Chart(
+        chart = new Chart(
             document.getElementById('myChart'),
             config
         );
-	}
+    }
+
+    function toggleLabel() {
+        if (chart.options.plugins.datalabels.display == 'auto') {
+            chart.options.plugins.datalabels.display = false;
+        } else {
+            chart.options.plugins.datalabels.display = 'auto';
+        }
+
+        chart.update();
+    }
 </script>
 </head>
 <body>
     <div class="jumbotron">
         <h1>Seed Visualizer</h1>
         <h3 style="display:inline-block"> @Model.Event.Name @@ @Model.Event.TournamentName<sup>Top 128 only</sup> </h3>
-        <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug" 
-            target="_blank">View on smash.gg </a>
-    <p>SPR = <a href="https://www.pgstats.com/articles/introducing-spr-and-uf" target="_blank">Seed Performance Rating</a></p>
+        <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug"
+           target="_blank">View on smash.gg </a>
+        <p>SPR = <a href="https://www.pgstats.com/articles/introducing-spr-and-uf" target="_blank">Seed Performance Rating</a></p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     @if (string.IsNullOrWhiteSpace(Model.Message))
     {
         <canvas id="myChart" class="col-sm-12" style="height:@((Model.DataPoints.Max(x => x.SPR) - @Model.DataPoints.Min(x => x.SPR))*60)px"></canvas>
+        <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-default" onclick="toggleLabel()">Show/Hide labels</a>
         <div class="col-sm-12">
             <h3>Standings and SPR (Top 128 only)</h3>
             <div style="overflow-y: scroll; height: 500px; margin-top: 30px">
