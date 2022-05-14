@@ -408,6 +408,7 @@ class API:
                   }
                 }
                 phaseGroup{
+                  id
                   displayIdentifier
                   phase {
                     name
@@ -479,6 +480,7 @@ class API:
                       }
                     }
                     phaseGroup{
+                      id
                       displayIdentifier
                       phase {
                         name

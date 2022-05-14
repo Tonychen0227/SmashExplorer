@@ -88,7 +88,13 @@
                                     } else {
                                         detailedScore = "";
                                     }
-                                    <a href="https://www.smash.gg/@Model.Event.Slug/set/@set.Id" target="_blank">
+                                    string url = "";
+                                    if (!string.IsNullOrEmpty(set.PhaseId) && !string.IsNullOrEmpty(set.PhaseGroupId)) {
+                                        url = $"https://www.smash.gg/{Model.Event.Slug}/brackets/{set.PhaseGroupId}/{set.PhaseId}";
+                                    } else {
+                                        url = $"https://www.smash.gg/{Model.Event.Slug}/set/{set.Id}";
+                                    }
+                                    <a href="url" target="_blank">
                                         @if (set.WinnerId == entrant.Id)
                                         {
                                             @:W @detailedScore
