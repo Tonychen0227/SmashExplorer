@@ -73,7 +73,7 @@ class CosmosDB:
         return [x["id"] for x in response]
 
     def get_outstanding_event_ids(self):
-        response = self.events.query_items(query="SELECT k.id FROM k WHERE k.state <> \"COMPLETED\"",
+        response = self.events.query_items(query="SELECT k.id FROM k WHERE NOT STARTSWITH(k.state, \"COMPLETED\")",
                                            enable_cross_partition_query=True)
         return [x["id"] for x in response]
 
