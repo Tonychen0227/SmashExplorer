@@ -41,11 +41,14 @@ class CosmosDB:
     def __upsert_event(self, event):
         return self.events.upsert_item(body=event)
 
+    def create_event_datafix(self, event):
+        return self.__upsert_event(event)
+
     def create_event(self, event):
         existing_event = self.get_event(event["id"])
         event["setsLastUpdated"] = 1 if existing_event is None else existing_event["setsLastUpdated"]
 
-        return self.__upsert_event(event)
+        return self.create_event_datafix(event)
 
     def get_all_events(self):
         return self.events.query_items(query="SELECT * FROM k",
