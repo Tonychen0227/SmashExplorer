@@ -64,7 +64,7 @@ class API:
             results = self.__call_api(f"Get Upcoming Ult {keys_array}", query_string, params)
 
             if results is None:
-                continue
+                break
 
             for key in keys_array:
                 results = results[key]
