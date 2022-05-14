@@ -20,7 +20,7 @@
                 <div class="panel" style="border:1px solid gray;margin:4px">
                     <div class="panel-body">
                         <p style="border-bottom: 1px solid black; padding-bottom: 5px">
-                            <strong>@entrant.Name - @SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
+                            <a href="https://www.smash.gg/@Model.Event.Slug/entrants/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a> - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
                             out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
                         </p>
                         @{
@@ -42,7 +42,7 @@
                                 }
                                 if (firstPreviewSet.PhaseId != null) { 
                                     <h5><strong>Preview Set:</strong> 
-                                <a href="https://www.smash.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
+                                <a href="https://www.smash.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank">vs @opponentName</a></h5>
                                 } else { 
                                     <h5><strong>Preview Set:</strong> vs @opponentName</h5>
                                 }
