@@ -31,7 +31,7 @@ class OperationsManager:
     def get_open_event_ids(self):
         return self.cosmos.get_outstanding_event_ids()
 
-    def get_new_events(self, days_back=1, days_forward=14):
+    def get_new_events(self, days_back=7, days_forward=14):
         date_now = datetime.datetime.now(datetime.timezone.utc)
 
         start_time = date_now - datetime.timedelta(days=days_back)
@@ -97,9 +97,8 @@ class OperationsManager:
         entrants_deleted = 0
 
         for entrant in event_entrants:
-            if entrant["id"] not in database_entrant_ids:
-                self.cosmos.create_entrant(entrant)
-                entrants_added += 1
+            self.cosmos.create_entrant(entrant)
+            entrants_added += 1
 
         for entrant_id in database_entrant_ids:
             if entrant_id not in event_entrant_ids:

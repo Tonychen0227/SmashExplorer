@@ -76,7 +76,7 @@ public class SmashExplorerDatabase
 
         var results = new List<Event>();
 
-        int secondsSinceEpoch = (int) (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+        int secondsSinceEpoch = (int) (DateTime.UtcNow.AddDays(-7) - new DateTime(1970, 1, 1)).TotalSeconds;
         using (var iterator = EventsContainer.GetItemQueryIterator<Event>($"SELECT * FROM c WHERE c.startAt > {secondsSinceEpoch} ORDER BY c.numEntrants DESC OFFSET 0 LIMIT 10"))
         {
             while (iterator.HasMoreResults)
@@ -198,7 +198,7 @@ public class SmashExplorerDatabase
             try
             {
                 newVanityLink.Id = generatedId.Substring(0, currentLinkSize);
-                return await VanityLinksContainer.CreateItemAsync(newVanityLink, new PartitionKey(eventId));
+                return await VanityLinksContainer.CreateItemAsync(newVanityLink, new PartitionKey(newVanityLink.Id));
             }
             catch (CosmosException ex)
             {

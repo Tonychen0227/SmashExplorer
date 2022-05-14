@@ -36,7 +36,7 @@
         </div>
         <div class="col-md-4">
             <h3>Selected Entrants</h3>
-            <div style="overflow-y: scroll; height: 500px">
+            <div style="overflow-y: scroll; height: @Math.Min(60 + Model.SelectedEntrants.Count*52, 500)px">
                 <table class="table table-hover">
                     <tr>
                         <th>Name</th>
@@ -85,9 +85,20 @@
                             <td>
                                 @foreach (EntrantInfo info in entrant.AdditionalInfo)
                                 {
-                                    foreach (string url in info.Urls.Select(x => x.Url))
+                                    bool alreadyHasElement = false;
+                                    foreach (string url in info.Urls.Select(x => x.Url).Where(x => !string.IsNullOrEmpty(x)))
                                     {
-                                        <a href="@url" target="_blank">@url</a><br/>
+                                        if (alreadyHasElement)
+                                        {
+                                            <br />
+                                        }
+
+                                        if (!alreadyHasElement)
+                                        {
+                                            alreadyHasElement = true;
+                                        }
+
+                                        <a href="@url" target="_blank">@url</a>
                                     }
                                 }
                             </td>
