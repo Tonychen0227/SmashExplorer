@@ -54,7 +54,7 @@ class OperationsManager:
         return upcoming_event_ids
 
     def update_event_sets(self, event_id):
-        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(seconds=15)).timestamp())
+        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=1)).timestamp())
 
         event = self.cosmos.get_event(event_id)
         if start_time < event["setsLastUpdated"]:
@@ -64,7 +64,7 @@ class OperationsManager:
 
         sets = self.api.get_event_sets_updated_after_timestamp(event_id, event["setsLastUpdated"])
 
-        self.logger.log(f"Updating {len(sets)} sets for event {event_id} with timestamp {event['setsLastUpdated']}")
+        self.logger.log(f"Updating {len(sets)} sets {[x['id'] for x in sets]} for event {event_id} with timestamp {event['setsLastUpdated']}")
 
         for tournament_set in sets:
             self.cosmos.create_set(tournament_set)
