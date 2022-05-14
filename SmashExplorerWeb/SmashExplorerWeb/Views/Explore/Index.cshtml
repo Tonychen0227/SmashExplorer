@@ -75,7 +75,7 @@
                                 {
                                     var opponent = set.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                     string detailedScore;
-                                    if (opponent != null) {
+                                    if (opponent != null && set.DetailedScore != null) {
                                         if (set.WinnerId == entrant.Id) {
                                             detailedScore = $"{set.DetailedScore[set.WinnerId]} - {set.DetailedScore[opponent.Id]}";
                                         } else {
