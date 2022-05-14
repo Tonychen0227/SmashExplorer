@@ -54,7 +54,7 @@ class OperationsManager:
         return upcoming_event_ids
 
     def update_event_sets(self, event_id):
-        start_time = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(seconds=15)).timestamp())
 
         event = self.cosmos.get_event(event_id)
         if start_time < event["setsLastUpdated"]:
