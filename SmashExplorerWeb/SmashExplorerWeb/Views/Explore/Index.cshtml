@@ -31,7 +31,7 @@
                             var sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenBy(x => x.CreatedAt);
                             if (sets.Any(x => x.Id.StartsWith("preview")) && !sets.Any(x => !x.Id.StartsWith("preview")))
                             {
-                                var firstPreviewSet = sets.OrderBy(x => x.CreatedAt).Where(x => x.Id.StartsWith("preview")).Single();
+                                var firstPreviewSet = sets.OrderBy(x => x.CreatedAt).Where(x => x.Id.StartsWith("preview")).FirstOrDefault();
                                 var targetOpponent = firstPreviewSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                 string opponentName;
                                 if (!string.IsNullOrEmpty(targetOpponent.Name)) {
@@ -44,9 +44,9 @@
                                         opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
                                     }
                                 }
-                                if (firstPreviewSet.PhaseId != null) { 
+                                if (firstPreviewSet.PhaseId != null && firstPreviewSet.PhaseId.Split('_').Length >= 2) { 
                                     <h5><strong>Preview Set:</strong> 
-                                <a href="https://www.smash.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank">vs @opponentName</a></h5>
+                                <a href="https://www.smash.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
                                 } else { 
                                     <h5><strong>Preview Set:</strong> vs @opponentName</h5>
                                 }
