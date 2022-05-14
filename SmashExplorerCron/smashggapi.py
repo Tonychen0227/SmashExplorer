@@ -294,6 +294,7 @@ class API:
             "lPlacement": tournament_set["lPlacement"],
             "bracketType": tournament_set["phaseGroup"]["phase"]["bracketType"],
             "phaseIdentifier": tournament_set["phaseGroup"]["displayIdentifier"],
+            "phaseGroupId": tournament_set["phaseGroup"]["id"],
             "phaseOrder": tournament_set["phaseGroup"]["phase"]["phaseOrder"],
             "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
             "phaseId": tournament_set["phaseGroup"]["phase"]["id"],
