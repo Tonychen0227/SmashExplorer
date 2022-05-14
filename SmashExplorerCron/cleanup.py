@@ -11,14 +11,14 @@ if __name__ == '__main__':
     logger.log("Starting Database Cleanup")
 
     event_count = 0
-    events = [x for x in list(operations.get_open_event_ids())]
+    events = [x for x in list(operations.get_all_events_from_db())]
     total_events = len(events)
     date_now = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)).timestamp())
 
-    for event_id in events:
+    for event in events:
+        event_id = str(event["id"])
         event_count += 1
         logger.log(f"Data cleanup: {event_count} of {total_events}")
-        event = operations.cosmos.get_event(event_id)
         if event["state"] == "ACTIVE":
             if event["startAt"] < date_now:
                 num_entrants = event["numEntrants"]
