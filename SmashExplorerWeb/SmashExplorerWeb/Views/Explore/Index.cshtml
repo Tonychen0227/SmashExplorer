@@ -2,10 +2,14 @@
 
 <div class="jumbotron">
     <h1>Explore - @Model.VanityLink.Name</h1>
-    <h3><a href="https://www.smash.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
+    <h3 style="display:inline-block"><a href="https://www.smash.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name
+            </a> @@ @Model.Event.TournamentName</h3><a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug" target="_blank">
+    View on smash.gg</a>
+    <div class="row" style="margin-top:10px">
     @Html.ActionLink("Check Upsets", null, "Upsets", new { id = Model.Event.Id }, new { @class = "btn btn-default" })
     @Html.ActionLink("Seed Visualizer", null, "SeedVisualizer", new { id = Model.Event.Id }, new { @class = "btn btn-default" })
     @Html.ActionLink("Copy to new Explore", null, "SelectEntrants", new { id = Model.VanityLink.Id }, new { @class = "btn btn-default" })
+    </div>
 </div>
 @{
     var currentCount = 0;
@@ -20,7 +24,7 @@
                 <div class="panel" style="border:1px solid gray;margin:4px">
                     <div class="panel-body">
                         <p style="border-bottom: 1px solid black; padding-bottom: 5px">
-                            <a href="https://www.smash.gg/@Model.Event.Slug/entrants/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a> - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
+                            <a href="https://www.smash.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a> - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
                             out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
                         </p>
                         @{
@@ -65,7 +69,7 @@
                                         opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
                                     }
                                 }
-                                <h5><strong>Upcoming Set:</strong><a href="https://www.smash.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank"> vs @opponentName</a></h5>
+                                <h5><strong>Upcoming Set: </strong><a href="https://www.smash.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank">vs @opponentName</a></h5>
                             }
                             var pastSets = sets.Where(x => x.WinnerId != null && x.WinnerId != "None" && !x.Id.StartsWith("preview"));
                             if (pastSets.Count() > 0)

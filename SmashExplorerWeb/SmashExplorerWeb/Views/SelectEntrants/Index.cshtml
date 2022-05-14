@@ -2,7 +2,11 @@
 
 <div class="jumbotron">
     <h1>Select Entrants</h1>
-    <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
+    <h3 style="display:inline-block">
+        @Model.Event.Name @@ @Model.Event.TournamentName
+    </h3>
+    <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug" target="_blank">
+        View on smash.gg</a>
 </div>
 <div class="row">
     @using (Html.BeginForm(null, "SelectEntrants", null, FormMethod.Post))
