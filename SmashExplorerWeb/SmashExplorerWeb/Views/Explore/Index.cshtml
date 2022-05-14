@@ -1,3 +1,140 @@
-﻿<div class="jumbotron">
-    <h1>Explore</h1>
+﻿@model ExploreModel
+
+<div class="jumbotron">
+    <h1>Explore - @Model.VanityLink.Name</h1>
+    <h3><a href="https://www.smash.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
+    @Html.ActionLink("Check Upsets", null, "Upsets", new { id = Model.Event.Id }, new { @class = "btn btn-default" })
+    @Html.ActionLink("Seed Visualizer", null, "SeedVisualizer", new { id = Model.Event.Id }, new { @class = "btn btn-default" })
+    @Html.ActionLink("Copy to new Explore", null, "SelectEntrants", new { id = Model.VanityLink.Id }, new { @class = "btn btn-default" })
 </div>
+@{
+    var currentCount = 0;
+    var sortedKeys = Model.DictKeys.OrderBy(x => x.Standing).ThenBy(x => x.Seeding).ToList();
+    for (var i = 0; i < sortedKeys.Count(); i+=3)
+    {
+    <div class="row">
+        @for (var k = i; k < Math.Min(sortedKeys.Count(), i + 3); k++)
+        {
+            var entrant = sortedKeys[k];
+            <div class="col-md-4">
+                <div class="panel" style="border:1px solid gray;margin:4px">
+                    <div class="panel-body">
+                        <p style="border-bottom: 1px solid black; padding-bottom: 5px">
+                            <strong>@entrant.Name - @SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
+                            out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
+                        </p>
+                        @{
+                            var sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenBy(x => x.CreatedAt);
+                            if (sets.Any(x => x.Id.StartsWith("preview")) && !sets.Any(x => !x.Id.StartsWith("preview")))
+                            {
+                                var firstPreviewSet = sets.OrderBy(x => x.CreatedAt).Where(x => x.Id.StartsWith("preview")).Single();
+                                var targetOpponent = firstPreviewSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
+                                string opponentName;
+                                if (!string.IsNullOrEmpty(targetOpponent.Name)) {
+                                    opponentName = $"{targetOpponent.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(targetOpponent.InitialSeedNum)} seed)";
+                                } else {
+                                    var prereqSet = Model.AllSets.Where(x => x.Id == targetOpponent.PrereqId).FirstOrDefault();
+                                    if (prereqSet == null) {
+                                        opponentName = "???";
+                                    } else {
+                                        opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
+                                    }
+                                }
+                                if (firstPreviewSet.PhaseId != null) { 
+                                    <h5><strong>Preview Set:</strong> 
+                                <a href="https://www.smash.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
+                                } else { 
+                                    <h5><strong>Preview Set:</strong> vs @opponentName</h5>
+                                }
+                            }
+                            var upcomingSet = sets.Where(x => !x.Id.StartsWith("preview") && (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None")).FirstOrDefault();
+                            if (upcomingSet != null)
+                            {
+                                var opponent = upcomingSet.Entrants.Where(x => x.Id != entrant.Id).Single();
+                                string opponentName;
+                                if (opponent.Name != null)
+                                {
+                                    opponentName = $"{opponent.Name} ({SmashExplorerDatabase.Instance.GetStringOrdinal(opponent.InitialSeedNum)} Seed)";
+                                }
+                                else
+                                {
+                                    opponentName = $"{opponent.PrereqType} {opponent.PrereqId}";
+                                    var prereqSet = Model.AllSets.Where(x => x.Id == opponent.PrereqId).FirstOrDefault();
+                                    if (prereqSet != null)
+                                    {
+                                        opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
+                                    }
+                                }
+                                <h5><strong>Upcoming Set:</strong><a href="https://www.smash.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank"> vs @opponentName</a></h5>
+                            }
+                            var pastSets = sets.Where(x => x.WinnerId != null && x.WinnerId != "None" && !x.Id.StartsWith("preview"));
+                            if (pastSets.Count() > 0)
+                            {
+                                <h5><strong>Past Sets</strong></h5>
+                                foreach (var set in pastSets)
+                                {
+                                    var opponent = set.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
+                                    string detailedScore;
+                                    if (opponent != null) {
+                                        if (set.WinnerId == entrant.Id) {
+                                            detailedScore = $"{set.DetailedScore[set.WinnerId]} - {set.DetailedScore[opponent.Id]}";
+                                        } else {
+                                            detailedScore = $"{set.DetailedScore[entrant.Id]} - {set.DetailedScore[opponent.Id]}";
+                                        }
+                                    } else {
+                                        detailedScore = "";
+                                    }
+                                    <a href="https://www.smash.gg/@Model.Event.Slug/set/@set.Id" target="_blank">
+                                        @if (set.WinnerId == entrant.Id)
+                                        {
+                                            @:W @detailedScore
+                                        }
+                                        else
+                                        {
+                                            @:L @detailedScore
+                                        } vs @if (set.Entrants.Count == 1)
+                                        {
+                                            @:Bye
+                                        }
+                                        else
+                                        {
+                                            @opponent.Name @:(@SmashExplorerDatabase.Instance.GetStringOrdinal(opponent.InitialSeedNum) Seed)
+                                        }
+                                    </a><br />
+                                }
+                            }
+                        }
+                    </div>
+                    <div class="panel-footer">
+                        @foreach (var info in entrant.AdditionalInfo)
+                        {
+                            if (info == null)
+                            {
+                                continue;
+                            }
+
+                            foreach (var url in info.Urls.OrderByDescending(x => x.Url))
+                            {
+                                if (url?.Url != null)
+                                {
+                                    Uri uri = new Uri(url.Url);
+                                    <a href="@url.Url" target="_blank">
+                                        @if (url.Url.Contains("twitter.com"))
+                                        {
+                                            <img src="~/Content/twitter.png" alt="Twitter" style="width:30px;height:30px;">
+                                        }
+                                        else if (url.Url.Contains("twitch.tv"))
+                                        {
+                                            <img src="~/Content/twitch.png" alt="Twitch" style="width:30px;height:30px;">
+                                        }
+                                    </a>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    }
+}

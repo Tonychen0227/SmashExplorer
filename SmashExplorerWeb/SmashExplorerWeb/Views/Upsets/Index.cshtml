@@ -2,7 +2,7 @@
 
 <div class="jumbotron">
     <h1>Upsets Thread</h1>
-    <h3><a href="https://www.smash.gg/@Model.Event.Slug">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
+    <h3><a href="https://www.smash.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name</a> @@ @Model.Event.TournamentName</h3>
     @if (string.IsNullOrWhiteSpace(Model.Message))
     {
         using (Html.BeginForm(null, null, FormMethod.Post))
@@ -23,15 +23,11 @@
 <div class="row">
     @if (string.IsNullOrWhiteSpace(Model.Message))
     {
-        for (var index = 0; index < 4; index++)
-        {
-            var items = new List<Dictionary<string, List<Upset>>>() { Model.WinnersUpsets, Model.LosersUpsets, Model.WinnersNotable, Model.LosersNotable };
-            var descriptions = new List<string>() { "Upsets - Winners", "Upsets - Losers", "Notable - Winners", "Notable - Losers" };
-            var item = items[index];
+        <div class="row">
             <div class="col-md-6">
-                <h3>@descriptions[index]</h3>
-                <div style="overflow-y: scroll; height: @Math.Min(75 + item.Values.Sum(x => x.Count)*90, 500)px ">
-                    @foreach (var phase in item.Keys)
+                <h3>Winners - Upsets</h3>
+                <div style="overflow-y: scroll; height: @Math.Min(75 + Model.WinnersUpsets.Values.Sum(x => x.Count)*75, 500)px ">
+                    @foreach (var phase in Model.WinnersUpsets.Keys)
                     {
                         <h4>@phase</h4>
                         <table class="table table-hover">
@@ -39,7 +35,7 @@
                                 <th>Score</th>
                                 <th>Upset Factor</th>
                             </tr>
-                            @foreach (var upset in item[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => Math.Abs(x.Set.Round ?? -1)))
+                            @foreach (var upset in Model.WinnersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
                             {
                                 <tr>
                                     <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
@@ -50,8 +46,78 @@
                     }
                 </div>
             </div>
-        }
-    } else { 
+            <div class="col-md-6">
+                <h3>Losers - Upsets</h3>
+                <div style="overflow-y: scroll; height: @Math.Min(75 + Model.LosersUpsets.Values.Sum(x => x.Count)*75, 500)px ">
+                    @foreach (var phase in Model.LosersUpsets.Keys)
+                    {
+                        <h4>@phase</h4>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Score</th>
+                                <th>Upset Factor</th>
+                            </tr>
+                            @foreach (var upset in Model.LosersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                            {
+                                <tr>
+                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td class="col-md-3">@upset.UpsetFactor</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Winners - Notable<sup>Last game, potential upset</sup></h3>
+                <div style="overflow-y: scroll; height: @Math.Min(75 + Model.WinnersNotable.Values.Sum(x => x.Count)*75, 500)px ">
+                    @foreach (var phase in Model.WinnersNotable.Keys)
+                    {
+                        <h4>@phase</h4>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Score</th>
+                                <th>Upset Factor</th>
+                            </tr>
+                            @foreach (var upset in Model.WinnersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                            {
+                                <tr>
+                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td class="col-md-3">@upset.UpsetFactor</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3>Losers - Notable<sup>Last game, potential upset</sup></h3>
+                <div style="overflow-y: scroll; height: @Math.Min(75 + Model.LosersNotable.Values.Sum(x => x.Count)*75, 500)px ">
+                    @foreach (var phase in Model.LosersNotable.Keys)
+                    {
+                        <h4>@phase</h4>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Score</th>
+                                <th>Upset Factor</th>
+                            </tr>
+                            @foreach (var upset in Model.LosersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                            {
+                                <tr>
+                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td class="col-md-3">@upset.UpsetFactor</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
         <h1>No upsets reported so far. Come back later!</h1>
     }
 </div>

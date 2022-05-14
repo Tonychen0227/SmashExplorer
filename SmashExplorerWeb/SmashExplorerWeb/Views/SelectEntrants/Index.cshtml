@@ -15,12 +15,12 @@
         @Html.HiddenFor(model => model.ToModifyEntrantId, new { id = "toModifyEntrantId" })
         @Html.HiddenFor(model => model.IsAddEntrant, new { id = "isAddEntrant" })
         @Html.HiddenFor(model => model.IsFinal, new { id = "isFinalSubmission" })
-        <div class="row">
+        <div class="row" style="margin-left:5px">
             <div class="col-md-4">
                 @Html.TextBoxFor(model => model.Title, new { style = "display:inline-block", @class = "form-control", @maxlength = "64", placeholder = "Enter Desired Explore Title" })
                 @if (Model.SelectedEntrants.Count <= 0)
                 {
-                    <p>Select at least 1 entrant</p>
+                    <button style="display:inline-block" type="button" class="btn btn-default" disabled>Select at least 1 entrant</button>
                 }
                 else
                 {
@@ -79,26 +79,33 @@
                             <td>
                                 @foreach (EntrantInfo info in entrant.AdditionalInfo)
                                 {
+                                    if (info == null)
+                                    {
+                                        @:No Location
+                                        continue;
+                                    }
                                     @info.LocationString
                                 }
                             </td>
                             <td>
                                 @foreach (EntrantInfo info in entrant.AdditionalInfo)
                                 {
-                                    bool alreadyHasElement = false;
-                                    foreach (string url in info.Urls.Select(x => x.Url).Where(x => !string.IsNullOrEmpty(x)))
+                                    if (info == null)
                                     {
-                                        if (alreadyHasElement)
-                                        {
-                                            <br />
-                                        }
-
-                                        if (!alreadyHasElement)
-                                        {
-                                            alreadyHasElement = true;
-                                        }
-
-                                        <a href="@url" target="_blank">@url</a>
+                                        continue;
+                                    }
+                                    foreach (string url in info.Urls.Select(x => x.Url).Where(x => !string.IsNullOrEmpty(x)).OrderByDescending(x => x))
+                                    {
+                                        <a href="@url" target="_blank">
+                                            @if (url.Contains("twitter.com"))
+                                            {
+                                                <img src="~/Content/twitter.png" alt="Twitter" style="width:30px;height:30px;">
+                                            }
+                                            else if (url.Contains("twitch.tv"))
+                                            {
+                                                <img src="~/Content/twitch.png" alt="Twitch" style="width:30px;height:30px;">
+                                            }
+                                        </a>
                                     }
                                 }
                             </td>

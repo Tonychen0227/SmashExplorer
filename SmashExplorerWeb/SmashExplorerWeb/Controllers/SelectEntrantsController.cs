@@ -9,6 +9,23 @@ namespace SmashExplorerWeb.Controllers
     {
         public async Task<ActionResult> Index(string id)
         {
+            var isNumeric = int.TryParse(id, out int n);
+
+            var selectedEntrantIds = new List<string>();
+
+            if (!isNumeric)
+            {
+                var vanityLink = await SmashExplorerDatabase.Instance.GetVanityLinkAsync(id);
+
+                if (vanityLink == null)
+                {
+                    return HttpNotFound();
+                }
+
+                id = vanityLink.EventId;
+                selectedEntrantIds = vanityLink.EntrantIds;
+            }
+
             ViewBag.Title = $"Smash Explorer - Select Entrants {id}";
 
             var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
@@ -17,8 +34,8 @@ namespace SmashExplorerWeb.Controllers
             return View(new SelectEntrantsModel()
             {
                 Entrants = entrants,
-                SelectedEntrants = new List<Entrant>(),
-                SelectedEntrantIds = new List<string>(),
+                SelectedEntrants = entrants.Where(x => selectedEntrantIds.Contains(x.Id)).ToList(),
+                SelectedEntrantIds = selectedEntrantIds,
                 Event = db_event,
                 EventId = id,
                 IsAddEntrant = false,

@@ -2,7 +2,7 @@
 
 <div class="jumbotron">
     <h1>Smash Explorer</h1>
-    <p class="lead">Welcome to Smash Explorer! Select an event to get started.</p>
+    <p class="lead">Welcome to Smash Explorer! Select an event to get started. @Html.ActionLink("FAQ", "Index", "FAQ")</p>
 </div>
 
 <div class="row">
@@ -87,12 +87,11 @@
         </p>
         @if (string.IsNullOrEmpty(Model.ChosenEventId))
         {
-            @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })
+            <button style="display:inline-block" type="button" class="btn btn-default" disabled>Only available after selecting an event</button>
         }
         else
         {
             @Html.ActionLink("Explore Entrants", null, "SelectEntrants", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", target = "_blank" })
-
         }
     </div>
     <div class="col-md-4">
@@ -100,7 +99,7 @@
         <p>See what upsets happened so far at this tournament. Notable sets also included - sets that went to last game, but the upset was not completed.</p>
         @if (string.IsNullOrEmpty(Model.ChosenEventId))
         {
-            @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })
+            <button style="display:inline-block" type="button" class="btn btn-default" disabled>Only available after selecting an event</button>
         }
         else
         {
@@ -112,11 +111,11 @@
         <p>Check out how well the event was seeded. SPR = how much farther (in terms of rounds) someone went vs what they were seeded to get. Top 128 Only.</p>
         @if (string.IsNullOrEmpty(Model.ChosenEventId))
         {
-            @Html.ActionLink("Only available after selecting an event", "Index", "Home", null, new { @class = "btn btn-default", disabled = true })
+            <button style="display:inline-block" type="button" class="btn btn-default" disabled>Only available after selecting an event</button>
         }
         else
         {
-            @Html.ActionLink("Seed Visualizer", null, "SeedVisualizer", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", target="_blank" })
+            @Html.ActionLink("Seed Visualizer", null, "SeedVisualizer", new { id = Model.ChosenEventId }, new { @class = "btn btn-default", target = "_blank" })
 
         }
     </div>

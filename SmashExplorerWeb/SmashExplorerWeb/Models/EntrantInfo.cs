@@ -7,20 +7,19 @@ public class EntrantInfo
     public EntrantLocation Location { get; set; }
     public string LocationString { get
         {
-            string rootString = "";
             List<string> elements = new List<string>();
 
-            if (!string.IsNullOrEmpty(Location.City))
+            if (!string.IsNullOrEmpty(Location?.City))
             {
                 elements.Add(Location.City);
             }
 
-            if (!string.IsNullOrEmpty(Location.State))
+            if (!string.IsNullOrEmpty(Location?.State))
             {
                 elements.Add(Location.State);
             }
 
-            if (!string.IsNullOrEmpty(Location.Country))
+            if (!string.IsNullOrEmpty(Location?.Country))
             {
                 elements.Add(Location.Country);
             }

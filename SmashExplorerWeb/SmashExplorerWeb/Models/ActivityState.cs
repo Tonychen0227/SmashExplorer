@@ -6,5 +6,6 @@
     READY,
     INVALID,
     CALLED,
-    QUEUED
+    QUEUED,
+    COMPLETED_FORCED
 }

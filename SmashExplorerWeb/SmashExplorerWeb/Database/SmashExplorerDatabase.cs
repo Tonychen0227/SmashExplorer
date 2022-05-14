@@ -20,6 +20,9 @@ public class SmashExplorerDatabase
     private Tuple<DateTime, List<Event>> UpcomingEventsCache = new Tuple<DateTime, List<Event>>(DateTime.MinValue, new List<Event>());
     private static readonly int UpcomingEventsCacheTTLSeconds = 60;
 
+    private Dictionary<string, Tuple<DateTime, Event>> EventsCache = new Dictionary<string, Tuple<DateTime, Event>>();
+    private static readonly int EventsCacheTTLSeconds = 60;
+
     private Dictionary<string, Tuple<DateTime, List<Entrant>>> EntrantsCache = new Dictionary<string, Tuple<DateTime, List<Entrant>>>();
     private static readonly int EntrantsCacheTTLSeconds = 60;
 
@@ -95,7 +98,23 @@ public class SmashExplorerDatabase
 
     public async Task<Event> GetEventAsync(string eventId)
     {
-        return await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
+        if (!EventsCache.ContainsKey(eventId))
+        {
+            EventsCache.Add(eventId, Tuple.Create(DateTime.MinValue, (Event) null));
+        }
+
+        Tuple<DateTime, Event> cachedEvent = EventsCache[eventId];
+
+        if (DateTime.UtcNow - cachedEvent.Item1 < TimeSpan.FromSeconds(EventsCacheTTLSeconds))
+        {
+            return cachedEvent.Item2;
+        }
+
+        var result = await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
+
+        EventsCache[eventId] = Tuple.Create(DateTime.UtcNow, (Event) result);
+
+        return result;
     }
 
     public async Task<List<Event>> GetEventsBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
@@ -231,29 +250,22 @@ public class SmashExplorerDatabase
             return cachedUpsets.Item2;
         }
 
-        var results = new List<Set>();
+        var results = await GetSetsAsync(eventId);
 
-        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.eventId = \"{eventId}\" and t.isUpsetOrNotable",
-                                                                      requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(eventId) }))
-        {
-            while (iterator.HasMoreResults)
-            {
-                foreach (var item in await iterator.ReadNextAsync())
-                {
-                    results.Add(item);
-                }
-            }
-        }
-
-        var ret = results.Select(set => MapToUpset(set));
+        var ret = results.Where(x => x.IsUpsetOrNotable).Select(set => MapToUpset(set));
 
         UpsetsCache[eventId] = Tuple.Create(DateTime.UtcNow, ret);
 
         return ret;
     }
 
-    public string GetStringOrdinal(int num)
+    public string GetStringOrdinal(int? num)
     {
+        if (num == null)
+        {
+            return "None";
+        }
+
         if (num <= 0) return num.ToString();
 
         switch (num % 100)

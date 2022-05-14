@@ -246,6 +246,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\ExploreController.cs" />
+    <Compile Include="Controllers\FAQController.cs" />
     <Compile Include="Controllers\ZookaloozaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SelectEntrantsController.cs" />
@@ -288,9 +289,12 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\discord.png" />
     <Content Include="Content\logo.png" />
     <Content Include="Content\SmashExplorer.png" />
     <Content Include="Content\SmashExplorerSmashBall.png" />
+    <Content Include="Content\twitch.png" />
+    <Content Include="Content\twitter.png" />
     <Content Include="Content\Zook1.png" />
     <Content Include="Content\Zook10.png" />
     <Content Include="Content\Zook2.png" />
@@ -341,6 +345,7 @@
     <Content Include="Views\SelectEntrants\Index.cshtml" />
     <Content Include="Views\Zookalooza\Index.cshtml" />
     <Content Include="Views\Explore\Index.cshtml" />
+    <Content Include="Views\FAQ\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
