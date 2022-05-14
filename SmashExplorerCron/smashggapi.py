@@ -407,7 +407,7 @@ class API:
                   }
                 }
                 phaseGroup{
-                  identifier
+                  displayIdentifier
                   phase {
                     name
                     phaseOrder
@@ -478,7 +478,7 @@ class API:
                       }
                     }
                     phaseGroup{
-                      identifier
+                      displayIdentifier
                       phase {
                         name
                         phaseOrder
