@@ -64,7 +64,7 @@ class OperationsManager:
 
         sets = self.api.get_event_sets_updated_after_timestamp(event_id, event["setsLastUpdated"])
 
-        self.logger.log(f"Updating {len(sets)} sets for event {event_id}")
+        self.logger.log(f"Updating {len(sets)} sets for event {event_id} with timestamp {event['setsLastUpdated']}")
 
         for tournament_set in sets:
             self.cosmos.create_set(tournament_set)
