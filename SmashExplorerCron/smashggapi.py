@@ -446,7 +446,7 @@ class API:
             query EventSetsQuery($eventId: ID, $page: Int, $updatedAfter: Timestamp) {
               event(id:$eventId) {
                 id
-                sets(page: $page, perPage: 15, sortType:ROUND, 
+                sets(page: $page, perPage: 15, sortType:NONE, 
                   filters:{showByes:false, hideEmpty:true, updatedAfter: $updatedAfter}) {
                   pageInfo {
                     totalPages
