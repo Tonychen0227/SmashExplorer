@@ -18,7 +18,7 @@ namespace SmashExplorerWeb.Controllers
             var startingModel = new TournamentFilterModel()
             {
                 StartAtBefore = DateTime.UtcNow.AddDays(14).ToString(DATE_FORMAT),
-                StartAtAfter = DateTime.UtcNow.AddDays(-7).ToString(DATE_FORMAT),
+                StartAtAfter = DateTime.UtcNow.AddDays(-3).ToString(DATE_FORMAT),
                 Events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync(),
                 StartTrackingDate = new DateTime(2022, 1, 1).ToString(DATE_FORMAT),
                 EndTrackingDate = DateTime.UtcNow.AddDays(14).ToString(DATE_FORMAT)
