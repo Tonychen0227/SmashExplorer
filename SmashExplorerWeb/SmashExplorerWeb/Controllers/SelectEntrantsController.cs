@@ -29,13 +29,15 @@ namespace SmashExplorerWeb.Controllers
             ViewBag.Title = $"Smash Explorer - Select Entrants {id}";
 
             var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
+            entrants = entrants.OrderBy(x => x.Seeding).ToList();
             var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
+            var selectedEntrants = entrants.Where(x => selectedEntrantIds.Contains(x.Id)).ToList();
             return View(new SelectEntrantsModel()
             {
                 Entrants = entrants,
-                SelectedEntrants = entrants.Where(x => selectedEntrantIds.Contains(x.Id)).ToList(),
-                SelectedEntrantIds = selectedEntrantIds,
+                SelectedEntrants = selectedEntrants,
+                SelectedEntrantIds = selectedEntrants.Select(x => x.Id).ToList(),
                 Event = db_event,
                 EventId = id,
                 IsAddEntrant = false,
@@ -57,6 +59,7 @@ namespace SmashExplorerWeb.Controllers
             ViewBag.Title = $"Smash Explorer - Select Entrants {model.EventId}";
 
             var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(model.EventId);
+            entrants = entrants.OrderBy(x => x.Seeding).ToList();
             var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(model.EventId);
 
             model.SelectedEntrantIds = model.SelectedEntrantIds ?? new List<string>();
@@ -72,11 +75,12 @@ namespace SmashExplorerWeb.Controllers
                 }
             }
 
+            var selectedEntrants = entrants.Where(x => model.SelectedEntrantIds.Contains(x.Id)).ToList();
             var viewModel = new SelectEntrantsModel()
             {
                 Entrants = entrants,
                 SelectedEntrants = entrants.Where(x => model.SelectedEntrantIds.Contains(x.Id)).ToList(),
-                SelectedEntrantIds = model.SelectedEntrantIds,
+                SelectedEntrantIds = selectedEntrants.Select(x => x.Id).ToList(),
                 Event = db_event,
                 EventId = model.EventId,
                 IsAddEntrant = false,
