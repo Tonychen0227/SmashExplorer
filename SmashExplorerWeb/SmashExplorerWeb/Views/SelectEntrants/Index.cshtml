@@ -72,7 +72,7 @@
                         <th>Socials</th>
                         <th>Add</th>
                     </tr>
-                    @foreach (Entrant entrant in Model.Entrants)
+                    @foreach (Entrant entrant in Model.Entrants.OrderBy(x => x.Seeding))
                     {
                         <tr>
                             <td>@entrant.Seeding</td>
