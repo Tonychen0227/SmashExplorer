@@ -1,7 +1,7 @@
 ﻿@model ExploreModel
 
 <script>
-    var isShowing = true;
+    var isShowing = false;
     function foo() {
         const elements = document.getElementsByClassName("emojiSpan");
         for (const e of elements) {
@@ -129,7 +129,7 @@
                                             @opponent.Name @:(@SmashExplorerDatabase.Instance.GetStringOrdinal(opponent.InitialSeedNum) Seed)
                                         }
                                     </a>
-                                    <span class="emojiSpan">@if (set.BracketType == "DOUBLE_ELIMINATION" && set.Round > 0) { 
+                                    <span class="emojiSpan" style="display:none">@if (set.BracketType == "DOUBLE_ELIMINATION" && set.Round > 0) { 
                                         if (set.WinnerId != entrant.Id) { 
                                             @:&#128315;
                                         } else {

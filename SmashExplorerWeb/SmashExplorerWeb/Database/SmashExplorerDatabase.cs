@@ -213,6 +213,13 @@ public class SmashExplorerDatabase
         var newVanityLink = new VanityLink(eventId, name, entrantIds);
         string generatedId = newVanityLink.Id;
         var currentLinkSize = 8;
+        newVanityLink.Id = generatedId.Substring(0, currentLinkSize);
+
+        while (int.TryParse(newVanityLink.Id, out var foo))
+        {
+            currentLinkSize++;
+            newVanityLink.Id = generatedId.Substring(0, currentLinkSize);
+        }
 
         while (true)
         {

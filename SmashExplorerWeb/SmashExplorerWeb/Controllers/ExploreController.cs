@@ -24,6 +24,8 @@ namespace SmashExplorerWeb.Controllers
 
             Dictionary<Entrant, List<Set>> setsByEntrants = new Dictionary<Entrant, List<Set>>();
 
+            var vanityLinkEntrants = entrants.Where(x => vanityLink.EntrantIds.Contains(x.Id)).ToList();
+
             sets.ForEach(x =>
             {
                 foreach (var entrant in x.Entrants)
@@ -33,7 +35,7 @@ namespace SmashExplorerWeb.Controllers
                         continue;
                     }
 
-                    var actualEntrant = entrants.Where(y => y.Id == entrant.Id).Single();
+                    var actualEntrant = vanityLinkEntrants.Where(y => y.Id == entrant.Id).Single();
 
                     if (!setsByEntrants.ContainsKey(actualEntrant))
                     {
@@ -41,6 +43,14 @@ namespace SmashExplorerWeb.Controllers
                     }
 
                     setsByEntrants[actualEntrant].Add(x);
+                }
+            });
+
+            vanityLinkEntrants.ForEach(x =>
+            {
+                if (!setsByEntrants.ContainsKey(x))
+                {
+                    setsByEntrants.Add(x, new List<Set>());
                 }
             });
 

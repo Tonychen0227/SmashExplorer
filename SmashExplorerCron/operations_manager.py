@@ -53,12 +53,15 @@ class OperationsManager:
 
         return upcoming_event_ids
 
-    def update_event_sets(self, event_id):
+    def update_event_sets(self, event_id, bypass_last_updated=False):
         start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=2)).timestamp())
 
         event = self.cosmos.get_event(event_id)
-        if start_time < event["setsLastUpdated"]:
+        if start_time < event["setsLastUpdated"] and not bypass_last_updated:
             return
+
+        if bypass_last_updated:
+            event["setsLastUpdated"] = 1
 
         sets = self.api.get_event_sets_updated_after_timestamp(event_id, event["setsLastUpdated"])
 
