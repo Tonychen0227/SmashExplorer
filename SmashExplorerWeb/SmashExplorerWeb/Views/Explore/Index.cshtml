@@ -28,12 +28,12 @@
                             out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
                         </p>
                         @{
-                            var sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenBy(x => x.CreatedAt);
+                            var sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenByDescending(x => x.CreatedAt);
                             var highestPhase = sets.Max(x => x.PhaseOrder);
                             if (sets.Any(x => x.Id.StartsWith("preview") && x.PhaseOrder == highestPhase) 
                                 && !sets.Any(x => !x.Id.StartsWith("preview") && x.PhaseOrder == highestPhase))
                             {
-                                var firstPreviewSet = sets.OrderBy(x => x.CreatedAt).Where(x => x.PhaseOrder == highestPhase && x.Id.StartsWith("preview")).FirstOrDefault();
+                                var firstPreviewSet = sets.Where(x => x.PhaseOrder == highestPhase && x.Id.StartsWith("preview")).FirstOrDefault();
                                 var targetOpponent = firstPreviewSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                 string opponentName;
                                 if (!string.IsNullOrEmpty(targetOpponent.Name)) {
