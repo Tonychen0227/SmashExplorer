@@ -154,7 +154,7 @@ public class SmashExplorerDatabase
             return cachedEntrants.Item2;
         }
 
-        var results = new List<Entrant>();
+        List<Entrant> results = new List<Entrant>();
 
         using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"select * from t where t.eventId = \"{eventId}\"",
                                                                               requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(eventId) }))
@@ -167,6 +167,8 @@ public class SmashExplorerDatabase
                 }
             }
         }
+
+        List<Entrant> resultsList = results.OrderBy(x => x.Seeding).ToList();
 
         EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, results);
 

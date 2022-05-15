@@ -31,11 +31,12 @@ namespace SmashExplorerWeb.Controllers
             var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
             var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
+            var selectedEntrants = entrants.Where(x => selectedEntrantIds.Contains(x.Id)).ToList();
             return View(new SelectEntrantsModel()
             {
                 Entrants = entrants,
-                SelectedEntrants = entrants.Where(x => selectedEntrantIds.Contains(x.Id)).ToList(),
-                SelectedEntrantIds = selectedEntrantIds,
+                SelectedEntrants = selectedEntrants,
+                SelectedEntrantIds = selectedEntrants.Select(x => x.Id).ToList(),
                 Event = db_event,
                 EventId = id,
                 IsAddEntrant = false,
@@ -72,11 +73,15 @@ namespace SmashExplorerWeb.Controllers
                 }
             }
 
+            var selectedEntrants = entrants.Where(x => model.SelectedEntrantIds.Contains(x.Id)).ToList();
+
+            ModelState.Clear();
+
             var viewModel = new SelectEntrantsModel()
             {
                 Entrants = entrants,
-                SelectedEntrants = entrants.Where(x => model.SelectedEntrantIds.Contains(x.Id)).ToList(),
-                SelectedEntrantIds = model.SelectedEntrantIds,
+                SelectedEntrants = selectedEntrants,
+                SelectedEntrantIds = selectedEntrants.Select(x => x.Id).ToList(),
                 Event = db_event,
                 EventId = model.EventId,
                 IsAddEntrant = false,
