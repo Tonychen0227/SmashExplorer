@@ -1,5 +1,16 @@
 ﻿@model ExploreModel
 
+<script>
+    var isShowing = true;
+    function foo() {
+        const elements = document.getElementsByClassName("emojiSpan");
+        for (const e of elements) {
+            e.style.display = isShowing ? 'none' : 'inline';
+        }
+
+        isShowing = !isShowing;
+    }
+</script>
 <div class="jumbotron">
     <h1>Explore - @Model.VanityLink.Name</h1>
     <h3 style="display:inline-block"><a href="https://www.smash.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name
@@ -14,6 +25,7 @@
 @{
     var currentCount = 0;
     var sortedKeys = Model.DictKeys.OrderBy(x => x.Standing).ThenBy(x => x.Seeding).ToList();
+    <button class="btn btn-toolbar" type="button" onclick="foo()">Toggle Emoji</button>
     for (var i = 0; i < sortedKeys.Count(); i+=3)
     {
     <div class="row">
@@ -71,7 +83,11 @@
                                         opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
                                     }
                                 }
-                                <h5><strong>Upcoming Set: </strong><a href="https://www.smash.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank">vs @opponentName</a></h5>
+                                <h5><strong>Upcoming Set: </strong><a href="https://www.smash.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank">vs @opponentName</a>
+                                @if (upcomingSet.Stream != null && upcomingSet.Stream.StreamSource == "TWITCH") { 
+                                    <a href="https://www.twitch.tv/@upcomingSet.Stream.StreamName" target="_blank"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px"/></a>
+                                }
+                                </h5>
                             }
                             var pastSets = sets.Where(x => x.WinnerId != null && x.WinnerId != "None" && !x.Id.StartsWith("preview"));
                             if (pastSets.Count() > 0)
@@ -96,7 +112,7 @@
                                     } else {
                                         url = $"https://www.smash.gg/{Model.Event.Slug}/set/{set.Id}";
                                     }
-                                    <a href="@url" target="_blank">
+                                    <span><a href="@url" target="_blank">
                                         @if (set.WinnerId == entrant.Id)
                                         {
                                             @:W @detailedScore
@@ -112,7 +128,20 @@
                                         {
                                             @opponent.Name @:(@SmashExplorerDatabase.Instance.GetStringOrdinal(opponent.InitialSeedNum) Seed)
                                         }
-                                    </a><br />
+                                    </a>
+                                    <span class="emojiSpan">@if (set.BracketType == "DOUBLE_ELIMINATION" && set.Round > 0) { 
+                                        if (set.WinnerId != entrant.Id) { 
+                                            @:&#128315;
+                                        } else {
+                                            @:&#128994;
+                                        }
+                                    } else if ((set.BracketType == "DOUBLE_ELIMINATION" && set.Round < 0) || set.BracketType == "SINGLE_ELIMINATION") { 
+                                        if (set.WinnerId != entrant.Id) { 
+                                            @:&#128128;
+                                        } else {
+                                            @:	&#128075;
+                                        } @SmashExplorerDatabase.Instance.GetStringOrdinal(set.LPlacement)
+                                    }</span></span><br/>
                                 }
                             }
                         }
