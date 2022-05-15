@@ -289,6 +289,9 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\dark-mode-switch.js" />
+    <Content Include="Content\dark-mode-switch.min.js" />
+    <Content Include="Content\dark-mode.css" />
     <Content Include="Content\discord.png" />
     <Content Include="Content\logo.png" />
     <Content Include="Content\SmashExplorer.png" />

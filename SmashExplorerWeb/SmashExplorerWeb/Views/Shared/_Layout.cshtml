@@ -7,6 +7,25 @@
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="~/Content/dark-mode.css">
+    <style>
+        [data-theme="dark"] {
+            background-color: #111;
+            color: #eee;
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: #333;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background-color: #000;
+        }
+
+        [data-theme="dark"] .bg-black {
+            background-color: #eee;
+        }
+    </style>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top" style="background-color: #3a3b3c">
@@ -15,6 +34,11 @@
                 <a href="@Url.Action(null, "Home")" title="Smash Explorer" class="links">
                     <img style="width:20%;margin-top:10px;margin-left:10px;margin-bottom:10px;" alt="Smash Explorer" src="~/Content/SmashExplorer.png">
                 </a>
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="darkSwitch">
+                    <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
+                </div>
+                <script src="~/Content/dark-mode-switch.min.js"></script>
             </div>
         </div>
     </div>
