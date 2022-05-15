@@ -170,9 +170,9 @@ public class SmashExplorerDatabase
 
         List<Entrant> resultsList = results.OrderBy(x => x.Seeding).ToList();
 
-        EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, results);
+        EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, resultsList);
 
-        return results;
+        return resultsList;
     }
 
     public async Task<List<Set>> GetSetsAsync(string eventId)

@@ -83,6 +83,7 @@ namespace SmashExplorerWeb.Controllers
                 SelectedEntrants = selectedEntrants,
                 SelectedEntrantIds = selectedEntrants.Select(x => x.Id).ToList(),
                 Event = db_event,
+                EntrantsFilterText = model.EntrantsFilterText,
                 EventId = model.EventId,
                 IsAddEntrant = false,
                 IsFinal = false,
