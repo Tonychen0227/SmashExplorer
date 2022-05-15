@@ -79,7 +79,7 @@ namespace SmashExplorerWeb.Controllers
             var viewModel = new SelectEntrantsModel()
             {
                 Entrants = entrants,
-                SelectedEntrants = entrants.Where(x => model.SelectedEntrantIds.Contains(x.Id)).ToList(),
+                SelectedEntrants = selectedEntrants,
                 SelectedEntrantIds = selectedEntrants.Select(x => x.Id).ToList(),
                 Event = db_event,
                 EventId = model.EventId,
