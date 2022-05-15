@@ -168,7 +168,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        List<Entrant> resultsList = results.OrderBy(x => x.Seeding).ToList();
+        List<Entrant> resultsList = results.OrderBy(x => x.Seeding == null).ThenBy(x => x.Seeding).ToList();
 
         EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, resultsList);
 
