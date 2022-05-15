@@ -31,7 +31,7 @@ class OperationsManager:
     def get_open_event_ids(self):
         return self.cosmos.get_outstanding_event_ids()
 
-    def get_new_events(self, days_back=3, days_forward=14):
+    def get_new_events(self, days_back=2, days_forward=14):
         date_now = datetime.datetime.now(datetime.timezone.utc)
 
         start_time = date_now - datetime.timedelta(days=days_back)
