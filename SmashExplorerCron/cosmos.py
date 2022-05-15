@@ -66,7 +66,6 @@ class CosmosDB:
         return self.events.delete_item(item=event_id, partition_key=event_id)
 
     def get_active_event_ids(self):
-        date_now = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
         date_now_minus_3_hours = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=3)).timestamp())
         date_now_minus_1_week = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)).timestamp())
         date_now_plus_1_day = int((datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=8)).timestamp())

@@ -24,6 +24,7 @@ if __name__ == '__main__':
                 num_entrants = event["numEntrants"]
                 event_sets = list(operations.cosmos.get_event_sets(event_id))
                 if len(event_sets) > num_entrants:
+                    logger.log(f"Event {event_id} forced complete")
                     event["state"] = "COMPLETED_FORCED"
                     operations.cosmos.create_event(event)
                     continue
