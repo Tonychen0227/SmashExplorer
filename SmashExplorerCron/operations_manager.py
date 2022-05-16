@@ -106,7 +106,6 @@ class OperationsManager:
         event_entrant_ids = [entrant["id"] for entrant in event_entrants]
         database_entrant_ids = [entrant["id"] for entrant in db_entrants]
 
-        entrants_added = 0
         entrants_deleted = 0
 
         total_event_entrants = len(event_entrant_ids)
@@ -125,5 +124,4 @@ class OperationsManager:
                 self.cosmos.delete_entrant(event_id, entrant_id)
                 entrants_deleted += 1
 
-        self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} "
-                        f"({entrants_added} added, {entrants_deleted} removed)")
+        self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} and {entrants_deleted} removed)")
