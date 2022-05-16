@@ -47,7 +47,7 @@ namespace SmashExplorerWeb.Controllers
             filterModel.Events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync();
             filterModel.Slug = !string.IsNullOrWhiteSpace(filterModel.Slug) ? string.Join("-", filterModel.Slug.Split(' ')) : string.Empty;
 
-            if (filterModel.Slug.Contains("smash.gg"))
+            if (filterModel.Slug.Contains("start.gg"))
             {
                 try
                 {
@@ -62,7 +62,7 @@ namespace SmashExplorerWeb.Controllers
                     startAtBefore = EndTrackingDate;
                 } catch (ArgumentNullException)
                 {
-                    filterModel.ErrorMessage = "Invalid smash.gg URL detected. Returning default events.";
+                    filterModel.ErrorMessage = "Invalid start.gg URL detected. Returning default events.";
                     return View(filterModel);
                 }
             }
