@@ -92,19 +92,15 @@ window.onload = function () {
                     display: 'auto',
                     align: function (context) {
                         var dataPoint = dataPoints[context.dataIndex];
-                        if (dataPoint.x == highestX) {
-                            if (dataPoint.y == highestSPR) {
-                                return 'bottom'
-                            } else {
-                                return 'top';
-                            }
-                        }
                         if (dataPoint.y == lowestSPR) {
                             return 'top';
                         }
-                        return 'bottom';
+                        if (dataPoint.y == highestSPR) {
+                            return 'bottom';
+                        }
+                        return (dataPoint.x % 2 == 0) ? "bottom" : "top";
                     },
-                    offset: 3
+                    offset: 1
                 },
                 tooltip: {
                     callbacks: {
