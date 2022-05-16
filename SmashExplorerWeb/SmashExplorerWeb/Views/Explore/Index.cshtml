@@ -13,9 +13,9 @@
 </script>
 <div class="jumbotron">
     <h1>Explore - @Model.VanityLink.Name</h1>
-    <h3 style="display:inline-block"><a href="https://www.smash.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name
-            </a> @@ @Model.Event.TournamentName</h3><a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug" target="_blank">
-    View on smash.gg</a>
+    <h3 style="display:inline-block"><a href="https://www.start.gg/@Model.Event.Slug" target="_blank">@Model.Event.Name
+            </a> @@ @Model.Event.TournamentName</h3><a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.start.gg/@Model.Event.Slug" target="_blank">
+    View on start.gg</a>
     <div class="row" style="margin-top:10px">
     @Html.ActionLink("Check Upsets", null, "Upsets", new { id = Model.Event.Id }, new { @class = "btn btn-default" })
     @Html.ActionLink("Seed Visualizer", null, "SeedVisualizer", new { id = Model.Event.Id }, new { @class = "btn btn-default" })
@@ -36,7 +36,7 @@
                 <div class="panel" style="border:1px solid gray;margin:4px">
                     <div class="panel-body">
                         <p style="border-bottom: 1px solid black; padding-bottom: 5px">
-                            <a href="https://www.smash.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a> - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
+                            <a href="https://www.start.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a> - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
                             out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
                         </p>
                         @{
@@ -60,7 +60,7 @@
                                 }
                                 if (firstPreviewSet.PhaseId != null && firstPreviewSet.Id.Split('_').Length >= 2) { 
                                     <h5><strong>Upcoming Set:</strong> 
-                                <a href="https://www.smash.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
+                                <a href="https://www.start.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a></h5>
                                 } else { 
                                     <h5><strong>Upcoming Set:</strong> vs @opponentName</h5>
                                 }
@@ -83,7 +83,7 @@
                                         opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
                                     }
                                 }
-                                <h5><strong>Upcoming Set: </strong><a href="https://www.smash.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank">vs @opponentName</a>
+                                <h5><strong>Upcoming Set: </strong><a href="https://www.start.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank">vs @opponentName</a>
                                 @if (upcomingSet.Stream != null && upcomingSet.Stream.StreamSource == "TWITCH") { 
                                     <a href="https://www.twitch.tv/@upcomingSet.Stream.StreamName" target="_blank"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px"/></a>
                                 }
@@ -108,9 +108,9 @@
                                     }
                                     string url = "";
                                     if (!string.IsNullOrEmpty(set.PhaseId) && !string.IsNullOrEmpty(set.PhaseGroupId)) {
-                                        url = $"https://www.smash.gg/{Model.Event.Slug}/brackets/{set.PhaseId}/{set.PhaseGroupId}";
+                                        url = $"https://www.start.gg/{Model.Event.Slug}/brackets/{set.PhaseId}/{set.PhaseGroupId}";
                                     } else {
-                                        url = $"https://www.smash.gg/{Model.Event.Slug}/set/{set.Id}";
+                                        url = $"https://www.start.gg/{Model.Event.Slug}/set/{set.Id}";
                                     }
                                     <span><a href="@url" target="_blank">
                                         @if (set.WinnerId == entrant.Id)

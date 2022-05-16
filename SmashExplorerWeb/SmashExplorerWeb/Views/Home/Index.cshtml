@@ -16,7 +16,7 @@
             <div class="form-group">
                 <label for="inputSlug">Tournament slug</label>
                 @Html.TextBoxFor(model => model.Slug, new { @class = "form-control", placeholder = "Enter tournament slug/URL" })
-                <small class="form-text text-muted">E.g. https://smash.gg/tournament/genesis-8 or "genesis-8". Dates will be ignored if you pass in URL.</small>
+                <small class="form-text text-muted">E.g. https://start.gg/tournament/genesis-8 or "genesis-8". Dates will be ignored if you pass in URL.</small>
             </div>
             <div class="form-group">
                 <label for="startAt">Search start date (UTC)</label>
@@ -49,7 +49,7 @@
                     {
                         <tr>
                             <td>
-                                <a href="https://www.smash.gg/@returnedEvent.Slug" target="_blank">@returnedEvent.TournamentName - @returnedEvent.Name</a>
+                                <a href="https://www.start.gg/@returnedEvent.Slug" target="_blank">@returnedEvent.TournamentName - @returnedEvent.Name</a>
                             </td>
                             @if (returnedEvent.TournamentLocation.City == null)
                             {

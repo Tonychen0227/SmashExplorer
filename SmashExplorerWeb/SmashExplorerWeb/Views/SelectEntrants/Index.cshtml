@@ -5,8 +5,8 @@
     <h3 style="display:inline-block">
         @Model.Event.Name @@ @Model.Event.TournamentName
     </h3>
-    <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug" target="_blank">
-        View on smash.gg</a>
+    <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.start.gg/@Model.Event.Slug" target="_blank">
+        View on start.gg</a>
 </div>
 <div class="row">
     @using (Html.BeginForm(null, "SelectEntrants", null, FormMethod.Post))
@@ -78,7 +78,7 @@
                             <td>@entrant.Seeding</td>
                             <td style="display:none;">@entrant.Name</td>
                             <td>
-                                <a href="https://www.smash.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank">@entrant.Name</a>
+                                <a href="https://www.start.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank">@entrant.Name</a>
                             </td>
                             <td>
                                 @foreach (EntrantInfo info in entrant.AdditionalInfo)

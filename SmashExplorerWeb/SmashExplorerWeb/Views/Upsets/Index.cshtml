@@ -5,8 +5,8 @@
     <h3 style="display:inline-block">
         @Model.Event.Name @@ @Model.Event.TournamentName
     </h3>
-    <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.smash.gg/@Model.Event.Slug" target="_blank">
-        View on smash.gg
+    <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.start.gg/@Model.Event.Slug" target="_blank">
+        View on start.gg
     </a>
     @if (string.IsNullOrWhiteSpace(Model.Message))
     {
@@ -43,7 +43,7 @@
                             @foreach (var upset in Model.WinnersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
                             {
                                 <tr>
-                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td><a href="https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
                                     <td class="col-md-3">@upset.UpsetFactor</td>
                                 </tr>
                             }
@@ -65,7 +65,7 @@
                             @foreach (var upset in Model.LosersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
                             {
                                 <tr>
-                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td><a href="https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
                                     <td class="col-md-3">@upset.UpsetFactor</td>
                                 </tr>
                             }
@@ -89,7 +89,7 @@
                             @foreach (var upset in Model.WinnersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
                             {
                                 <tr>
-                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td><a href="https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
                                     <td class="col-md-3">@upset.UpsetFactor</td>
                                 </tr>
                             }
@@ -111,7 +111,7 @@
                             @foreach (var upset in Model.LosersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
                             {
                                 <tr>
-                                    <td><a href="https://www.smash.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
+                                    <td><a href="https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">@upset.NewDisplayScore</a></td>
                                     <td class="col-md-3">@upset.UpsetFactor</td>
                                 </tr>
                             }
