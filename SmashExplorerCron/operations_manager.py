@@ -41,6 +41,8 @@ class OperationsManager:
 
         upcoming_event_ids = []
         for event_list in upcoming_event_lists:
+            if event_list is None:
+                continue
             for event in event_list:
                 if event["numEntrants"] is not None and event["numEntrants"] >= 10:
                     upcoming_event_ids.append(str(event["id"]))
@@ -67,10 +69,18 @@ class OperationsManager:
 
         self.cosmos.update_event_sets_last_updated(event_id, start_time)
 
-        self.logger.log(f"Updating {len(sets)} sets {[x['id'] for x in sets]} for event {event_id} with timestamp {event['setsLastUpdated']}")
+        total_sets = len(sets)
+        self.logger.log(f"Updating {total_sets} sets {[x['id'] for x in sets]} for event {event_id} with timestamp {event['setsLastUpdated']}")
 
-        for tournament_set in sets:
-            self.cosmos.create_set(tournament_set)
+        try:
+            num_added = self.cosmos.create_sets(event_id, sets)
+            if num_added < total_sets:
+                self.logger.log(f"WTF: Added fewer sets than expected for {event_id}")
+                raise ValueError()
+        except:
+            self.logger.log(f"WTF: Something wrong happened with cosmos create sets on {event_id}, creating 1by1")
+            for tournament_set in sets:
+                self.cosmos.create_set(tournament_set)
 
     def get_events_for_tournament(self, tournament_slug):
         return self.api.get_ult_tournament_events(tournament_slug)
@@ -99,9 +109,16 @@ class OperationsManager:
         entrants_added = 0
         entrants_deleted = 0
 
-        for entrant in event_entrants:
-            self.cosmos.create_entrant(entrant)
-            entrants_added += 1
+        total_event_entrants = len(event_entrant_ids)
+        try:
+            num_added = self.cosmos.create_entrants(event_id, event_entrants)
+            if num_added < total_event_entrants:
+                self.logger.log(f"WTF: Added fewer entrants than expected for {event_id}")
+                raise ValueError()
+        except:
+            self.logger.log(f"WTF: Something wrong happened with cosmos create entrants on {event_id}, creating 1by1")
+            for entrant in event_entrants:
+                self.cosmos.create_entrant(entrant)
 
         for entrant_id in database_entrant_ids:
             if entrant_id not in event_entrant_ids:

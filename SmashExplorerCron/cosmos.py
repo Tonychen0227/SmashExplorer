@@ -16,6 +16,9 @@ class CosmosDB:
     def __upsert_entrant(self, entrant):
         return self.entrants.upsert_item(body=entrant)
 
+    def create_entrants(self, event_id, entrants):
+        return self.entrants.scripts.execute_stored_procedure("bulkImport", partition_key=event_id, params=[entrants])
+
     def create_entrant(self, entrant):
         self.__upsert_entrant(entrant)
 
@@ -98,6 +101,9 @@ class CosmosDB:
     def get_event_sets(self, event_id):
         return self.sets.query_items(query=f"SELECT * FROM k WHERE k.eventId = \"{event_id}\"",
                                      partition_key=event_id)
+
+    def create_sets(self, event_id, sets):
+        return self.sets.scripts.execute_stored_procedure("bulkImport", partition_key=event_id, params=[sets])
 
     def create_set(self, tournament_set):
         self.__upsert_set(tournament_set)

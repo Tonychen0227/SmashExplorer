@@ -19,11 +19,11 @@
                 <small class="form-text text-muted">E.g. https://smash.gg/tournament/genesis-8 or "genesis-8". Dates will be ignored if you pass in URL.</small>
             </div>
             <div class="form-group">
-                <label for="startAt">Starts after (UTC)</label>
+                <label for="startAt">Search start date (UTC)</label>
                 @Html.TextBoxFor(model => model.StartAtAfter, new { type = "date", @class = "form-control" })
             </div>
             <div class="form-group">
-                <label for="startBefore">Starts before (UTC)</label>
+                <label for="startBefore">Search end date (UTC)</label>
                 @Html.TextBoxFor(model => model.StartAtBefore, new { type = "date", @class = "form-control" })
                 <small class="form-text text-muted">Currently tracking: @Model.StartTrackingDate to @Model.EndTrackingDate </small>
             </div>
