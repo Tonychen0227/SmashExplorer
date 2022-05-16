@@ -4,144 +4,185 @@
 <html>
 <head>
 <script>
-    var config = null;
-    var chart = null;
+var config = null;
+var chart = null;
 
-    window.onload = function () {
-        Chart.register(ChartDataLabels);
+window.onload = function () {
+    Chart.register(ChartDataLabels);
 
-        var dataPoints = []
+    var dataPoints = []
 
-        @foreach (var dataPoint in Model.DataPoints)
-        {
-            @:dataPoints.push({ x: @dataPoint.NormalizedPlacement.ToString(), y: @dataPoint.SPR, title: "@dataPoint.PlacementOrdinal (@dataPoint.SPR SPR)", label: "@dataPoint.Name (@dataPoint.Seed)" });
+    var dict = {};
+    @foreach (var dataPoint in Model.DataPoints)
+    {
+        <text>
+        var x_value = @dataPoint.NormalizedPlacement.ToString();
+        var y_value = @dataPoint.SPR;
+        var title = "@dataPoint.PlacementOrdinal (@dataPoint.SPR SPR)";
+        var tooltip = "@dataPoint.Name (@dataPoint.Seed)";
+
+        if (!(x_value in dict)) {
+            dict[x_value] = {};
         }
 
-        var lowestSPR = null;
-        var highestX = null;
-        for (var i = 0; i < dataPoints.length; i++) {
-            var dataPoint = dataPoints[i];
-            if (lowestSPR == null) {
-                lowestSPR = dataPoint.y;
-            } else if (lowestSPR > dataPoint.y) {
-                lowestSPR = dataPoint.y;
-            }
-
-            if (highestX == null) {
-                highestX = dataPoint.x;
-            } else if (highestX < dataPoint.x) {
-                highestX = dataPoint.x;
-            }
+        var inner_dict = dict[x_value];
+        if (!(y_value in inner_dict)) {
+            dict[x_value][y_value] = [];
         }
 
-        const data = {
-            datasets: [{
-                label: 'SPR',
-                data: dataPoints,
-                backgroundColor: 'rgb(255, 39, 104)',
-                pointRadius: 5
-            }]
-        };
+        dict[x_value][y_value].push(tooltip);
+        </text>
+        @:dataPoints.push({ x: x_value, y: y_value, title: title, label: tooltip, tooltip: tooltip });
+    }
 
-        config = {
-            type: 'scatter',
-            data: data,
-            options: {
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    datalabels: {
-                        color: '#3f80ff',
-                        display: 'auto',
-                        align: function (context) {
-                            var dataPoint = dataPoints[context.dataIndex];
-                            if (dataPoint.x == highestX) {
-                                return 'left';
-                            }
-                            if (dataPoint.y == lowestSPR) {
+    for (var index in dataPoints) {
+        var dataPoint = dataPoints[index];
+        var numEntries = dict[dataPoint.x][dataPoint.y].length;
+
+        if (numEntries <= 1) {
+            continue;
+        } else {
+            dataPoint.label = numEntries.toString() + " Players";
+        }
+    }
+
+    var lowestSPR = null;
+    var highestSPR = null;
+    var highestX = null;
+    for (var i = 0; i < dataPoints.length; i++) {
+        var dataPoint = dataPoints[i];
+        if (lowestSPR == null) {
+            lowestSPR = dataPoint.y;
+        } else if (lowestSPR > dataPoint.y) {
+            lowestSPR = dataPoint.y;
+        }
+
+        if (highestSPR == null) {
+            highestSPR = dataPoint.y;
+        } else if (highestSPR < dataPoint.y) {
+            highestSPR = dataPoint.y;
+        }
+
+        if (highestX == null) {
+            highestX = dataPoint.x;
+        } else if (highestX < dataPoint.x) {
+            highestX = dataPoint.x;
+        }
+    }
+
+    const data = {
+        datasets: [{
+            label: 'SPR',
+            data: dataPoints,
+            backgroundColor: 'rgb(255, 39, 104)',
+            pointRadius: 5
+        }]
+    };
+
+    config = {
+        type: 'scatter',
+        data: data,
+        options: {
+            plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    color: '#3f80ff',
+                    display: 'auto',
+                    align: function (context) {
+                        var dataPoint = dataPoints[context.dataIndex];
+                        if (dataPoint.x == highestX) {
+                            if (dataPoint.y == highestSPR) {
+                                return 'bottom'
+                            } else {
                                 return 'top';
                             }
-                            return 'bottom';
-                        },
-                        offset: 3
-                    },
-                    tooltip: {
-                        callbacks: {
-                            title: function (tooltipItem, data) {
-                                return tooltipItem[0].raw.title;
-                            },
-                            label: function (tooltipItem, data) {
-                                return tooltipItem.raw.label;
-                            }
                         }
-                    }
-                },
-                scales: {
-                    x: {
-                        type: 'linear',
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'Placement',
-                            font: {
-                                size: 20,
-                                weight: 'bold',
-                                lineHeight: 1.2,
-                            },
-                            padding: { top: 20, left: 0, right: 0, bottom: 0 }
-                        },
-                        ticks: {
-                            callback: function (val, index) {
-                                // Hide the label of every 2nd dataset
-                                if (val == -1) {
-                                    return 0;
-                                }
-
-                                var array = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129]
-
-                                return array[val]
-                            },
-                            stepSize: 1
-                        },
-                        min: -1
+                        if (dataPoint.y == lowestSPR) {
+                            return 'top';
+                        }
+                        return 'bottom';
                     },
-                    y: {
-                        type: 'linear',
-                        position: 'bottom',
-                        title: {
-                            display: true,
-                            text: 'SPR',
-                            font: {
-                                size: 20,
-                                weight: 'bold',
-                                lineHeight: 1.2,
-                            },
-                            padding: { top: 20, left: 0, right: 0 }
+                    offset: 3
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function (tooltipItem, data) {
+                            return tooltipItem[0].raw.title;
                         },
-                        ticks: {
-                            stepSize: 1
+                        label: function (tooltipItem, data) {
+                            return tooltipItem.raw.tooltip;
                         }
                     }
                 }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Placement',
+                        font: {
+                            size: 20,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                        padding: { top: 20, left: 0, right: 0, bottom: 0 }
+                    },
+                    ticks: {
+                        callback: function (val, index) {
+                            // Hide the label of every 2nd dataset
+                            if (val == -1) {
+                                return 0;
+                            }
+
+                            var array = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257]
+
+                            return array[val]
+                        },
+                        stepSize: 1
+                    },
+                    min: -1,
+                    max: highestX + 1
+                },
+                y: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'SPR',
+                        font: {
+                            size: 20,
+                            weight: 'bold',
+                            lineHeight: 1.2,
+                        },
+                        padding: { top: 20, left: 0, right: 0 }
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
             }
-        };
-
-        chart = new Chart(
-            document.getElementById('myChart'),
-            config
-        );
-    }
-
-    function toggleLabel() {
-        if (chart.options.plugins.datalabels.display == 'auto') {
-            chart.options.plugins.datalabels.display = false;
-        } else {
-            chart.options.plugins.datalabels.display = 'auto';
         }
+    };
 
-        chart.update();
+    chart = new Chart(
+        document.getElementById('myChart'),
+        config
+    );
+}
+
+function toggleLabel() {
+    if (chart.options.plugins.datalabels.display == 'auto') {
+        chart.options.plugins.datalabels.display = false;
+    } else {
+        chart.options.plugins.datalabels.display = 'auto';
     }
+
+    chart.update();
+}
 </script>
 </head>
 <body>
