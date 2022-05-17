@@ -131,6 +131,6 @@ class OperationsManager:
                 self.cosmos.delete_entrant(event_id, entrant_id)
                 entrants_deleted += 1
 
-        self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} and {entrants_deleted} removed)")
+        self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} and {entrants_deleted} removed")
 
         self.cosmos.update_event_entrants_last_updated(event_id, int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
