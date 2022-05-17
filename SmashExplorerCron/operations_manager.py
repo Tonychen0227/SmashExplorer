@@ -103,7 +103,7 @@ class OperationsManager:
         start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)).timestamp())
 
         event = self.cosmos.get_event(event_id)
-        if "eventsLastUpdated" in event and start_time < event["eventsLastUpdated"] and not event["state"] == "COMPLETED":
+        if "entrantsLastUpdated" in event and start_time < event["entrantsLastUpdated"] and not event["state"] == "COMPLETED":
             self.logger.log(f"Skip updating entrants for {event_id} because it has not yet been an hour")
             return
 
