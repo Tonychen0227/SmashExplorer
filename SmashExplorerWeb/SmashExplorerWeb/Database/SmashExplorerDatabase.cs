@@ -84,10 +84,8 @@ public class SmashExplorerDatabase
         {
             while (iterator.HasMoreResults)
             {
-                foreach (var item in await iterator.ReadNextAsync())
-                {
-                    results.Add(item);
-                }
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
             }
         }
 
@@ -130,10 +128,8 @@ public class SmashExplorerDatabase
         {
             while (iterator.HasMoreResults)
             {
-                foreach (var item in await iterator.ReadNextAsync())
-                {
-                    results.Add(item);
-                }
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
             }
         }
 
@@ -161,10 +157,8 @@ public class SmashExplorerDatabase
         {
             while (iterator.HasMoreResults)
             {
-                foreach (var item in await iterator.ReadNextAsync())
-                {
-                    results.Add(item);
-                }
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
             }
         }
 
@@ -196,10 +190,8 @@ public class SmashExplorerDatabase
         {
             while (iterator.HasMoreResults)
             {
-                foreach (var item in await iterator.ReadNextAsync())
-                {
-                    results.Add(item);
-                }
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
             }
         }
 
