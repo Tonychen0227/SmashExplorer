@@ -50,6 +50,7 @@ class CosmosDB:
     def create_event(self, event):
         existing_event = self.get_event(event["id"])
         event["setsLastUpdated"] = 1 if existing_event is None else existing_event["setsLastUpdated"]
+        event["entrantsLastUpdated"] = 1 if existing_event is None else existing_event["entrantsLastUpdated"]
 
         return self.create_event_datafix(event)
 
@@ -87,6 +88,11 @@ class CosmosDB:
         event = self.get_event(event_id)
         event["setsLastUpdated"] = last_updated
 
+        self.__upsert_event(event)
+
+    def update_event_entrants_last_updated(self, event_id, last_updated):
+        event = self.get_event(event_id)
+        event["entrantsLastUpdated"] = last_updated
         self.__upsert_event(event)
     # endregion Events
 

@@ -100,6 +100,13 @@ class OperationsManager:
         return self.cosmos.create_event(event)
 
     def get_and_create_entrants_for_event(self, event_id):
+        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)).timestamp())
+
+        event = self.cosmos.get_event(event_id)
+        if start_time < event["eventsLastUpdated"] and not event["state"] == "COMPLETED":
+            self.logger.log(f"Skip updating entrants for {event_id} because it has not yet been an hour")
+            return
+
         event_entrants = self.api.get_ult_event_entrants(event_id)
         db_entrants = self.cosmos.get_event_entrants(event_id)
 
@@ -125,3 +132,5 @@ class OperationsManager:
                 entrants_deleted += 1
 
         self.logger.log(f"Processed {len(event_entrant_ids)} entrants for event {event_id} and {entrants_deleted} removed)")
+
+        self.cosmos.update_event_entrants_last_updated(event_id, int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
