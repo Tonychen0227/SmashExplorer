@@ -22,9 +22,9 @@ if __name__ == '__main__':
             logger.log(f"Skipping existing event {event_id}")
             continue
 
-        operations.get_and_create_event(event_id)
-        operations.get_and_create_entrants_for_event(event_id)
-        operations.update_event_sets(event_id)
+        created_event = operations.get_and_create_event(event_id)
+        operations.get_and_create_entrants_for_event(event_id, created_event)
+        operations.update_event_sets(event_id, created_event)
         added_events.append(event_id)
 
     events_count = 0
@@ -36,11 +36,13 @@ if __name__ == '__main__':
         if event_id in added_events:
             logger.log(f"Skipping discovered event {event_id}")
             continue
-        if operations.get_and_create_event(event_id) is None:
+
+        created_event = operations.get_and_create_event(event_id)
+        if created_event is None:
             logger.log(f"Event {event_id} has been deleted")
             operations.delete_event(event_id)
             continue
-        operations.get_and_create_entrants_for_event(event_id)
-        operations.update_event_sets(event_id)
+        operations.get_and_create_entrants_for_event(event_id, created_event)
+        operations.update_event_sets(event_id, created_event)
 
     logger.log("Daily Script Complete")

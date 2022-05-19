@@ -21,8 +21,8 @@ if __name__ == '__main__':
             logger.log(f"Skipping existing event {event_id}")
             continue
         try:
-            operations.get_and_create_event(event_id)
-            operations.get_and_create_entrants_for_event(event_id)
-            operations.update_event_sets(event_id)
+            created_event = operations.get_and_create_event(event_id)
+            operations.get_and_create_entrants_for_event(event_id, created_event)
+            operations.update_event_sets(event_id, created_event, bypass_last_updated=True)
         except:
             logger.log(f"Issue backfilling {event_id}, skipping")

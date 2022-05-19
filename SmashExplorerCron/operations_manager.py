@@ -55,10 +55,10 @@ class OperationsManager:
 
         return upcoming_event_ids
 
-    def update_event_sets(self, event_id, bypass_last_updated=False):
+    def update_event_sets(self, event_id, created_event, bypass_last_updated=False):
         start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=2)).timestamp())
 
-        event = self.cosmos.get_event(event_id)
+        event = created_event
         if start_time < event["setsLastUpdated"] and not bypass_last_updated:
             return
 
@@ -99,8 +99,8 @@ class OperationsManager:
 
         return self.cosmos.create_event(event)
 
-    def get_and_create_entrants_for_event(self, event_id):
-        event = self.cosmos.get_event(event_id)
+    def get_and_create_entrants_for_event(self, event_id, created_event):
+        event = created_event
 
         if event["state"] == "ACTIVE":
             start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).timestamp())

@@ -15,10 +15,11 @@ if __name__ == '__main__':
     for event_id in event_ids:
         event_count += 1
         logger.log(f"Minutely operation on {event_id} ({event_count} of {events_size})")
-        if operations.get_and_create_event(event_id) is None:
+        created_event = operations.get_and_create_event(event_id)
+        if created_event is None:
             logger.log(f"Event {event_id} has been deleted")
             continue
-        operations.get_and_create_entrants_for_event(event_id)
-        operations.update_event_sets(event_id)
+        operations.get_and_create_entrants_for_event(event_id, created_event)
+        operations.update_event_sets(event_id, created_event)
 
     logger.log("Minutely Script Complete")
