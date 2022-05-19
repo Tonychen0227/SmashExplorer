@@ -1,12 +1,12 @@
 import datetime
-import logging
+import os
 
 from logger import Logger
 from operations_manager import OperationsManager
 
 
 if __name__ == '__main__':
-    logger = Logger("", enabled=False)
+    logger = Logger(f"{os.environ['SMASH_EXPLORER_LOG_ROOT']}/cleanup")
     operations = OperationsManager(logger)
     logger.log("Starting Database Cleanup")
 

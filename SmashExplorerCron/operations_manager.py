@@ -99,13 +99,13 @@ class OperationsManager:
 
         return self.cosmos.create_event(event)
 
-    def get_and_create_entrants_for_event(self, event_id, created_event):
+    def get_and_create_entrants_for_event(self, event_id, created_event, is_minutely_operation=True):
         event = created_event
 
-        if event["state"] == "ACTIVE":
+        if event["state"] == "ACTIVE" or is_minutely_operation:
             start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).timestamp())
         else:
-            start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=2)).timestamp())
+            start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=12)).timestamp())
 
         if "entrantsLastUpdated" in event and start_time < event["entrantsLastUpdated"] and not event["state"] == "COMPLETED":
             self.logger.log(f"Skip updating entrants for {event_id}")
