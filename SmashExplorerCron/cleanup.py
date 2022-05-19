@@ -11,14 +11,15 @@ if __name__ == '__main__':
     logger.log("Starting Database Cleanup")
 
     event_count = 0
-    events = [x for x in list(operations.get_all_events_from_db())]
-    total_events = len(events)
+    event_ids = [x for x in list(operations.get_open_event_ids())]
+    total_events = len(event_ids)
     date_now = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)).timestamp())
 
-    for event in events:
-        event_id = str(event["id"])
+    for event_id in event_ids:
+        event = operations.api.get_event(event_id)
         event_count += 1
         logger.log(f"Data cleanup: {event_count} of {total_events}")
+
         if event["state"] == "ACTIVE":
             if event["startAt"] < date_now:
                 num_entrants = event["numEntrants"]
@@ -28,12 +29,4 @@ if __name__ == '__main__':
                     event["state"] = "COMPLETED_FORCED"
                     operations.cosmos.create_event(event)
                     continue
-        if operations.api.get_event(event_id) is None:
-            try:
-                logger.log(f"Event {event_id} marked for cleanup")
-                operations.delete_event(event_id)
-            except:
-                logging.exception("")
-                logger.log(f"Error cleaning up {event_id}")
-                pass
 
