@@ -105,7 +105,7 @@ class OperationsManager:
         if event["state"] == "ACTIVE" or is_minutely_operation:
             start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).timestamp())
         else:
-            start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=12)).timestamp())
+            start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=8)).timestamp())
 
         if "entrantsLastUpdated" in event and start_time < event["entrantsLastUpdated"] and not event["state"] == "COMPLETED":
             self.logger.log(f"Skip updating entrants for {event_id}")
