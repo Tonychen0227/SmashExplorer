@@ -16,14 +16,17 @@ class CosmosDB:
     def __upsert_entrant(self, entrant):
         return self.entrants.upsert_item(body=entrant)
 
-    def create_entrants(self, event_id, entrants):
-        return self.entrants.scripts.execute_stored_procedure("bulkImport", partition_key=event_id, params=[entrants])
+    def create_entrants(self, event_id, entrants, db_entrants_dict):
+        for entrant in entrants:
+            if entrant["id"] in db_entrants_dict:
+                entrant["_self"] = db_entrants_dict[entrant["id"]]
+        return self.entrants.scripts.execute_stored_procedure("bulkImport2", partition_key=event_id, params=[entrants])
 
     def create_entrant(self, entrant):
         self.__upsert_entrant(entrant)
 
     def get_event_entrants(self, event_id):
-        response = self.entrants.query_items(query=f"SELECT k.id FROM k WHERE k.eventId = \"{event_id}\"",
+        response = self.entrants.query_items(query=f"SELECT k.id, k._self FROM k WHERE k.eventId = \"{event_id}\"",
                                              partition_key=event_id)
         return response
 

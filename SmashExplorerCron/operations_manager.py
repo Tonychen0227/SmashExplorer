@@ -100,24 +100,27 @@ class OperationsManager:
         return self.cosmos.create_event(event)
 
     def get_and_create_entrants_for_event(self, event_id):
-        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)).timestamp())
+        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).timestamp())
 
         event = self.cosmos.get_event(event_id)
         if "entrantsLastUpdated" in event and start_time < event["entrantsLastUpdated"] and not event["state"] == "COMPLETED":
-            self.logger.log(f"Skip updating entrants for {event_id} because it has not yet been an hour")
+            self.logger.log(f"Skip updating entrants for {event_id}")
             return
 
         event_entrants = self.api.get_ult_event_entrants(event_id)
         db_entrants = self.cosmos.get_event_entrants(event_id)
 
-        event_entrant_ids = [entrant["id"] for entrant in event_entrants]
-        database_entrant_ids = [entrant["id"] for entrant in db_entrants]
+        event_entrant_ids = set([entrant["id"] for entrant in event_entrants])
+
+        db_entrants_dict = {}
+        for db_entrant in db_entrants:
+            db_entrants_dict[db_entrant["id"]] = db_entrant["_self"]
 
         entrants_deleted = 0
 
         total_event_entrants = len(event_entrant_ids)
         try:
-            num_added = self.cosmos.create_entrants(event_id, event_entrants)
+            num_added = self.cosmos.create_entrants(event_id, event_entrants, db_entrants_dict)
             if num_added < total_event_entrants:
                 self.logger.log(f"WTF: Added fewer entrants than expected for {event_id}")
                 raise ValueError()
@@ -126,7 +129,7 @@ class OperationsManager:
             for entrant in event_entrants:
                 self.cosmos.create_entrant(entrant)
 
-        for entrant_id in database_entrant_ids:
+        for entrant_id in db_entrants_dict.keys():
             if entrant_id not in event_entrant_ids:
                 self.cosmos.delete_entrant(event_id, entrant_id)
                 entrants_deleted += 1
