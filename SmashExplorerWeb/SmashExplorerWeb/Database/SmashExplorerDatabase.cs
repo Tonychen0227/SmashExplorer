@@ -315,11 +315,6 @@ public class SmashExplorerDatabase
         var newDisplayScore = $"{winner.Name} ({winner.InitialSeedNum}) {set.DetailedScore[winner.Id]}-{set.DetailedScore[loser.Id]} " +
                               $"{loser.Name} ({loser.InitialSeedNum})";
 
-        if (set.Round < 0)
-        {
-            newDisplayScore += $" (out @ {GetStringOrdinal(set.LPlacement ?? -1)})";
-        }
-
         return new Upset()
         {
             Set = set,
