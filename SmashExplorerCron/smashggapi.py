@@ -79,6 +79,24 @@ class API:
 
         return all_results
 
+    def get_game_characters(self, video_game_id):
+        query_string = '''
+            query Characters($videoGameId: ID) {
+                videogame(id: $videoGameId){
+                    characters {
+                        id
+                        images {
+                          url
+                        }
+                        name
+                    }
+                }
+            }
+            '''
+
+        params = {"videoGameId": video_game_id}
+        return self.__call_api(f"Characters, for {video_game_id}", query_string, params)
+
     def get_upcoming_ult_events(self, start_time: datetime, end_time: datetime):
         after_date = int(start_time.timestamp())
         before_date = int(end_time.timestamp())
