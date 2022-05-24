@@ -116,6 +116,8 @@
                                 string storedSet = null;
                                 foreach (var set in pastSets)
                                 {
+                                    var playerSelections = set.Games?.SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
+
                                     var selections = set.Games?.SelectMany(x => x.Selections.Where(s => s.Entrant.Id != entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
 
                                     if (storedSet != set.PhaseName) {
@@ -139,7 +141,15 @@
                                     } else {
                                         url = $"https://www.start.gg/{Model.Event.Slug}/set/{set.Id}";
                                     }
-                                    <span><a href="@url" target="_blank">
+                                    <span>
+                                    @if (playerSelections != null) {
+                                        foreach(var selection in playerSelections.Distinct()) { 
+                                            if (selection != null) { 
+                                                <img style="height:20px;width:20px;" src="~/Content/Characters/@(selection).jpg" />
+                                            }
+                                        }
+                                    }
+                                    <a href="@url" target="_blank">
                                         @if (set.WinnerId == entrant.Id)
                                         {
                                             @:W @detailedScore
