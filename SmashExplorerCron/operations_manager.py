@@ -56,7 +56,7 @@ class OperationsManager:
         return upcoming_event_ids
 
     def update_event_sets(self, event_id, created_event, bypass_last_updated=False):
-        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=2)).timestamp())
+        start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=3)).timestamp())
 
         event = created_event
         if start_time < event["setsLastUpdated"] and not bypass_last_updated:

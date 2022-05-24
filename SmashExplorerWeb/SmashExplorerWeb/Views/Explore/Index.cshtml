@@ -36,7 +36,27 @@
                 <div class="panel" style="border:1px solid gray;margin:4px">
                     <div class="panel-body">
                         <p style="border-bottom: 1px solid black; padding-bottom: 5px">
-                            <a href="https://www.start.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a> - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
+                            <a href="https://www.start.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a>
+                            @{
+                                List<int?> characters = new List<int?>();
+                                foreach (var set in Model.EntrantsSets[entrant])
+                                {
+                                    if (set.Games != null)
+                                    {
+                                        var selections = set.Games.SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
+                                        characters.AddRange(selections);
+                                    }
+                                }
+
+                                foreach (var character in characters.Distinct())
+                                {
+                                    if (character != null)
+                                    {
+                                        <img src="~/Content/Characters/@(character).jpg" style = "height:20px;width:20px" />
+                                    }
+                                }
+                            }
+                            - <strong>@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Standing ?? null)</strong>
                             out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
                         </p>
                         @{
@@ -96,7 +116,9 @@
                                 string storedSet = null;
                                 foreach (var set in pastSets)
                                 {
-                                    if (storedSet != set.PhaseName) { 
+                                    var selections = set.Games?.SelectMany(x => x.Selections.Where(s => s.Entrant.Id != entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
+
+                                    if (storedSet != set.PhaseName) {
                                         <i>@set.PhaseName</i><br/>
                                         storedSet = set.PhaseName;
                                     }
@@ -134,6 +156,14 @@
                                             @opponent.Name @:(@SmashExplorerDatabase.Instance.GetStringOrdinal(opponent.InitialSeedNum) Seed)
                                         }
                                     </a>
+                                    @if (selections != null) {
+                                        foreach(var selection in selections.Distinct()) { 
+                                            if (selection != null) { 
+                                                <img style="height:20px;width:20px;" src="~/Content/Characters/@(selection).jpg" />
+                                            }
+                                        }
+                                    }
+
                                     <span class="emojiSpan" style="display:none">@if (set.BracketType == "DOUBLE_ELIMINATION" && set.Round > 0) { 
                                         if (set.WinnerId != entrant.Id) { 
                                             @:&#128315;
