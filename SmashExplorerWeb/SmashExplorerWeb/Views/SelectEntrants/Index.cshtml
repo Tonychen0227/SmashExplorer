@@ -16,6 +16,7 @@
         {
             @Html.HiddenFor(model => model.SelectedEntrantIds[x])
         }
+        @Html.HiddenFor(model => model.EntrantsAnchorId)
         @Html.HiddenFor(model => model.ToModifyEntrantId, new { id = "toModifyEntrantId" })
         @Html.HiddenFor(model => model.IsAddEntrant, new { id = "isAddEntrant" })
         @Html.HiddenFor(model => model.IsFinal, new { id = "isFinalSubmission" })
@@ -39,16 +40,17 @@
             }
         </div>
         <div class="col-md-4">
-            <h3>Selected Entrants</h3>
+            <h3>Selected Entrants (@Model.SelectedEntrants.Count)</h3>
             <div style="overflow-y: scroll; height: @Math.Min(60 + Model.SelectedEntrants.Count*52, 500)px">
                 <table class="table table-hover">
                     <tr>
                         <th>Name</th>
                         <th>Delete</th>
                     </tr>
-                    @foreach (Entrant entrant in Model.SelectedEntrants)
+                    @for (var i = 0; i < Model.SelectedEntrants.Count; i++)
                     {
-                        <tr>
+                        Entrant entrant = Model.SelectedEntrants[i];
+                        <tr id="@(Model.SelectedEntrants.Count - 1 == i ? "lastSelected" : null)">
                             <td>@entrant.Name</td>
                             <td><button onclick="removeEntrant(@entrant.Id)" class="btn btn-warning">Remove</button></td>
                         </tr>
@@ -74,7 +76,7 @@
                     </tr>
                     @foreach (Entrant entrant in Model.Entrants)
                     {
-                        <tr>
+                        <tr id="@entrant.Id">
                             <td>@entrant.Seeding</td>
                             <td style="display:none;">@entrant.Name</td>
                             <td>
@@ -154,7 +156,6 @@
 
             if (td_name) {
                 txtValue = td_name.textContent || td_name.innerText;
-                console.log(txtValue);
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
                     continue;
@@ -180,6 +181,16 @@
 </script>
 <script>
     window.onload = function () {
+        if (@Model.EntrantsAnchorId != null) {
+            var element = document.getElementById("@Model.EntrantsAnchorId");
+            element.scrollIntoView();
+        }
+
+        if (@Model.SelectedEntrants.Count > 0) {
+            var element = document.getElementById("lastSelected");
+            element.scrollIntoView();
+        }
+
         document.getElementById("entrantsFilter").value = document.getElementById("modelEntrantsFilter").value;
 
         var input, filter, table, tr, td, i, txtValue;
@@ -195,7 +206,6 @@
 
             if (td_name) {
                 txtValue = td_name.textContent || td_name.innerText;
-                console.log(txtValue);
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     tr[i].style.display = "";
                     continue;

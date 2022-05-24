@@ -11,6 +11,7 @@ public class SelectEntrantsModel
     public string EntrantsFilterText { get; set; }
     public bool IsFinal { get; set; }
     public bool IsAddEntrant { get; set; }
+    public string EntrantsAnchorId { get; set; }
     public string ToModifyEntrantId { get; set; }
     public string ErrorMessage { get; set; }
 }

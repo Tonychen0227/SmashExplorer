@@ -66,6 +66,7 @@ namespace SmashExplorerWeb.Controllers
             {
                 if (model.IsAddEntrant)
                 {
+                    model.EntrantsAnchorId = model.ToModifyEntrantId;
                     model.SelectedEntrantIds.Add(model.ToModifyEntrantId);
                 } else
                 {
@@ -87,7 +88,8 @@ namespace SmashExplorerWeb.Controllers
                 EventId = model.EventId,
                 IsAddEntrant = false,
                 IsFinal = false,
-                Title = model.Title
+                Title = model.Title,
+                EntrantsAnchorId = model.EntrantsAnchorId
             };
 
             return View(viewModel);
