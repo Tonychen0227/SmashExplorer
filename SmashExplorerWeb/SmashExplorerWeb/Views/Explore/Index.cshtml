@@ -93,8 +93,13 @@
                             if (pastSets.Count() > 0)
                             {
                                 <h5><strong>Past Sets</strong></h5>
+                                string storedSet = null;
                                 foreach (var set in pastSets)
                                 {
+                                    if (storedSet != set.PhaseName) { 
+                                        <i>@set.PhaseName</i><br/>
+                                        storedSet = set.PhaseName;
+                                    }
                                     var opponent = set.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                     string detailedScore;
                                     if (opponent != null && set.DetailedScore != null) {
