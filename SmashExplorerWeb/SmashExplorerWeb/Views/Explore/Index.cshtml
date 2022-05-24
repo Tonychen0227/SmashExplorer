@@ -26,13 +26,13 @@
     var currentCount = 0;
     var sortedKeys = Model.DictKeys.OrderBy(x => x.Standing).ThenBy(x => x.Seeding).ToList();
     <button class="btn btn-toolbar" type="button" onclick="foo()">Toggle Emoji</button>
-    for (var i = 0; i < sortedKeys.Count(); i+=3)
+    for (var i = 0; i < sortedKeys.Count(); i+=2)
     {
     <div class="row">
-        @for (var k = i; k < Math.Min(sortedKeys.Count(), i + 3); k++)
+        @for (var k = i; k < Math.Min(sortedKeys.Count(), i + 2); k++)
         {
             var entrant = sortedKeys[k];
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="panel" style="border:1px solid gray;margin:4px">
                     <div class="panel-body">
                         <p style="border-bottom: 1px solid black; padding-bottom: 5px">
