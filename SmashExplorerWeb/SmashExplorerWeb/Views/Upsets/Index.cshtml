@@ -10,64 +10,72 @@
         stringArgs.push("## Winners - Upsets")
         @foreach (var phase in Model.WinnersUpsets.Keys)
         {
-            @:stringArgs.push("");
-            @:stringArgs.push("@phase");
-            @:stringArgs.push("");
-            @:stringArgs.push("Match|Upset Factor");
-            @:stringArgs.push("---|---");
-            foreach (var upset in Model.WinnersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
-            {
-                var newString = upset.NewDisplayScore.Replace("|", @"\\\|");
-                @:stringArgs.push("[@newString](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id)|@upset.UpsetFactor");
+            if (Model.WinnersUpsets[phase].Count > 0) {
+                @:stringArgs.push("");
+                var firstSet = Model.WinnersUpsets[phase][0];
+                @:stringArgs.push("[**@phase**](https://www.start.gg/@Model.Event.Slug/brackets/@firstSet.Set.PhaseId/@firstSet.Set.PhaseGroupId)");
+                @:stringArgs.push("");
+                foreach (var upset in Model.WinnersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                {
+                    var newString = upset.NewDisplayScore;
+                    @:stringArgs.push("@newString -> *UF @upset.UpsetFactor*");
+                    @:stringArgs.push("");
+                }
             }
         }
 
         stringArgs.push("## Losers - Upsets")
         @foreach (var phase in Model.LosersUpsets.Keys)
         {
-            @:stringArgs.push("");
-            @:stringArgs.push("@phase");
-            @:stringArgs.push("");
-            @:stringArgs.push("Match|Upset Factor");
-            @:stringArgs.push("---|---");
-            foreach (var upset in Model.LosersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
-            {
-                var newString = upset.NewDisplayScore.Replace("|", @"\\\|");
-                var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)})";
-                @:stringArgs.push("[@newString](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id) **@placementString**|@upset.UpsetFactor");
+            if (Model.LosersUpsets[phase].Count > 0) {
+                @:stringArgs.push("");
+                var firstSet = Model.LosersUpsets[phase][0];
+                @:stringArgs.push("[**@phase**](https://www.start.gg/@Model.Event.Slug/brackets/@firstSet.Set.PhaseId/@firstSet.Set.PhaseGroupId)");
+                @:stringArgs.push("");
+                foreach (var upset in Model.WinnersUpsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                {
+                    var newString = upset.NewDisplayScore;
+                    var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
+                    @:stringArgs.push("@newString -> *UF @upset.UpsetFactor* **@placementString**");
+                    @:stringArgs.push("");
+                }
             }
         }
 
-        stringArgs.push("#Notable")
+        stringArgs.push("#Notable");
 
         stringArgs.push("## Winners - Notable")
         @foreach (var phase in Model.WinnersNotable.Keys)
         {
-            @:stringArgs.push("");
-            @:stringArgs.push("@phase");
-            @:stringArgs.push("");
-            @:stringArgs.push("Match|Upset Factor");
-            @:stringArgs.push("---|---");
-            foreach (var upset in Model.WinnersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
-            {
-                var newString = upset.NewDisplayScore.Replace("|", @"\\\|");
-                @:stringArgs.push("[@newString](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id)|@upset.UpsetFactor");
+            if (Model.WinnersNotable[phase].Count > 0) {
+                @:stringArgs.push("");
+                var firstSet = Model.WinnersNotable[phase][0];
+                @:stringArgs.push("[**@phase**](https://www.start.gg/@Model.Event.Slug/brackets/@firstSet.Set.PhaseId/@firstSet.Set.PhaseGroupId)");
+                @:stringArgs.push("");
+                foreach (var Notable in Model.WinnersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                {
+                    var newString = Notable.NewDisplayScore;
+                    @:stringArgs.push("@newString -> *UF @Notable.UpsetFactor*");
+                    @:stringArgs.push("");
+                }
             }
         }
 
         stringArgs.push("## Losers - Notable")
         @foreach (var phase in Model.LosersNotable.Keys)
         {
-            @:stringArgs.push("");
-            @:stringArgs.push("@phase");
-            @:stringArgs.push("");
-            @:stringArgs.push("Match|Upset Factor");
-            @:stringArgs.push("---|-");
-            foreach (var upset in Model.LosersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
-            {
-                var newString = upset.NewDisplayScore.Replace("|", @"\\\|");
-                var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)})";
-                @:stringArgs.push("[@newString](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id) **@placementString**|@upset.UpsetFactor");
+            if (Model.LosersNotable[phase].Count > 0) {
+                @:stringArgs.push("");
+                var firstSet = Model.LosersNotable[phase][0];
+                @:stringArgs.push("[**@phase**](https://www.start.gg/@Model.Event.Slug/brackets/@firstSet.Set.PhaseId/@firstSet.Set.PhaseGroupId)");
+                @:stringArgs.push("");
+                foreach (var Notable in Model.LosersNotable[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                {
+                    var newString = Notable.NewDisplayScore;
+                    var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(Notable.Set.LPlacement ?? -1)} in {phase})";
+                    @:stringArgs.push("@newString -> *UF @Notable.UpsetFactor* **@placementString**");
+                    @:stringArgs.push("");
+                }
             }
         }
 
