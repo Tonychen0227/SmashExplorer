@@ -30,7 +30,7 @@
                             lastUpsetFactor = upset.UpsetFactor;
                         }
                         var newString = upset.NewDisplayScore;
-                        @:stringArgs.push("@newString ([set link](https://www.start.gg/@Model.Event.Slug/sets/@upset.Set.Id))");
+                        @:stringArgs.push("@newString ([set link](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id))");
                         @:stringArgs.push("");
                     }
                 }
@@ -60,7 +60,7 @@
                         }
                         var newString = upset.NewDisplayScore;
                         var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
-                        @:stringArgs.push("@newString **@placementString** ([set link](https://www.start.gg/@Model.Event.Slug/sets/@upset.Set.Id))");
+                        @:stringArgs.push("@newString **@placementString** ([set link](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id))");
                         @:stringArgs.push("");
                     }
                 }
@@ -91,7 +91,7 @@
                             lastUpsetFactor = upset.UpsetFactor;
                         }
                         var newString = upset.NewDisplayScore;
-                        @:stringArgs.push("@newString ([set link](https://www.start.gg/@Model.Event.Slug/sets/@upset.Set.Id))");
+                        @:stringArgs.push("@newString ([set link](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id))");
                         @:stringArgs.push("");
                     }
                 }
@@ -122,7 +122,7 @@
                         }
                         var newString = upset.NewDisplayScore;
                         var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
-                        @:stringArgs.push("@newString **@placementString** ([set link](https://www.start.gg/@Model.Event.Slug/sets/@upset.Set.Id))");
+                        @:stringArgs.push("@newString **@placementString** ([set link](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id))");
                         @:stringArgs.push("");
                     }
                 }
@@ -195,7 +195,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var winnerSelections = upset.Set.Games?
+                                                var winnerSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id == upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -212,7 +212,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var loserSelections = upset.Set.Games?
+                                                var loserSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id != upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -252,7 +252,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var winnerSelections = upset.Set.Games?
+                                                var winnerSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id == upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -269,7 +269,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var loserSelections = upset.Set.Games?
+                                                var loserSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id != upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -311,7 +311,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var winnerSelections = upset.Set.Games?
+                                                var winnerSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id == upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -328,7 +328,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var loserSelections = upset.Set.Games?
+                                                var loserSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id != upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -368,7 +368,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var winnerSelections = upset.Set.Games?
+                                                var winnerSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id == upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 
@@ -385,7 +385,7 @@
                                         @{
                                             if (upset.Set.Games != null)
                                             {
-                                                var loserSelections = upset.Set.Games?
+                                                var loserSelections = upset.Set.Games?.Where(x => x.Selections != null)
                                                     .SelectMany(x => x.Selections.Where(k => k.Entrant.Id != upset.Set.WinnerId)
                                                         .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
 

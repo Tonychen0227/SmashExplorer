@@ -43,7 +43,7 @@
                                 {
                                     if (set.Games != null)
                                     {
-                                        var selections = set.Games.SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
+                                        var selections = set.Games.Where(x => x.Selections != null).SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
                                         characters.AddRange(selections);
                                     }
                                 }
@@ -116,9 +116,9 @@
                                 string storedSet = null;
                                 foreach (var set in pastSets)
                                 {
-                                    var playerSelections = set.Games?.SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
+                                    var playerSelections = set.Games?.Where(x => x.Selections != null).SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
 
-                                    var selections = set.Games?.SelectMany(x => x.Selections.Where(s => s.Entrant.Id != entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
+                                    var selections = set.Games?.Where(x => x.Selections != null).SelectMany(x => x.Selections.Where(s => s.Entrant.Id != entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
 
                                     if (storedSet != set.PhaseName) {
                                         <i>@set.PhaseName</i><br/>
