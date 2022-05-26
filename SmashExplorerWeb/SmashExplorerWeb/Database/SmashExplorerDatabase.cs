@@ -234,7 +234,19 @@ public class SmashExplorerDatabase
 
     public async Task<VanityLink> GetVanityLinkAsync(string id)
     {
-        return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(id));
+        try
+        {
+            return await VanityLinksContainer.ReadItemAsync<VanityLink>(id, new PartitionKey(id));
+        }
+        catch (CosmosException ex)
+        {
+            if (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
+            {
+                throw ex;
+            }
+
+            return null;
+        }
     }
 
     public async Task<IEnumerable<Upset>> GetUpsetsAndNotableAsync(string eventId)

@@ -11,6 +11,14 @@ namespace SmashExplorerWeb.Controllers
         {
             VanityLink vanityLink = await SmashExplorerDatabase.Instance.GetVanityLinkAsync(id);
 
+            if (id.StartsWith("admin-"))
+            {
+                string eventId = id.Substring(6);
+                var retEvent = await SmashExplorerDatabase.Instance.GetEventAsync(eventId);
+                var retEntrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(eventId);
+                vanityLink = new VanityLink(retEvent.Id, $"Admin panel for {retEvent.Name} @ {retEvent.TournamentName}", retEntrants.Select(x => x.Id).ToList());
+            }
+
             if (vanityLink == null)
             {
                 return HttpNotFound();
