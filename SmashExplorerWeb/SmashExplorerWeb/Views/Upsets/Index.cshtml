@@ -216,6 +216,8 @@
                                                 if (i % 2 == 1)
                                                 {
                                                     finalDisplayScore += $" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
+                                                } else {
+                                                    finalDisplayScore += $" (lowest possible placement {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
                                                 }
                                             }
                                             <td class="col-md-3">
