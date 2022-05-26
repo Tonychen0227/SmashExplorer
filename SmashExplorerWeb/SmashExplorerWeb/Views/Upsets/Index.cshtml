@@ -135,7 +135,7 @@
         }
     }
 </div>
-@if (!string.IsNullOrWhiteSpace(Model.Message))
+@if (string.IsNullOrWhiteSpace(Model.Message))
 {
     <button type="button" onclick="copyToClipboard()" style="margin-left:10px;margin-top:10px;display:inline-block" class="btn btn-default">Copy markdown to clipboard</button>
 }
