@@ -1,5 +1,13 @@
 ﻿@model TournamentFilterModel
 
+<script>
+    window.onload = function () {
+        if (@Model.ChosenEventId != null) {
+            var element = document.getElementById("eventsTable");
+            element.scrollIntoView();
+        }
+    }
+</script>
 <div class="jumbotron">
     <h1>Smash Explorer</h1>
     <p class="lead">Welcome to Smash Explorer! Select an event to get started. @Html.ActionLink("FAQ", "Index", "FAQ")</p>
@@ -36,7 +44,7 @@
             @Html.ActionLink("Reset To Default", null, null, null, new { @class = "btn btn-default" })
         </div>
         var height = string.IsNullOrEmpty(Model.ChosenEventId) ? "350px" : "150px";
-        <div class="col-md-8">
+        <div class="col-md-8" id="eventsTable">
             <div style="overflow-y: scroll; height: @height ">
                 <table class="table table-hover">
                     <tr>

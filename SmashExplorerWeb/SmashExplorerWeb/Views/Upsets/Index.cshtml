@@ -20,45 +20,52 @@
 
             var keys = argsList.Keys.ToList();
 
-            for (var i = 0; i < keys.Count; i++)
+            if (keys != null)
             {
-                var key = keys[i];
-                var upsets = argsList[key];
-                var setAdded = false;
-                @:stringArgs.push("@key");
-                foreach (var phase in upsets.Keys)
+                for (var i = 0; i < keys.Count; i++)
                 {
-                    var setsList = upsets[phase].Where(x => x.UpsetFactor > 1).ToList();
-                    if (setsList.Count > 0) {
-                        setAdded = true;
-                        @:stringArgs.push("");
-                        var firstSet = setsList[0];
-                        @:stringArgs.push("[**@phase**](https://www.start.gg/@Model.Event.Slug/brackets/@firstSet.Set.PhaseId/@firstSet.Set.PhaseGroupId)");
-                        @:stringArgs.push("");
-
-                        var lastUpsetFactor = -1;
-                        foreach (var upset in setsList.OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
-                        {
-                            if (upset.UpsetFactor != lastUpsetFactor) {
-                                @:stringArgs.push("**Upset Factor @upset.UpsetFactor**");
-                                @:stringArgs.push("");
-                                lastUpsetFactor = upset.UpsetFactor;
-                            }
-                            var newString = upset.NewDisplayScore;
-                            if (i % 2 == 1)
-                            {
-                                var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
-                                newString = $"{newString} **{placementString}**";
-                            }
-                            @:stringArgs.push("@newString ([set link](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id))");
+                    var key = keys[i];
+                    var upsets = argsList[key];
+                    var setAdded = false;
+                    @:stringArgs.push("@key");
+                    if (upsets?.Keys == null)
+                    {
+                        continue;
+                    }
+                    foreach (var phase in upsets.Keys)
+                    {
+                        var setsList = upsets[phase].Where(x => x.UpsetFactor > 1).ToList();
+                        if (setsList.Count > 0) {
+                            setAdded = true;
                             @:stringArgs.push("");
+                            var firstSet = setsList[0];
+                            @:stringArgs.push("[**@phase**](https://www.start.gg/@Model.Event.Slug/brackets/@firstSet.Set.PhaseId/@firstSet.Set.PhaseGroupId)");
+                            @:stringArgs.push("");
+
+                            var lastUpsetFactor = -1;
+                            foreach (var upset in setsList.OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                            {
+                                if (upset.UpsetFactor != lastUpsetFactor) {
+                                    @:stringArgs.push("**Upset Factor @upset.UpsetFactor**");
+                                    @:stringArgs.push("");
+                                    lastUpsetFactor = upset.UpsetFactor;
+                                }
+                                var newString = upset.NewDisplayScore;
+                                if (i % 2 == 1)
+                                {
+                                    var placementString = $"(out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
+                                    newString = $"{newString} **{placementString}**";
+                                }
+                                @:stringArgs.push("@newString ([set link](https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id))");
+                                @:stringArgs.push("");
+                            }
                         }
                     }
-                }
 
-                if (!setAdded)
-                {
-                    @:stringArgs.push("No sets here!");
+                    if (!setAdded)
+                    {
+                        @:stringArgs.push("No sets here!");
+                    }
                 }
             }
         }
@@ -128,7 +135,10 @@
         }
     }
 </div>
-<button type="button" onclick="copyToClipboard()" style="margin-left:10px;margin-top:10px;display:inline-block" class="btn btn-default">Copy markdown to clipboard</button>
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <button type="button" onclick="copyToClipboard()" style="margin-left:10px;margin-top:10px;display:inline-block" class="btn btn-default">Copy markdown to clipboard</button>
+}
 <div class="row">
     @if (string.IsNullOrWhiteSpace(Model.Message))
     {
@@ -136,79 +146,91 @@
                   { "Winners - Notable" , Model.WinnersNotable }, { "Losers - Notable", Model.LosersNotable } };
 
         var keysList = array.Keys.ToList();
-        for (var start = 0; start < keysList.Count; start+=2) {
-            if (start % 2 == 0) {
+        for (var start = 0; start < keysList.Count; start += 2)
+        {
+            if (start % 2 == 0)
+            {
                 @:<div class="row">
-            }for (var i = start; i <= start + 1; i++) {
-                var upsets = array[keysList[i]];
-                <div class="col-md-6">
-                    <h3>@keysList[i]@if (start == 2){<sup>Last game, potential upset</sup>}</h3>
-                    <div style="overflow-y: scroll; height: @Math.Min(75 + upsets.Values.Sum(x => x.Count)*75, 500)px ">
-                        @foreach (var phase in upsets.Keys)
-                        {
-                            <h4>@phase</h4>
-                            <table class="table table-hover">
-                                <tr>
-                                    <th>Score</th>
-                                    <th>Upset Factor</th>
-                                </tr>
-                                @foreach (var upset in upsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
-                                {
+                }
+                for (var i = start; i <= start + 1; i++)
+                {
+                    var upsets = array[keysList[i]];
+                    <div class="col-md-6">
+                        <h3>@keysList[i]@if (start == 2)
+                        {<sup>Last game, potential upset</sup>}</h3>
+                        <div style="overflow-y: scroll; height: @Math.Min(75 + upsets.Values.Sum(x => x.Count)*75, 500)px ">
+                            @foreach (var phase in upsets.Keys)
+                            {
+                                <h4>@phase</h4>
+                                <table class="table table-hover">
                                     <tr>
-                                        <td><a href="https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">
-                                            @{
-                                                if (upset.Set.Games != null)
-                                                {
-                                                    var winnerSelections = upset.Set.Games?.Where(x => x.Selections != null)
-                                                        .SelectMany(x => x.Selections.Where(k => k.Entrant.Id == upset.Set.WinnerId)
-                                                            .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
-
-                                                    foreach (var selection in winnerSelections)
-                                                    {
-                                                        if (selection != null)
+                                        <th>Score</th>
+                                        <th>Upset Factor</th>
+                                    </tr>
+                                    @foreach (var upset in upsets[phase].OrderByDescending(x => x.UpsetFactor).ThenBy(x => x.Set.LPlacement))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="https://www.start.gg/@Model.Event.Slug/set/@upset.Set.Id" target="_blank" class="col-md-9">
+                                                    @{
+                                                        if (upset.Set.Games != null)
                                                         {
-                                                        <img style="width:20px;height:20px" src="~/Content/Characters/@(selection).jpg"/>
+                                                            var winnerSelections = upset.Set.Games?.Where(x => x.Selections != null)
+                                                                .SelectMany(x => x.Selections.Where(k => k.Entrant.Id == upset.Set.WinnerId)
+                                                                    .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
+
+                                                            foreach (var selection in winnerSelections)
+                                                            {
+                                                                if (selection != null)
+                                                                {
+                                                                    <img style="width:20px;height:20px" src="~/Content/Characters/@(selection).jpg" />
+                                                                }
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }
-                                            @upset.NewDisplayScore
-                                            @{
-                                                if (upset.Set.Games != null)
-                                                {
-                                                    var loserSelections = upset.Set.Games?.Where(x => x.Selections != null)
-                                                        .SelectMany(x => x.Selections.Where(k => k.Entrant.Id != upset.Set.WinnerId)
-                                                            .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
-
-                                                    foreach (var selection in loserSelections)
-                                                    {
-                                                        if (selection != null)
+                                                    @upset.NewDisplayScore
+                                                    @{
+                                                        if (upset.Set.Games != null)
                                                         {
-                                                        <img style="width:20px;height:20px" src="~/Content/Characters/@(selection).jpg"/>
+                                                            var loserSelections = upset.Set.Games?.Where(x => x.Selections != null)
+                                                                .SelectMany(x => x.Selections.Where(k => k.Entrant.Id != upset.Set.WinnerId)
+                                                                    .Where(k => k.SelectionType == "CHARACTER").Select(k => k.SelectionValue)).Distinct();
+
+                                                            foreach (var selection in loserSelections)
+                                                            {
+                                                                if (selection != null)
+                                                                {
+                                                                    <img style="width:20px;height:20px" src="~/Content/Characters/@(selection).jpg" />
+                                                                }
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            }
-                                            @if (i % 2 == 1) { 
-                                                @($" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)})")
-                                            }
-                                            </a></td>
-                                            @{ 
+                                                    @if (i % 2 == 1)
+                                                    {
+                                                        @($" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)})")
+                                                    }
+                                                </a>
+                                            </td>
+                                            @{
                                                 var finalDisplayScore = upset.NewDisplayScore;
-                                                if (i % 2 == 1) {
+                                                if (i % 2 == 1)
+                                                {
                                                     finalDisplayScore += $" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
                                                 }
                                             }
-                                        <td class="col-md-3">@upset.UpsetFactor     
-                                        <a id="@upset.Set.Id" style="margin-left:10px" class="twitter-share-button" onclick="foo('@keysList[i]', '@phase', '@Model.Event.Name - @Model.Event.TournamentName', '@Model.Event.Id', '@upset.Set.Id', '@finalDisplayScore', @upset.UpsetFactor)"><img src="~/Content/twitter.png" style="height:15px;width:15px"/>Share</a></td>
+                                            <td class="col-md-3">
+                                                @upset.UpsetFactor
+                                            <a id="@upset.Set.Id" style="margin-left:10px" class="twitter-share-button" onclick="foo('@keysList[i]', '@phase', '@Model.Event.Name - @Model.Event.TournamentName', '@Model.Event.Id', '@upset.Set.Id', '@finalDisplayScore', @upset.UpsetFactor)"><img src="~/Content/twitter.png" style="height:15px;width:15px" />Share</a>
+                                        </td>
                                     </tr>
                                 }
-                            </table>
-                        }
+                                </table>
+                            }
+                        </div>
                     </div>
-                </div>
-                        }
-            if (start % 2 == 0) { 
+                }
+                if (start % 2 == 0)
+                {
                 @:</div>
             }
         }
