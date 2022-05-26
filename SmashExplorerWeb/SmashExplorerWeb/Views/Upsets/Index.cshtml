@@ -193,8 +193,14 @@
                                                 @($" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)})")
                                             }
                                             </a></td>
+                                            @{ 
+                                                var finalDisplayScore = upset.NewDisplayScore;
+                                                if (i % 2 == 1) {
+                                                    finalDisplayScore += $" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})";
+                                                }
+                                            }
                                         <td class="col-md-3">@upset.UpsetFactor     
-                                        <a id="@upset.Set.Id" style="margin-left:10px" class="twitter-share-button" onclick="foo('@keysList[i]', '@phase', '@Model.Event.Name - @Model.Event.TournamentName', '@Model.Event.Id', '@upset.Set.Id', '@upset.NewDisplayScore@($" (out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase})")', @upset.UpsetFactor)"><img src="~/Content/twitter.png" style="height:15px;width:15px"/>Share</a></td>
+                                        <a id="@upset.Set.Id" style="margin-left:10px" class="twitter-share-button" onclick="foo('@keysList[i]', '@phase', '@Model.Event.Name - @Model.Event.TournamentName', '@Model.Event.Id', '@upset.Set.Id', '@finalDisplayScore', @upset.UpsetFactor)"><img src="~/Content/twitter.png" style="height:15px;width:15px"/>Share</a></td>
                                     </tr>
                                 }
                             </table>
