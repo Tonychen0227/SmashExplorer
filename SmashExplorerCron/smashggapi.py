@@ -254,6 +254,7 @@ class API:
                   }
                   nodes {
                     name
+                    isDisqualified
                     initialSeedNum
                     id
                     standing {
@@ -286,6 +287,7 @@ class API:
                 "name": entrant["name"],
                 "standing": None if entrant["standing"] is None else entrant["standing"]["placement"],
                 "id": str(entrant["id"]),
+                "isDisqualified": entrant["isDisqualified"],
                 "seeding": entrant["initialSeedNum"],
                 "additionalInfo": [
                     {
