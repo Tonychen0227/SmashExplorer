@@ -136,6 +136,13 @@ public class SmashExplorerDatabase
         return results;
     }
 
+    public async Task<List<Entrant>> GetDQdEntrantsAsync(string eventId)
+    {
+        var entrants = await GetEntrantsAsync(eventId);
+
+        return entrants.Where(x => x.IsDisqualified == true).ToList();
+    }
+
     public async Task<List<Entrant>> GetEntrantsAsync(string eventId)
     {
         if (!EntrantsCache.ContainsKey(eventId))

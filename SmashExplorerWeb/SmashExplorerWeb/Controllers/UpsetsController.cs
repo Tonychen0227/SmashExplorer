@@ -28,6 +28,7 @@ namespace SmashExplorerWeb.Controllers
 
             model = OrganizeUpsets(upsets);
             model.Event = db_event;
+            model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(id);
 
             return View(model);
         }
@@ -41,6 +42,7 @@ namespace SmashExplorerWeb.Controllers
 
             model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id), model.MinimumUpsetFactor, model.SelectedPhases);
             model.Event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
+            model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(id);
 
             return View(model);
         }
