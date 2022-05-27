@@ -10,7 +10,9 @@ if __name__ == '__main__':
     logger.log("Starting Backfill")
 
     events_count = 1
-    new_events = operations.get_new_events(days_back=132, days_forward=-40)
+    new_events = ["613153"]
+    if len(new_events) == 0:
+        new_events = operations.get_new_events(days_back=132, days_forward=-40)
     events_size = len(new_events)
     for event_id in new_events:
         events_count += 1

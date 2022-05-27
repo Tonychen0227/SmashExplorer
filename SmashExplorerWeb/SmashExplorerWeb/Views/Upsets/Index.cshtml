@@ -63,7 +63,7 @@
                     }
                 }
 
-                if (Model.DQEntrants.Count > 0)
+                if (Model.DQEntrants != null && Model.DQEntrants.Count > 0)
                 {
                     @:stringArgs.push("## DQs");
                     foreach (var dqEntrant in Model.DQEntrants)
@@ -161,8 +161,10 @@
                 {
                     var upsets = array[keysList[i]];
                     <div class="col-md-6">
-                        <h3>@keysList[i]@if (start == 2)
-                        {<sup>Last game, potential upset</sup>}</h3>
+                        <h3>
+                            @keysList[i]@if (start == 2)
+                        {<sup>Last game, potential upset</sup>}
+                        </h3>
                         <div style="overflow-y: scroll; height: @Math.Min(75 + upsets.Values.Sum(x => x.Count)*75, 500)px ">
                             @foreach (var phase in upsets.Keys)
                             {
@@ -222,17 +224,19 @@
                                                 if (i % 2 == 1)
                                                 {
                                                     additionalDisplay = $"{loserName} -> out @ {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase}";
-                                                } else {
+                                                }
+                                                else
+                                                {
                                                     additionalDisplay = $"{loserName} -> lowest possible placement {SmashExplorerDatabase.Instance.GetStringOrdinal(upset.Set.LPlacement ?? -1)} in {phase}";
                                                 }
                                             }
                                             <td class="col-md-3">
                                                 @upset.UpsetFactor
-                                            <a id="@upset.Set.Id" style="margin-left:10px" class="twitter-share-button" 
-                                               onclick="foo('@keysList[i]', '@phase', '@Model.Event.Name - @Model.Event.TournamentName', '@Model.Event.Id', '@upset.Set.Id', '@upset.NewDisplayScore', '@additionalDisplay', @upset.UpsetFactor)"><img src="~/Content/twitter.png" style="height:15px;width:15px" />Share</a>
-                                        </td>
-                                    </tr>
-                                }
+                                                <a id="@upset.Set.Id" style="margin-left:10px" class="twitter-share-button"
+                                                   onclick='foo("@keysList[i]", "@phase", "@Model.Event.Name - @Model.Event.TournamentName", "@Model.Event.Id", "@upset.Set.Id", "@upset.NewDisplayScore", "@additionalDisplay", "@upset.UpsetFactor")'><img src="~/Content/twitter.png" style="height:15px;width:15px" />Share</a>
+                                            </td>
+                                        </tr>
+                                    }
                                 </table>
                             }
                         </div>
@@ -249,14 +253,17 @@
         <h1>No upsets reported so far. Come back later!</h1>
     }
 </div>
-<div class="row">
-    <div class="col-md-6">
-        <h3>DQs</h3>
-        <ul>
-            @foreach (var dqEntrant in Model.DQEntrants)
-            {
-                <li><a href="https://start.gg/@Model.Event.Slug/entrant/@dqEntrant.Id" target="_blank">@dqEntrant.Name</a> (@dqEntrant.Seeding seed)</li>
-            }
-        </ul>
+@if (Model.DQEntrants != null && Model.DQEntrants.Count > 0)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <h3>DQs</h3>
+            <ul>
+                @foreach (var dqEntrant in Model.DQEntrants)
+                {
+                    <li><a href="https://start.gg/@Model.Event.Slug/entrant/@dqEntrant.Id" target="_blank">@dqEntrant.Name</a> (@dqEntrant.Seeding seed)</li>
+                }
+            </ul>
+        </div>
     </div>
-</div>
+}

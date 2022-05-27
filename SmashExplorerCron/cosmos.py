@@ -30,8 +30,8 @@ class CosmosDB:
                                              partition_key=event_id)
         return response
 
-    def get_entrant(self, entrant_id):
-        response = self.entrants.read_item(item=str(entrant_id), partition_key=entrant_id)
+    def get_entrant(self, event_id, entrant_id):
+        response = self.entrants.read_item(item=str(entrant_id), partition_key=event_id)
         return response
 
     def delete_entrant(self, event_id, entrant_id):
@@ -54,7 +54,9 @@ class CosmosDB:
         existing_event = self.get_event(event["id"])
         event["setsLastUpdated"] = 1 if existing_event is None else existing_event["setsLastUpdated"]
         event["entrantsLastUpdated"] = 1 if (existing_event is None or "entrantsLastUpdated" not in existing_event) else existing_event["entrantsLastUpdated"]
-
+        event["upsetThreadRoot"] = None if existing_event is None or "upsetThreadRoot" not in existing_event else existing_event["upsetThreadRoot"]
+        event["doUpsetThread"] = False if existing_event is None or "doUpsetThread" not in existing_event else existing_event["doUpsetThread"]
+        event["setsAlreadyTweeted"] = [] if existing_event is None or "setsAlreadyTweeted" not in existing_event else existing_event["setsAlreadyTweeted"]
         return self.create_event_datafix(event)
 
     def get_all_events(self):
@@ -97,6 +99,13 @@ class CosmosDB:
         event = self.get_event(event_id)
         event["entrantsLastUpdated"] = last_updated
         self.__upsert_event(event)
+
+    def update_event_upset_thread_root(self, event_id, upset_thread_root, sets_tweeted_out):
+        event = self.get_event(event_id)
+        event["upsetThreadRoot"] = upset_thread_root
+        event["setsAlreadyTweeted"] = sets_tweeted_out
+        self.__upsert_event(event)
+
     # endregion Events
 
     # region Sets

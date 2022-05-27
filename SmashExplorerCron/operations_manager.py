@@ -3,7 +3,7 @@ import os
 
 from cosmos import CosmosDB
 from smashggapi import API
-
+from twitter_engine import TwitterClient
 
 class OperationsManager:
     def __init__(self, logger):
@@ -15,6 +15,7 @@ class OperationsManager:
         self.cosmos = cosmos
         self.api = api
         self.logger = logger
+        self.twitter = TwitterClient(logger)
 
     def get_all_events_from_db(self):
         return self.cosmos.get_all_events()
@@ -55,7 +56,7 @@ class OperationsManager:
 
         return upcoming_event_ids
 
-    def update_event_sets(self, event_id, created_event, bypass_last_updated=False):
+    def update_event_sets(self, event_id, created_event, bypass_last_updated=False, disable_backfill=False):
         start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=5)).timestamp())
 
         event = created_event
@@ -71,6 +72,70 @@ class OperationsManager:
 
         total_sets = len(sets)
         self.logger.log(f"Updating {total_sets} sets {[x['id'] for x in sets]} for event {event_id} with timestamp {event['setsLastUpdated']}")
+
+        upset_thread_root = event["upsetThreadRoot"]
+
+        tweeted_out = False
+        sets_tweeted_out = event["setsAlreadyTweeted"]
+        ordinal = lambda n: "%d%s" % (n, "tsnrhtdd"[(n // 10 % 10 != 1) * (n % 10 < 4) * n % 10::4])
+
+        for set in sets:
+            if disable_backfill or not event["doUpsetThread"]:
+                break
+
+            if set["id"] in sets_tweeted_out:
+                continue
+
+            if not set["isUpsetOrNotable"] or set["detailedScore"] is None or set["upsetFactor"] <= 2:
+                continue
+
+            detailed_score = set["detailedScore"]
+
+            loser_id = [x["id"] for x in set["entrants"] if x["id"] != set["winnerId"]][0]
+
+            winner_seed = [x["initialSeedNum"] for x in set["entrants"] if x["id"] == set["winnerId"]][0]
+            loser_seed = [x["initialSeedNum"] for x in set["entrants"] if x["id"] != set["winnerId"]][0]
+
+            if winner_seed < loser_seed:
+                continue
+
+            winner_entrant = self.cosmos.get_entrant(event_id, set["winnerId"])
+            loser_entrant = self.cosmos.get_entrant(event_id, loser_id)
+
+            if upset_thread_root is None:
+                upset_thread_root = self.twitter.make_root_tweet(event)
+
+            twitter_links = []
+
+            for info in winner_entrant["additionalInfo"]:
+                for url in info["urls"]:
+                    if "twitter" in url["url"]:
+                        twitter_handle = url["url"].split("/")[-1]
+                        twitter_links.append(twitter_handle)
+
+            winner_display = winner_entrant["name"]
+
+            if len(twitter_links) > 0:
+                winner_display = ' '.join([f"@{x}" for x in twitter_links])
+
+            heading = f"UPSET FACTOR {set['upsetFactor']} - {'LOSERS' if set['round'] < 0 else 'WINNERS'} {set['phaseName']}"
+
+            display_score = f"{winner_display} ({winner_entrant['seeding']}) {detailed_score[winner_entrant['id']]} - " \
+                            f"{detailed_score[loser_id]} {loser_entrant['name']} ({loser_entrant['seeding']})"
+
+            args = [heading, display_score]
+
+            if set["round"] < 0:
+                args.append(f"{loser_entrant['name']} -> out @ {ordinal(set['lPlacement'])} in {set['phaseName']}")
+
+            upset_thread_root = self.twitter.make_tweet(args, upset_thread_root)
+
+            sets_tweeted_out.append(set["id"])
+
+            tweeted_out = True
+
+        if tweeted_out:
+            self.cosmos.update_event_upset_thread_root(event_id, upset_thread_root, sets_tweeted_out)
 
         try:
             num_added = self.cosmos.create_sets(event_id, sets)

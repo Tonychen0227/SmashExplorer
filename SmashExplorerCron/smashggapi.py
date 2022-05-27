@@ -348,6 +348,8 @@ class API:
         winner_round_seed = self.placement_to_round[winner["initialSeedNum"]]
         loser_round_seed = self.placement_to_round[loser["initialSeedNum"]]
 
+        return_set["upsetFactor"] = abs(winner_round_seed - loser_round_seed)
+
         if winner_round_seed > loser_round_seed:
             return_set["isUpsetOrNotable"] = True
 
