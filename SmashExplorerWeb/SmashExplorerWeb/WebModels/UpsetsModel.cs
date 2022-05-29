@@ -9,7 +9,9 @@ public class UpsetsModel
     public Dictionary<string, List<Upset>> LosersNotable { get; set; }
     public List<Entrant> DQEntrants { get; set; }
     public Event Event { get; set; }
-    public int MinimumUpsetFactor { get; set; }
+    public int? MinimumUpsetFactor { get; set; }
+    public int? MaximumUpseteeSeed { get; set; }
+    public int MaxAvailableUpseteeSeed { get; set; }
     public int MaximumUpsetFactor { get; set; }
     public List<SelectListItem> AvailablePhases { get; set; }
     public List<string> SelectedPhases { get; set; }

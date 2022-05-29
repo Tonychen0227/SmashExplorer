@@ -85,7 +85,10 @@
                                     <h5><strong>Upcoming Set:</strong> vs @opponentName</h5>
                                 }
                             }
-                            var upcomingSet = sets.Where(x => !x.Id.StartsWith("preview") && (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None")).FirstOrDefault();
+                            var pastSets = sets.Where(x => x.WinnerId != null && x.WinnerId != "None" && !x.Id.StartsWith("preview"));
+                            var upcomingSet = sets.Where(x => !x.Id.StartsWith("preview") && (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None"))
+                                        .Where(x => pastSets.Where(ps => ps.PhaseOrder == x.PhaseOrder && ps.Round == x.Round).Count() == 0)
+                                        .FirstOrDefault();
                             if (upcomingSet != null)
                             {
                                 var opponent = upcomingSet.Entrants.Where(x => x.Id != entrant.Id).Single();
@@ -109,7 +112,6 @@
                                 }
                                 </h5>
                             }
-                            var pastSets = sets.Where(x => x.WinnerId != null && x.WinnerId != "None" && !x.Id.StartsWith("preview"));
                             if (pastSets.Count() > 0)
                             {
                                 <h5><strong>Past Sets</strong></h5>

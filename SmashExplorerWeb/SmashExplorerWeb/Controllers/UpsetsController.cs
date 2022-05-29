@@ -29,6 +29,11 @@ namespace SmashExplorerWeb.Controllers
             model = OrganizeUpsets(upsets);
             model.Event = db_event;
             model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(id);
+            model.MaxAvailableUpseteeSeed = upsets.SelectMany(x => x.Set.Entrants.Select(e => e.InitialSeedNum ?? -1)).Max();
+            if (model.MaxAvailableUpseteeSeed == -1)
+            {
+                model.MaxAvailableUpseteeSeed = int.MaxValue;
+            }
 
             return View(model);
         }
@@ -40,14 +45,25 @@ namespace SmashExplorerWeb.Controllers
 
             if (string.IsNullOrWhiteSpace(id)) return View();
 
-            model = OrganizeUpsets(await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id), model.MinimumUpsetFactor, model.SelectedPhases);
+            var maxUpseteeSeed = model.MaximumUpseteeSeed;
+            var minUpsetFactor = model.MinimumUpsetFactor;
+
+            var upsets = await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id);
+            model = OrganizeUpsets(upsets, model.MinimumUpsetFactor ?? 1, model.MaximumUpseteeSeed ?? int.MaxValue, model.SelectedPhases);
             model.Event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
             model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(id);
+            model.MaxAvailableUpseteeSeed = upsets.SelectMany(x => x.Set.Entrants.Select(e => e.InitialSeedNum ?? -1)).Max();
+            if (model.MaxAvailableUpseteeSeed == -1)
+            {
+                model.MaxAvailableUpseteeSeed = int.MaxValue;
+            }
+            model.MaximumUpseteeSeed = maxUpseteeSeed;
+            model.MinimumUpsetFactor = minUpsetFactor;
 
             return View(model);
         }
 
-        private UpsetsModel OrganizeUpsets(IEnumerable<Upset> upsets, int minimumUpsetFactor = 1, List<string> selectedPhases = null)
+        private UpsetsModel OrganizeUpsets(IEnumerable<Upset> upsets, int minimumUpsetFactor = 1, int maximumUpseteeSeed = int.MaxValue, List<string> selectedPhases = null)
         {
             selectedPhases = selectedPhases ?? upsets.Select(x => x.Set.PhaseName).Distinct().ToList();
             upsets = upsets.OrderByDescending(x => x.Set.PhaseOrder);
@@ -63,7 +79,9 @@ namespace SmashExplorerWeb.Controllers
                 SelectedPhases = selectedPhases
             };
 
-            foreach (var upset in upsets.Where(x => x.UpsetFactor >= minimumUpsetFactor).Where(x => selectedPhases.Contains(x.Set.PhaseName)))
+            foreach (var upset in upsets.Where(x => x.UpsetFactor >= minimumUpsetFactor)
+                .Where(x => x.Set.Entrants.Select(k => k.InitialSeedNum ?? -1).Min() <= maximumUpseteeSeed)
+                .Where(x => selectedPhases.Contains(x.Set.PhaseName)))
             {
                 if (upset.Set.Round > 0)
                 {
