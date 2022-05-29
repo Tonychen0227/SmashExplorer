@@ -20,6 +20,9 @@ if __name__ == '__main__':
         event_count += 1
         logger.log(f"Data cleanup: {event_count} of {total_events}")
 
+        if event is None:
+            continue
+
         if event["state"] == "ACTIVE":
             if event["startAt"] < date_now:
                 num_entrants = event["numEntrants"]
