@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -8,7 +7,7 @@ namespace SmashExplorerWeb.Controllers
 {
     public class UpsetsController : Controller
     {
-        public async Task<ActionResult> Index(string id)
+        public async Task<ActionResult> Index(string id, int? minUpsetFactor, int? maxUpseteeSeed)
         {
             ViewBag.Title = $"Smash Explorer - Upsets {id}";
 
@@ -26,16 +25,11 @@ namespace SmashExplorerWeb.Controllers
                 return View(model);
             }
 
-            model = OrganizeUpsets(upsets);
-            model.Event = db_event;
-            model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(id);
-            model.MaxAvailableUpseteeSeed = upsets.SelectMany(x => x.Set.Entrants.Select(e => e.InitialSeedNum ?? -1)).Max();
-            if (model.MaxAvailableUpseteeSeed == -1)
-            {
-                model.MaxAvailableUpseteeSeed = int.MaxValue;
-            }
+            var upsetsModel = await GetUpsetsModel(id, minUpsetFactor ?? 1, maxUpseteeSeed ?? int.MaxValue);
+            upsetsModel.MaximumUpseteeSeed = maxUpseteeSeed;
+            upsetsModel.MinimumUpsetFactor = minUpsetFactor;
 
-            return View(model);
+            return View(upsetsModel);
         }
 
         [HttpPost]
@@ -48,19 +42,26 @@ namespace SmashExplorerWeb.Controllers
             var maxUpseteeSeed = model.MaximumUpseteeSeed;
             var minUpsetFactor = model.MinimumUpsetFactor;
 
-            var upsets = await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id);
-            model = OrganizeUpsets(upsets, model.MinimumUpsetFactor ?? 1, model.MaximumUpseteeSeed ?? int.MaxValue, model.SelectedPhases);
-            model.Event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
-            model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(id);
+            var upsetsModel = await GetUpsetsModel(id, model.MinimumUpsetFactor ?? 1, model.MaximumUpseteeSeed ?? int.MaxValue, model.SelectedPhases);
+            upsetsModel.MaximumUpseteeSeed = maxUpseteeSeed;
+            upsetsModel.MinimumUpsetFactor = minUpsetFactor;
+
+            return View(upsetsModel);
+        }
+
+        private async Task<UpsetsModel> GetUpsetsModel(string eventId, int minimumUpsetFactor = 1, int maximumUpseteeSeed = int.MaxValue, List<string> selectedPhases = null)
+        {
+            var upsets = await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(eventId);
+            var model = OrganizeUpsets(upsets, minimumUpsetFactor, maximumUpseteeSeed, selectedPhases);
+            model.Event = await SmashExplorerDatabase.Instance.GetEventAsync(eventId);
+            model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(eventId);
             model.MaxAvailableUpseteeSeed = upsets.SelectMany(x => x.Set.Entrants.Select(e => e.InitialSeedNum ?? -1)).Max();
             if (model.MaxAvailableUpseteeSeed == -1)
             {
                 model.MaxAvailableUpseteeSeed = int.MaxValue;
             }
-            model.MaximumUpseteeSeed = maxUpseteeSeed;
-            model.MinimumUpsetFactor = minUpsetFactor;
 
-            return View(model);
+            return model;
         }
 
         private UpsetsModel OrganizeUpsets(IEnumerable<Upset> upsets, int minimumUpsetFactor = 1, int maximumUpseteeSeed = int.MaxValue, List<string> selectedPhases = null)
