@@ -147,9 +147,6 @@ class OperationsManager:
             for tournament_set in sets:
                 self.cosmos.create_set(tournament_set)
 
-    def get_events_for_tournament(self, tournament_slug):
-        return self.api.get_ult_tournament_events(tournament_slug)
-
     def delete_event(self, event_id):
         self.cosmos.delete_event(event_id)
         self.cosmos.delete_entrants(event_id)
