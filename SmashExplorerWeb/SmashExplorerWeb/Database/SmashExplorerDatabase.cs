@@ -331,7 +331,9 @@ public class SmashExplorerDatabase
             };
         }
 
-        var newDisplayScore = $"{winner.Name} ({winner.InitialSeedNum}) {set.DetailedScore[winner.Id]}-{set.DetailedScore[loser.Id]} " +
+        var display = set.DetailedScore == null ? ">" : $"{set.DetailedScore[winner.Id]}-{set.DetailedScore[loser.Id]}";
+
+        var newDisplayScore = $"{winner.Name} ({winner.InitialSeedNum}) {display} " +
                               $"{loser.Name} ({loser.InitialSeedNum})";
 
         return new Upset()

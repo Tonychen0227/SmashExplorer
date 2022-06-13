@@ -139,6 +139,9 @@ class API:
               slug
               numEntrants
               tournament {
+                admins {
+                  id
+                }
                 addrState
                 city
                 countryCode
@@ -175,6 +178,7 @@ class API:
         return {
                 "tournamentSlug": tournament["slug"],
                 "tournamentName": tournament["name"],
+                "tournamentAdmins": [x["id"] for x in tournament["admins"] if x is not None and "id" in x],
                 "tournamentLocation": {
                     "city": tournament["city"],
                     "countryCode": tournament["countryCode"],

@@ -55,6 +55,7 @@ namespace SmashExplorerWeb.Controllers
             var model = OrganizeUpsets(upsets, minimumUpsetFactor, maximumUpseteeSeed, selectedPhases);
             model.Event = await SmashExplorerDatabase.Instance.GetEventAsync(eventId);
             model.DQEntrants = await SmashExplorerDatabase.Instance.GetDQdEntrantsAsync(eventId);
+            model.DQEntrants = model.DQEntrants.Where(x => maximumUpseteeSeed >= x.Seeding).ToList();
             model.MaxAvailableUpseteeSeed = upsets.SelectMany(x => x.Set.Entrants.Select(e => e.InitialSeedNum ?? -1)).Max();
             if (model.MaxAvailableUpseteeSeed == -1)
             {
