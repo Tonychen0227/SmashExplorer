@@ -139,8 +139,13 @@ class API:
               slug
               numEntrants
               tournament {
-                admins {
+                owner {
                   id
+                  slug
+                  player {
+                    gamerTag
+                  }
+                  name
                 }
                 addrState
                 city
@@ -175,10 +180,19 @@ class API:
 
         tournament = result["event"]["tournament"]
 
+        tournament_owner = {
+            "id": tournament["owner"]["id"],
+            "slug": tournament["owner"]["slug"],
+            "gamerTag": None
+        }
+
+        if tournament["owner"]["player"] is not None and "gamerTag" in tournament["owner"]["player"]:
+            tournament_owner["gamerTag"] = tournament["owner"]["player"]["gamerTag"]
+
         return {
                 "tournamentSlug": tournament["slug"],
                 "tournamentName": tournament["name"],
-                "tournamentAdmins": [x["id"] for x in tournament["admins"] if x is not None and "id" in x],
+                "tournamentOwner": tournament_owner,
                 "tournamentLocation": {
                     "city": tournament["city"],
                     "countryCode": tournament["countryCode"],
