@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +30,8 @@ public class SmashExplorerDatabase
 
     private Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>>();
     private static readonly int UpsetsCacheTTLSeconds = 120;
+
+    private static readonly List<int> BannedOwners = new List<int>() { 1819468 };
 
     private Container GetContainer(string containerName)
     {
@@ -91,7 +92,7 @@ public class SmashExplorerDatabase
 
         UpcomingEventsCache = Tuple.Create(DateTime.UtcNow, results);
 
-        return results;
+        return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
 
     public async Task<Event> GetEventAsync(string eventId)
@@ -108,9 +109,14 @@ public class SmashExplorerDatabase
             return cachedEvent.Item2;
         }
 
-        var result = await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
+        Event result = await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
 
-        EventsCache[eventId] = Tuple.Create(DateTime.UtcNow, (Event) result);
+        if (result.TournamentOwner?.Id != null && BannedOwners.Contains(result.TournamentOwner.Id))
+        {
+            result = null;
+        }
+
+        EventsCache[eventId] = Tuple.Create(DateTime.UtcNow, result);
 
         return result;
     }
@@ -133,7 +139,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        return results;
+        return results.Where(x => x.TournamentOwner?.Id != null && !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
 
     public async Task<List<Entrant>> GetDQdEntrantsAsync(string eventId)

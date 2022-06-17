@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class Event
 {
+    public User TournamentOwner { get; set; }
     public string Id { get; set; }
     public ActivityState State { get; set; }
     public string TournamentName { get; set; }
