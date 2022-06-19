@@ -7,6 +7,12 @@
 var config = null;
 var chart = null;
 
+var decodeHtmlEntity = function (str) {
+    return str.replace(/&#(\d+);/g, function (match, dec) {
+        return String.fromCharCode(dec);
+    });
+};
+
 window.onload = function () {
     Chart.register(ChartDataLabels);
 
@@ -19,7 +25,7 @@ window.onload = function () {
         var x_value = @dataPoint.NormalizedPlacement.ToString();
         var y_value = @dataPoint.SPR;
         var title = "@dataPoint.PlacementOrdinal (@dataPoint.SPR SPR)";
-        var tooltip = "@dataPoint.Name (@dataPoint.Seed)";
+        var tooltip = decodeHtmlEntity("@dataPoint.Name") + " (@dataPoint.Seed)";
 
         if (!(x_value in dict)) {
             dict[x_value] = {};

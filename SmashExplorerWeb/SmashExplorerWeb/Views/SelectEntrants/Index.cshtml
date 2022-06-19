@@ -8,6 +8,43 @@
     <a style="display:inline-block;margin-left:10px;margin-bottom:5px" class="btn btn-info" href="https://www.start.gg/@Model.Event.Slug" target="_blank">
         View on start.gg</a>
 </div>
+<script>
+    var decodeHtmlEntity = function (str) {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        });
+    };
+
+    window.onload = function () {
+        var items = [
+            "Player 1 || @@Player1",
+            "Player 2 || @@Player2"
+        ];
+
+        @foreach (Entrant entrant in Model.Entrants){
+            var secondary = entrant.Name;
+
+            foreach (EntrantInfo info in entrant.AdditionalInfo)
+            {
+                if (info == null)
+                {
+                    continue;
+                }
+                foreach (string url in info.Urls.Select(x => x.Url).Where(x => !string.IsNullOrEmpty(x)).OrderByDescending(x => x))
+                {
+                    if (url.Contains("twitter.com"))
+                    {
+                        secondary = $"@{url.Split('/')[url.Split('/').Length - 1]}";
+                    }
+                }
+            }
+
+            @:items.push(decodeHtmlEntity("@($"{entrant.Name} || {secondary}")"));
+        }
+
+        console.log(items.join('\n'))
+    }
+</script>
 <div class="row">
     @using (Html.BeginForm(null, "SelectEntrants", null, FormMethod.Post))
     {

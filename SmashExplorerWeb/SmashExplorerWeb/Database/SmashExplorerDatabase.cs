@@ -139,7 +139,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        return results.Where(x => x.TournamentOwner?.Id != null && !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
+        return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
 
     public async Task<List<Entrant>> GetDQdEntrantsAsync(string eventId)
