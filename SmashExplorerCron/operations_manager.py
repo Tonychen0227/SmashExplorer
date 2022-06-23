@@ -108,6 +108,8 @@ class OperationsManager:
             twitter_links = []
 
             for info in winner_entrant["additionalInfo"]:
+                if "urls" not in info:
+                    continue
                 for url in info["urls"]:
                     if "twitter" in url["url"]:
                         twitter_handle = url["url"].split("/")[-1]
