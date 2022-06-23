@@ -109,6 +109,8 @@ class OperationsManager:
 
             if "additionalInfo" in winner_entrant:
                 for info in winner_entrant["additionalInfo"]:
+                    if info is None:
+                        continue
                     for url in info["urls"]:
                         if "twitter" in url["url"]:
                             twitter_handle = url["url"].split("/")[-1]
