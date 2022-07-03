@@ -32,14 +32,20 @@
         @for (var k = i; k < Math.Min(sortedKeys.Count(), i + 2); k++)
         {
             var entrant = sortedKeys[k];
+            IEnumerable<Set> sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenByDescending(x => x.CreatedAt).ToList();
+            var pastSets = sets.Where(x => !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
+            var incompleteSets = sets.Where(x => (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None"));
+            var pendingSets = incompleteSets.Where(x => !pastSets.Any(y => y.Round >= x.Round && y.PhaseOrder == x.PhaseOrder && y.CompletedAt > x.CreatedAt)
+                && !sets.Any(y => y.Round == x.Round && y.PhaseOrder == x.PhaseOrder && (string.IsNullOrEmpty(y.WinnerId) || y.WinnerId == "None") 
+                && ((!y.Id.StartsWith("preview") && x.Id.StartsWith("preview")) || y.CreatedAt > x.CreatedAt)));
             <div class="col-md-6">
-                <div class="panel" style="border:1px solid gray;margin:4px">
+                <div class="panel" style="border: 1px solid gray; margin: 4px;">
                     <div class="panel-body">
                         <p style="border-bottom: 1px solid black; padding-bottom: 5px">
                             <a href="https://www.start.gg/@Model.Event.Slug/entrant/@entrant.Id" target="_blank"><strong>@entrant.Name</strong></a>
                             @{
                                 List<int?> characters = new List<int?>();
-                                foreach (var set in Model.EntrantsSets[entrant])
+                                foreach (var set in pastSets)
                                 {
                                     if (set.Games != null)
                                     {
@@ -60,13 +66,9 @@
                             out of @Model.Event.NumEntrants (@SmashExplorerDatabase.Instance.GetStringOrdinal(entrant.Seeding) Seed)
                         </p>
                         @{
-                            var sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenByDescending(x => x.CreatedAt);
-                            var previewSets = sets.Where(x => x.Id.StartsWith("preview"));
-                            var distinctPreviewSets = previewSets.Where(x => !sets.Any(y => !y.Id.StartsWith("preview") && y.PhaseOrder == x.PhaseOrder && y.Round == x.Round));
-                            if (distinctPreviewSets.Any())
+                            foreach (var pendingSet in pendingSets)
                             {
-                                var firstPreviewSet = distinctPreviewSets.FirstOrDefault();
-                                var targetOpponent = firstPreviewSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
+                                var targetOpponent = pendingSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                 string opponentName;
                                 if (!string.IsNullOrEmpty(targetOpponent.Name))
                                 {
@@ -74,58 +76,38 @@
                                 }
                                 else
                                 {
+                                    opponentName = $"{targetOpponent.PrereqType} {targetOpponent.PrereqId}";
                                     var prereqSet = Model.AllSets.Where(x => x.Id == targetOpponent.PrereqId).FirstOrDefault();
-                                    if (prereqSet == null)
-                                    {
-                                        opponentName = "???";
-                                    }
-                                    else
+                                    if (prereqSet != null)
                                     {
                                         opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
                                     }
                                 }
-                                if (firstPreviewSet.PhaseId != null && firstPreviewSet.Id.Split('_').Length >= 2)
+                                if (pendingSet.Id.StartsWith("preview"))
                                 {
-                                    <h5>
-                                        <strong>Upcoming Set (@firstPreviewSet.PhaseName):</strong>
-                                        <a href="https://www.start.gg/@Model.Event.Slug/brackets/@firstPreviewSet.PhaseId/@firstPreviewSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a>
-                                    </h5>
-                                }
-                                else
-                                {
-                                    <h5><strong>Upcoming Set (@firstPreviewSet.PhaseName):</strong> vs @opponentName</h5>
-                                }
-                            }
-                            var pastSets = sets.Where(x => x.WinnerId != null && x.WinnerId != "None" && !x.Id.StartsWith("preview"));
-                            var upcomingSets = sets.Where(x => !x.Id.StartsWith("preview") && (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None"))
-                                        .Where(x => pastSets.Where(ps => ps.PhaseOrder == x.PhaseOrder && ps.Round == x.Round).Count() == 0);
-                            if (upcomingSets.Any())
-                            {
-                                foreach (var upcomingSet in upcomingSets)
-                                {
-                                    var opponent = upcomingSet.Entrants.Where(x => x.Id != entrant.Id).Single();
-                                    string opponentName;
-                                    if (opponent.Name != null)
+                                    if (pendingSet.PhaseId != null && pendingSet.Id.Split('_').Length >= 2)
                                     {
-                                        opponentName = $"{opponent.Name} ({SmashExplorerDatabase.Instance.GetStringOrdinal(opponent.InitialSeedNum)} Seed)";
+                                        <h5>
+                                            <strong>Upcoming Set (@pendingSet.PhaseName):</strong>
+                                            <a href="https://www.start.gg/@Model.Event.Slug/brackets/@pendingSet.PhaseId/@pendingSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a>
+                                        </h5>
                                     }
                                     else
                                     {
-                                        opponentName = $"{opponent.PrereqType} {opponent.PrereqId}";
-                                        var prereqSet = Model.AllSets.Where(x => x.Id == opponent.PrereqId).FirstOrDefault();
-                                        if (prereqSet != null)
-                                        {
-                                            opponentName = string.Join(" / ", prereqSet.Entrants.Select(x => $"{x.Name} ({@SmashExplorerDatabase.Instance.GetStringOrdinal(x.InitialSeedNum)} seed)"));
-                                        }
+                                        <h5><strong>Upcoming Set (@pendingSet.PhaseName):</strong> vs @opponentName</h5>
                                     }
+                                }
+                                else
+                                {
                                     <h5>
-                                        <strong>Upcoming Set (@upcomingSet.PhaseName): </strong><a href="https://www.start.gg/@Model.Event.Slug/set/@upcomingSet.Id" target="_blank">vs @opponentName</a>
-                                        @if (upcomingSet.Stream != null && upcomingSet.Stream.StreamSource == "TWITCH")
+                                        <strong>Upcoming Set (@pendingSet.PhaseName): </strong><a href="https://www.start.gg/@Model.Event.Slug/set/@pendingSet.Id" target="_blank">vs @opponentName</a>
+                                        @if (pendingSet.Stream != null && pendingSet.Stream.StreamSource == "TWITCH")
                                         {
-                                            <a href="https://www.twitch.tv/@upcomingSet.Stream.StreamName" target="_blank"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px" /></a>
+                                            <a href="https://www.twitch.tv/@pendingSet.Stream.StreamName" target="_blank"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px" /></a>
                                         }
                                     </h5>
                                 }
+
                             }
                             if (pastSets.Any())
                             {
@@ -230,10 +212,10 @@
                                                     @:	&#128075;
                                                 } @SmashExplorerDatabase.Instance.GetStringOrdinal(set.LPlacement)
                                             }
-                                    </span>
-                                </span><br />
+                                        </span>
+                                    </span><br />
+                                }
                             }
-                        }
                         }
                     </div>
                     <div class="panel-footer">
