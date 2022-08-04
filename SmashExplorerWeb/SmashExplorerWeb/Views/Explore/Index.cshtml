@@ -35,7 +35,7 @@
             IEnumerable<Set> sets = Model.EntrantsSets[entrant].OrderByDescending(x => x.CompletedAt).ThenByDescending(x => x.CreatedAt).ToList();
             var pastSets = sets.Where(x => !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
             var incompleteSets = sets.Where(x => (string.IsNullOrEmpty(x.WinnerId) || x.WinnerId == "None"));
-            var pendingSets = incompleteSets.Where(x => !pastSets.Any(y => y.Round >= x.Round && y.PhaseOrder == x.PhaseOrder && y.CompletedAt > x.CreatedAt)
+            var pendingSets = incompleteSets.Where(x => !pastSets.Any(y => (y.Round > 0 == x.Round > 0 && Math.Abs(y.Round ?? 0) >= Math.Abs(x.Round ?? 0)) && y.PhaseOrder == x.PhaseOrder && y.CompletedAt > x.CreatedAt)
                 && !sets.Any(y => y.Round == x.Round && y.PhaseOrder == x.PhaseOrder && (string.IsNullOrEmpty(y.WinnerId) || y.WinnerId == "None") 
                 && ((!y.Id.StartsWith("preview") && x.Id.StartsWith("preview")) || y.CreatedAt > x.CreatedAt)));
             <div class="col-md-6">
@@ -69,6 +69,7 @@
                             foreach (var pendingSet in pendingSets)
                             {
                                 var targetOpponent = pendingSet.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
+                                var phaseIdentifier = $"{pendingSet.PhaseName}{(String.IsNullOrEmpty(pendingSet.PhaseIdentifier) || pendingSet.PhaseIdentifier == "1" ? "" : $" {pendingSet.PhaseIdentifier}")}";
                                 string opponentName;
                                 if (!string.IsNullOrEmpty(targetOpponent.Name))
                                 {
@@ -88,19 +89,19 @@
                                     if (pendingSet.PhaseId != null && pendingSet.Id.Split('_').Length >= 2)
                                     {
                                         <h5>
-                                            <strong>Upcoming Set (@pendingSet.PhaseName):</strong>
+                                            <strong>Upcoming Set (@phaseIdentifier):</strong>
                                             <a href="https://www.start.gg/@Model.Event.Slug/brackets/@pendingSet.PhaseId/@pendingSet.Id.Split('_')[1]" target="_blank">vs @opponentName</a>
                                         </h5>
                                     }
                                     else
                                     {
-                                        <h5><strong>Upcoming Set (@pendingSet.PhaseName):</strong> vs @opponentName</h5>
+                                        <h5><strong>Upcoming Set (@phaseIdentifier):</strong> vs @opponentName</h5>
                                     }
                                 }
                                 else
                                 {
                                     <h5>
-                                        <strong>Upcoming Set (@pendingSet.PhaseName): </strong><a href="https://www.start.gg/@Model.Event.Slug/set/@pendingSet.Id" target="_blank">vs @opponentName</a>
+                                        <strong>Upcoming Set (@phaseIdentifier): </strong><a href="https://www.start.gg/@Model.Event.Slug/set/@pendingSet.Id" target="_blank">vs @opponentName</a>
                                         @if (pendingSet.Stream != null && pendingSet.Stream.StreamSource == "TWITCH")
                                         {
                                             <a href="https://www.twitch.tv/@pendingSet.Stream.StreamName" target="_blank"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px" /></a>
@@ -112,17 +113,19 @@
                             if (pastSets.Any())
                             {
                                 <h5><strong>Past Sets</strong></h5>
-                                string storedSet = null;
+                                string storedIdentifier = null;
                                 foreach (var set in pastSets)
                                 {
                                     var playerSelections = set.Games?.Where(x => x.Selections != null).SelectMany(x => x.Selections.Where(s => s.Entrant.Id == entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
 
                                     var selections = set.Games?.Where(x => x.Selections != null).SelectMany(x => x.Selections.Where(s => s.Entrant.Id != entrant.Id && s.SelectionType == "CHARACTER").Select(s => s.SelectionValue)).Distinct();
 
-                                    if (storedSet != set.PhaseName)
+                                    var phaseIdentifier = $"{set.PhaseName}{(String.IsNullOrEmpty(set.PhaseIdentifier) || set.PhaseIdentifier == "1" ? "" : $" {set.PhaseIdentifier}")}";
+
+                                    if (phaseIdentifier != storedIdentifier)
                                     {
-                                        <strong><i>@set.PhaseName</i></strong><br />
-                                        storedSet = set.PhaseName;
+                                        <strong><i>@phaseIdentifier</i></strong><br />
+                                        storedIdentifier = phaseIdentifier;
                                     }
                                     var opponent = set.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                     string detailedScore;

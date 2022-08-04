@@ -16,6 +16,7 @@ public class Set
     public List<string> EntrantIds { get; set; }
     public string BracketType { get; set; }
     public string PhaseGroupId { get; set; }
+    public string PhaseIdentifier { get; set; }
     public int? PhaseOrder { get; set; }
     public string PhaseName { get; set; }
     public string PhaseId { get; set; }

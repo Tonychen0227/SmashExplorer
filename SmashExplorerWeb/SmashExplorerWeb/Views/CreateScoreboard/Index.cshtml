@@ -1,0 +1,23 @@
+﻿@model CreateScoreboardModel
+
+<script>
+</script>
+<div class="jumbotron">
+    <h1>Create Scoreboard</h1>
+</div>
+<div class="row">
+    @using(Html.BeginForm(null, "CreateScoreboard", null, FormMethod.Post))
+    {
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+            <h3>Create a Scoreboard</h3>
+            @Html.TextBoxFor(model => model.Player1Name, new { @class = "form-control", style = "margin-bottom:10px", @maxlength = "64", placeholder = "Player 1 Name" })
+            @Html.TextBoxFor(model => model.Player2Name, new { @class = "form-control", @maxlength = "64", placeholder = "Player 2 Name" })
+            <br/>
+            <p>Best of: </p>
+            @Html.DropDownListFor(model => model.BestOf, new SelectList(new List<int>() { 3, 5 }), new { @class = "form-control", style = "margin-bottom:10px", @maxlength = "64", placeholder = "Best Of" })
+            <button style="display:inline-block" type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div class="col-md-4"></div>
+    }
+</div>

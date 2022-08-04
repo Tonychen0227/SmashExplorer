@@ -1,0 +1,233 @@
+﻿@model ScoreboardModel
+
+<header>
+    @if (Model.ShouldRefresh)
+    {
+        <meta http-equiv="Refresh" content="2">
+    }
+</header>
+<style>
+    .stage-select {
+        width: 200px;
+        height: 100px;
+        margin: 10px 10px 20px 10px;
+        position: relative;
+        z-index: 0;
+    }
+
+    .stage-display {
+        width: 600px;
+        height: 300px;
+        margin: 10px 10px 20px 10px;
+        position: relative;
+    }
+
+    .selected {
+        filter: sepia(100%);
+    }
+
+    .display-icon {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        top: 10px;
+        left: 70px;
+    }
+</style>
+<script>
+    function doGentleman() {
+        var element = document.getElementById("scoreboardAction");
+
+        element.value = @((int)ScoreboardAction.AgreeGentleman);
+    }
+
+    function setNextLogStage(stageName) {
+        var element = document.getElementById("selectedStage");
+        switch (stageName) {
+            case "battlefield":
+                element.value = @((int)ScoreboardStage.Battlefield);
+                break;
+            case "smallbattlefield":
+                element.value = @((int)ScoreboardStage.SmallBattlefield);
+                break;
+            case "fd":
+                element.value = @((int)ScoreboardStage.FinalDestination);
+                break;
+            case "smashville":
+                element.value = @((int)ScoreboardStage.Smashville);
+                break;
+            case "ps2":
+                element.value = @((int)ScoreboardStage.PokemonStadium2);
+                break;
+            case "hollowbastion":
+                element.value = @((int)ScoreboardStage.HollowBastion);
+                break;
+            case "tnc":
+                element.value = @((int)ScoreboardStage.TownAndCity);
+                break;
+            default:
+                break;
+        }
+    }
+
+    function selectStage(stageName) {
+        var bannedElement = document.getElementById("banned-" + stageName);
+        var dsrElement = document.getElementById("dsr-" + stageName);
+
+        if ((bannedElement.classList != null && bannedElement.classList.contains("display-icon")) || 
+            (dsrElement.classList != null && dsrElement.classList.contains("display-icon"))) {
+            alert("Stage is not valid for selection");
+            return;
+        }
+
+        Array.from(document.getElementsByClassName("stage-select")).forEach((el) => {
+            el.classList.remove("selected");
+        });
+
+        document.getElementById(stageName).classList.add("selected");
+
+        setNextLogStage(stageName);
+    }
+</script>
+<div class="jumbotron">
+    <h3>Scoreboard - @($"{Model.Scoreboard.Player1Name} ({Model.Scoreboard.Player1Score}) - {Model.Scoreboard.Player2Name} ({Model.Scoreboard.Player2Score})")</h3>
+    @if (Model.ShouldRefresh)
+    {
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=localhost:62058/Scoreboard/@Model.Scoreboard.Id" />
+    }
+</div>
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        @if (Model.Scoreboard.ScoreboardState != ScoreboardState.Completed)
+        {
+            using (Html.BeginForm(null, "Scoreboard", null, FormMethod.Post))
+            {
+                Dictionary<ScoreboardStage, string> keywordLookup = new Dictionary<ScoreboardStage, string>
+{
+                { ScoreboardStage.Battlefield, "battlefield" },
+                { ScoreboardStage.FinalDestination, "fd" },
+                { ScoreboardStage.HollowBastion, "hollowbastion" },
+                { ScoreboardStage.PokemonStadium2, "ps2" },
+                { ScoreboardStage.Smashville, "smashville" },
+                { ScoreboardStage.TownAndCity, "tnc" },
+                { ScoreboardStage.SmallBattlefield, "smallbattlefield" }
+            };
+                switch (Model.NextLog.ScoreboardAction)
+                {
+                    case ScoreboardAction.StarterPick:
+                    case ScoreboardAction.GentlemanPick:
+                    case ScoreboardAction.Pick:
+                    case ScoreboardAction.Ban:
+                        @Html.HiddenFor(model => model.NextLog.PlayerName)
+                        @Html.HiddenFor(model => model.NextLog.ScoreboardAction, new { id = "scoreboardAction" })
+                        @Html.HiddenFor(model => model.NextLog.Stage, new { id = "selectedStage" })
+                        @Html.HiddenFor(model => model.Scoreboard.Id)
+                        var displayString = "Pick Stage - ";
+                        if (Model.NextLog.ScoreboardAction == ScoreboardAction.GentlemanPick)
+                        {
+                            displayString += "Gentleman";
+                        }
+                        else if (Model.NextLog.ScoreboardAction == ScoreboardAction.Pick)
+                        {
+                            displayString += $"Counterpick for {Model.NextLog.PlayerName}";
+                        }
+                        else if (Model.NextLog.ScoreboardAction == ScoreboardAction.StarterPick)
+                        {
+                            displayString += $"Starter";
+                        }
+                        else if (Model.NextLog.ScoreboardAction == ScoreboardAction.Ban)
+                        {
+                            displayString = $"Ban Stage - {Model.NextLog.PlayerName}";
+                        }
+                        <h3>@displayString</h3>
+                        var count = 0;
+                        <div class="row">
+                            @foreach (var stage in Model.SelectableStages)
+                            {
+                                var asset = keywordLookup[stage];
+                                <div class="col-md-4" onclick="selectStage('@asset')">
+                                    <img id="@asset" src="~/Content/Stages/@(asset + ".png")" class="stage-select" />
+                                    @if (Model.BannedStages.Contains(stage))
+                                    {
+                                        <img src="~/Content/Stages/Ban.png" class="display-icon" id="banned-@asset" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/Content/Stages/Ban.png" class="" style="display: none" id="banned-@asset" />
+                                    }
+                                    @if (Model.DSRStages.Contains(stage))
+                                    {
+                                        <img src="~/Content/Stages/DSR.png" class="display-icon" id="dsr-@asset" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/Content/Stages/DSR.png" class="" style="display: none" id="dsr-@asset" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                        if (Model.NextLog.ScoreboardAction != ScoreboardAction.GentlemanPick && Model.NextLog.ScoreboardAction != ScoreboardAction.StarterPick)
+                        {
+                            <button style="display:inline-block;" onclick="doGentleman()" type="submit" class="btn btn-default">Agree to Gentleman</button>
+                        }
+                        break;
+                    case ScoreboardAction.Win:
+                        @Html.HiddenFor(model => model.NextLog.ScoreboardAction)
+                        @Html.HiddenFor(model => model.NextLog.Stage)
+                        @Html.HiddenFor(model => model.Scoreboard.Id)
+                        <h3>Select winner for Game @(Model.Scoreboard.Player1Score + Model.Scoreboard.Player2Score + 1)</h3>
+                        var lastStage = Model.Scoreboard.ScoreboardLogs.Last().Stage;
+                        <div class="row">
+                            <img src="~/Content/Stages/@(keywordLookup[lastStage] + ".png")" class="stage-display" />
+                        </div>
+                        var players = new SelectList(new List<string>() { Model.Scoreboard.Player1Name, Model.Scoreboard.Player2Name });
+                        @Html.DropDownListFor(x => x.NextLog.PlayerName, players, new { @class = "form-control", style = "display:inline" });
+                        break;
+                    default:
+                        break;
+                }
+                <button style="display:inline-block" type="submit" class="btn btn-primary">Submit</button>
+            }
+        }
+    </div>
+    <div class="col-md-2"></div>
+</div>
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <h3>LOGS</h3>
+        <ul>
+            @{
+                var gameNumber = 0;
+                foreach (var log in Model.Scoreboard.ScoreboardLogs)
+                {
+                    string stageName = Enum.GetName(typeof(ScoreboardStage), log.Stage);
+                    switch (log.ScoreboardAction)
+                    {
+                        case ScoreboardAction.Pick:
+                            <li><strong>@log.PlayerName</strong> Picks <strong>@stageName</strong></li>
+                            break;
+                        case ScoreboardAction.Ban:
+                            <li><strong>@log.PlayerName</strong> Bans <strong>@stageName</strong></li>
+                            break;
+                        case ScoreboardAction.Win:
+                            gameNumber += 1;
+                            <li><span style="background-color: #00FF00"><strong>@log.PlayerName Wins Game @gameNumber</strong> On <strong>@stageName</strong></span></li>
+                            break;
+                        case ScoreboardAction.StarterPick:
+                            <li>Players pick starting stage <strong>@stageName</strong></li>
+                            break;
+                        case ScoreboardAction.GentlemanPick:
+                            <li>Gentleman selected stage <strong>@stageName</strong></li>
+                            break;
+                        case ScoreboardAction.AgreeGentleman:
+                            <li>Players agree to gentleman</li>
+                            break;
+                    }
+                }
+            }
+        </ul>
+</div>
+    <div class="col-md-2"></div>
+</div>

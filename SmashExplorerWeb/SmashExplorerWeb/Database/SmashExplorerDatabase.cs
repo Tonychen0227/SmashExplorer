@@ -11,6 +11,7 @@ public class SmashExplorerDatabase
     private readonly Container SetsContainer;
     private readonly Container VanityLinksContainer;
     private readonly Container EventsContainer;
+    private readonly Container ScoreboardsContainer;
 
     public static Dictionary<int, int> PlacementToRounds;
 
@@ -51,6 +52,7 @@ public class SmashExplorerDatabase
         SetsContainer = GetContainer("Sets");
         VanityLinksContainer = GetContainer("VanityLinks");
         EventsContainer = GetContainer("Events");
+        ScoreboardsContainer = GetContainer("Scoreboards");
 
         PlacementToRounds = new Dictionary<int, int>();
 
@@ -283,6 +285,97 @@ public class SmashExplorerDatabase
         UpsetsCache[eventId] = Tuple.Create(DateTime.UtcNow, ret);
 
         return ret;
+    }
+
+    public async Task<Scoreboard> GetScoreboardAsync(string id)
+    {
+        try
+        {
+            return await ScoreboardsContainer.ReadItemAsync<Scoreboard>(id, new PartitionKey(id));
+        }
+        catch (CosmosException ex)
+        {
+            if (ex.StatusCode != System.Net.HttpStatusCode.NotFound)
+            {
+                throw ex;
+            }
+
+            return null;
+        }
+    }
+
+    public async Task<Scoreboard> CreateScoreboardAsync(CreateScoreboardModel model)
+    {
+        var newScoreboard = new Scoreboard(model.Player1Name, model.Player2Name, model.BestOf);
+
+        string generatedId = newScoreboard.Id;
+        var currentLinkSize = 8;
+
+        while (true)
+        {
+            try
+            {
+                newScoreboard.Id = generatedId.Substring(0, currentLinkSize);
+                return await ScoreboardsContainer.CreateItemAsync(newScoreboard, new PartitionKey(newScoreboard.Id));
+            }
+            catch (CosmosException ex)
+            {
+                if (ex.StatusCode != System.Net.HttpStatusCode.Conflict)
+                {
+                    throw ex;
+                }
+
+                currentLinkSize++;
+            }
+        };
+    }
+
+    public async Task<Scoreboard> AddLogToScoreboardAsync(string id, ScoreboardLog log)
+    {
+        var scoreboard = await GetScoreboardAsync(id);
+        var lastLog = scoreboard.ScoreboardLogs.LastOrDefault();
+
+        scoreboard.ScoreboardLogs.Add(log);
+        
+        switch (log.ScoreboardAction)
+        {
+            case ScoreboardAction.AgreeGentleman:
+                scoreboard.ScoreboardState = ScoreboardState.Gentlemaning;
+                break;
+            case ScoreboardAction.StarterPick:
+            case ScoreboardAction.GentlemanPick:
+            case ScoreboardAction.Pick:
+                scoreboard.ScoreboardState = ScoreboardState.StageSelected;
+                break;
+            case ScoreboardAction.Ban:
+                if (lastLog.ScoreboardAction == ScoreboardAction.Ban)
+                {
+                    scoreboard.ScoreboardState = ScoreboardState.Counterpicking;
+                } else
+                {
+                    scoreboard.ScoreboardState = ScoreboardState.Banning;
+                }
+                break;
+            case ScoreboardAction.Win:
+                scoreboard.ScoreboardState = ScoreboardState.Banning;
+                if (log.PlayerName == scoreboard.Player1Name)
+                {
+                    scoreboard.Player1Score += 1;
+                } else
+                {
+                    scoreboard.Player2Score += 1;
+                }
+
+                if (Math.Max(scoreboard.Player1Score, scoreboard.Player2Score) > scoreboard.BestOf / 2)
+                {
+                    scoreboard.ScoreboardState = ScoreboardState.Completed;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return await ScoreboardsContainer.UpsertItemAsync(scoreboard);
     }
 
     public string GetStringOrdinal(int? num)
