@@ -56,6 +56,7 @@ class CosmosDB:
         event["entrantsLastUpdated"] = 1 if (existing_event is None or "entrantsLastUpdated" not in existing_event) else existing_event["entrantsLastUpdated"]
         event["upsetThreadRoot"] = None if existing_event is None or "upsetThreadRoot" not in existing_event else existing_event["upsetThreadRoot"]
         event["doUpsetThread"] = False if existing_event is None or "doUpsetThread" not in existing_event else existing_event["doUpsetThread"]
+        event["upsetThreadFactor"] = False if existing_event is None or "upsetThreadFactor" not in existing_event else  existing_event["upsetThreadFactor"]
         event["setsAlreadyTweeted"] = [] if existing_event is None or "setsAlreadyTweeted" not in existing_event else existing_event["setsAlreadyTweeted"]
         return self.create_event_datafix(event)
 

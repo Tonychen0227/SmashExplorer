@@ -106,7 +106,7 @@ public class ScoreboardModel
             {
                 BannedStages.Add(log.Stage);
 
-                if (BannedStages.Count == 2)
+                if ((BannedStages.Count == 2 && Scoreboard.BestOf == 3) || (BannedStages.Count == 1 && Scoreboard.BestOf == 5))
                 {
                     NextLog = new ScoreboardLog()
                     {

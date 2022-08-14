@@ -8,16 +8,16 @@
 </header>
 <style>
     .stage-select {
-        width: 200px;
-        height: 100px;
+        width: 100%;
+        height: 50%;
         margin: 10px 10px 20px 10px;
         position: relative;
         z-index: 0;
     }
 
     .stage-display {
-        width: 600px;
-        height: 300px;
+        width: 100%;
+        height: 50%;
         margin: 10px 10px 20px 10px;
         position: relative;
     }
@@ -28,10 +28,10 @@
 
     .display-icon {
         position: absolute;
-        width: 100px;
-        height: 100px;
-        top: 10px;
-        left: 70px;
+        width: 80%;
+        height: 80%;
+        top: 10%;
+        left: 15%;
     }
 </style>
 <script>
@@ -74,7 +74,7 @@
         var bannedElement = document.getElementById("banned-" + stageName);
         var dsrElement = document.getElementById("dsr-" + stageName);
 
-        if ((bannedElement.classList != null && bannedElement.classList.contains("display-icon")) || 
+        if ((bannedElement.classList != null && bannedElement.classList.contains("display-icon")) ||
             (dsrElement.classList != null && dsrElement.classList.contains("display-icon"))) {
             alert("Stage is not valid for selection");
             return;
@@ -91,10 +91,12 @@
 </script>
 <div class="jumbotron">
     <h3>Scoreboard - @($"{Model.Scoreboard.Player1Name} ({Model.Scoreboard.Player1Score}) - {Model.Scoreboard.Player2Name} ({Model.Scoreboard.Player2Score})")</h3>
-    @if (Model.ShouldRefresh)
-    {
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=localhost:62058/Scoreboard/@Model.Scoreboard.Id" />
-    }
+    <div class="col-md-2">
+        @if (Model.ShouldRefresh)
+        {
+            @Html.ActionLink("Create new set", null, "CreateScoreboard", null, new { @class = "btn btn-primary", target = "_blank" });
+        }
+    </div>
 </div>
 <div class="row">
     <div class="col-md-2"></div>
@@ -167,7 +169,7 @@
                                 </div>
                             }
                         </div>
-                        if (Model.NextLog.ScoreboardAction != ScoreboardAction.GentlemanPick && Model.NextLog.ScoreboardAction != ScoreboardAction.StarterPick)
+                        if (!Model.ShouldRefresh && Model.NextLog.ScoreboardAction != ScoreboardAction.GentlemanPick && Model.NextLog.ScoreboardAction != ScoreboardAction.StarterPick)
                         {
                             <button style="display:inline-block;" onclick="doGentleman()" type="submit" class="btn btn-default">Agree to Gentleman</button>
                         }
@@ -182,17 +184,34 @@
                             <img src="~/Content/Stages/@(keywordLookup[lastStage] + ".png")" class="stage-display" />
                         </div>
                         var players = new SelectList(new List<string>() { Model.Scoreboard.Player1Name, Model.Scoreboard.Player2Name });
-                        @Html.DropDownListFor(x => x.NextLog.PlayerName, players, new { @class = "form-control", style = "display:inline" });
+                        if (!Model.ShouldRefresh && Model.NextLog.ScoreboardAction != ScoreboardAction.GentlemanPick && Model.NextLog.ScoreboardAction != ScoreboardAction.StarterPick)
+                        {
+                            @Html.DropDownListFor(x => x.NextLog.PlayerName, players, new { @class = "form-control", style = "display:inline" });
+                        }
                         break;
                     default:
                         break;
                 }
-                <button style="display:inline-block" type="submit" class="btn btn-primary">Submit</button>
+                if (!Model.ShouldRefresh)
+                {
+                    <button style="display:inline-block" type="submit" class="btn btn-primary">Submit</button>
+                }
             }
         }
     </div>
     <div class="col-md-2"></div>
 </div>
+@if (Model.NextLog != null && Model.NextLog.ScoreboardAction == ScoreboardAction.StarterPick)
+{
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+    <br />
+}
 <div class="row">
     <div class="col-md-2"></div>
     <div class="col-md-8">
@@ -228,6 +247,14 @@
                 }
             }
         </ul>
-</div>
+    </div>
     <div class="col-md-2"></div>
+</div>
+<div class="row">
+    <div class="col-md-4"></div>
+    @if (Model.ShouldRefresh)
+    {
+        <img style="width:20%;height:20%;margin-top:500px;margin-bottom:500px" class="col-md-4" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://smashexplorer.gg/Scoreboard/@Model.Scoreboard.Id" />
+    }
+    <div class="col-md-4"></div>
 </div>

@@ -86,7 +86,12 @@ class OperationsManager:
             if set["id"] in sets_tweeted_out:
                 continue
 
-            if not set["isUpsetOrNotable"] or set["detailedScore"] is None or set["upsetFactor"] <= 2:
+            minimum_upset_factor = 3
+
+            if "upsetThreadFactor" in set and set["upsetThreadFactor"] is not None and set["upsetThreadFactor"] != False:
+                minimum_upset_factor = int(set["upsetThreadFactor"])
+
+            if not set["isUpsetOrNotable"] or set["detailedScore"] is None or set["upsetFactor"] < minimum_upset_factor:
                 continue
 
             detailed_score = set["detailedScore"]
@@ -103,7 +108,7 @@ class OperationsManager:
             loser_entrant = self.cosmos.get_entrant(event_id, loser_id)
 
             if upset_thread_root is None:
-                upset_thread_root = self.twitter.make_root_tweet(event)
+                upset_thread_root = self.twitter.make_root_tweet(event, minimum_upset_factor)
 
             twitter_links = []
 

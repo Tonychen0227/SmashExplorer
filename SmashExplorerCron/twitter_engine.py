@@ -17,8 +17,11 @@ class TwitterClient:
                                  access_token_secret=twitter_keys[3],
                                  wait_on_rate_limit=True)
 
-    def make_root_tweet(self, event):
-        text = f"Upset Thread for {event['name']} @ {event['tournamentName']} (minimum Upset Factor 3)\n\nFor full upsets, check https://smashexplorer.gg/Upsets/{event['id']}"
+    def make_root_tweet(self, event, minimum_upset_factor):
+        if minimum_upset_factor is None:
+            minimum_upset_factor = 3
+
+        text = f"Upset Thread for {event['name']} @ {event['tournamentName']} (minimum Upset Factor {minimum_upset_factor})\n\nFor full upsets, check https://smashexplorer.gg/Upsets/{event['id']}"
 
         print(text)
 
