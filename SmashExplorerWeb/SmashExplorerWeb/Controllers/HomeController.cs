@@ -18,9 +18,9 @@ namespace SmashExplorerWeb.Controllers
             var startingModel = new TournamentFilterModel()
             {
                 StartAtBefore = DateTime.UtcNow.AddDays(14).ToString(DATE_FORMAT),
-                StartAtAfter = DateTime.UtcNow.AddDays(-3).ToString(DATE_FORMAT),
+                StartAtAfter = DateTime.UtcNow.AddDays(-5).ToString(DATE_FORMAT),
                 Events = await SmashExplorerDatabase.Instance.GetUpcomingEventsAsync(),
-                StartTrackingDate = new DateTime(2022, 1, 1).ToString(DATE_FORMAT),
+                StartTrackingDate = new DateTime(2019, 1, 1).ToString(DATE_FORMAT),
                 EndTrackingDate = DateTime.UtcNow.AddDays(14).ToString(DATE_FORMAT)
             };
 
@@ -58,8 +58,8 @@ namespace SmashExplorerWeb.Controllers
                         throw new ArgumentNullException();
 
                     filterModel.Slug = slugArray[index + 1];
-                    startAtAfter = StartTrackingDate;
-                    startAtBefore = EndTrackingDate;
+                    startAtAfter = new DateTime(1970, 1, 1);
+                    startAtBefore = new DateTime(2030, 1, 1);
                 } catch (ArgumentNullException)
                 {
                     filterModel.ErrorMessage = "Invalid start.gg URL detected. Returning default events.";

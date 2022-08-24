@@ -245,8 +245,10 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ScoreboardController.cs" />
     <Compile Include="Controllers\ExploreController.cs" />
     <Compile Include="Controllers\FAQController.cs" />
+    <Compile Include="Controllers\CreateScoreboardController.cs" />
     <Compile Include="Controllers\ZookaloozaController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SelectEntrantsController.cs" />
@@ -257,6 +259,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ActivityState.cs" />
+    <Compile Include="Models\CreateScoreboardModel.cs" />
     <Compile Include="Models\DataPoint.cs" />
     <Compile Include="Models\Entrant.cs" />
     <Compile Include="Models\EntrantInfo.cs" />
@@ -265,6 +268,12 @@
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\GameSelection.cs" />
     <Compile Include="Models\Image.cs" />
+    <Compile Include="Models\ScoreboardAction.cs" />
+    <Compile Include="Models\ScoreboardLog.cs" />
+    <Compile Include="Models\Scoreboard.cs" />
+    <Compile Include="Models\ScoreboardModel.cs" />
+    <Compile Include="Models\ScoreboardStage.cs" />
+    <Compile Include="Models\ScoreboardState.cs" />
     <Compile Include="Models\Set.cs" />
     <Compile Include="Models\Stage.cs" />
     <Compile Include="Models\Standing.cs" />
@@ -425,18 +434,28 @@
     <Content Include="Content\logo.png" />
     <Content Include="Content\SmashExplorer.png" />
     <Content Include="Content\SmashExplorerSmashBall.png" />
+    <Content Include="Content\Stages\Ban.png" />
+    <Content Include="Content\Stages\battlefield.png" />
+    <Content Include="Content\Stages\DSR.png" />
+    <Content Include="Content\Stages\fd.png" />
+    <Content Include="Content\Stages\hollowbastion.png" />
+    <Content Include="Content\Stages\Pick.png" />
+    <Content Include="Content\Stages\ps2.png" />
+    <Content Include="Content\Stages\smallbattlefield.png" />
+    <Content Include="Content\Stages\smashville.png" />
+    <Content Include="Content\Stages\tnc.png" />
     <Content Include="Content\twitch.png" />
     <Content Include="Content\twitter.png" />
-    <Content Include="Content\Zook1.png" />
-    <Content Include="Content\Zook10.png" />
-    <Content Include="Content\Zook2.png" />
-    <Content Include="Content\Zook3.png" />
-    <Content Include="Content\Zook4.png" />
-    <Content Include="Content\Zook5.png" />
-    <Content Include="Content\Zook6.png" />
-    <Content Include="Content\Zook7.png" />
-    <Content Include="Content\Zook8.png" />
-    <Content Include="Content\Zook9.png" />
+    <Content Include="Content\Zook\Zook1.png" />
+    <Content Include="Content\Zook\Zook10.png" />
+    <Content Include="Content\Zook\Zook2.png" />
+    <Content Include="Content\Zook\Zook3.png" />
+    <Content Include="Content\Zook\Zook4.png" />
+    <Content Include="Content\Zook\Zook5.png" />
+    <Content Include="Content\Zook\Zook6.png" />
+    <Content Include="Content\Zook\Zook7.png" />
+    <Content Include="Content\Zook\Zook8.png" />
+    <Content Include="Content\Zook\Zook9.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -478,6 +497,8 @@
     <Content Include="Views\Zookalooza\Index.cshtml" />
     <Content Include="Views\Explore\Index.cshtml" />
     <Content Include="Views\FAQ\Index.cshtml" />
+    <Content Include="Views\CreateScoreboard\Index.cshtml" />
+    <Content Include="Views\Scoreboard\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

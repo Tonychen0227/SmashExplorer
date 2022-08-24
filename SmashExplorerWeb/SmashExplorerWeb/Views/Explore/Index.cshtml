@@ -86,6 +86,11 @@
                                 }
                                 if (pendingSet.Id.StartsWith("preview"))
                                 {
+                                    var latestPendingSet = sets.Where(x => x.Id.StartsWith("preview")).OrderByDescending(x => x.CreatedAt).First();
+                                    if (pendingSet.Id != latestPendingSet.Id)
+                                    {
+                                        continue;
+                                    }
                                     if (pendingSet.PhaseId != null && pendingSet.Id.Split('_').Length >= 2)
                                     {
                                         <h5>
@@ -156,14 +161,14 @@
                                     <span>
                                         @if (playerSelections != null)
                                         {
-                                            foreach (var selection in playerSelections.Distinct())
+                                        foreach (var selection in playerSelections.Distinct())
+                                        {
+                                            if (selection != null)
                                             {
-                                                if (selection != null)
-                                                {
                                                     <img style="height:20px;width:20px;" src="~/Content/Characters/@(selection).jpg" />
                                                 }
-                                            }
                                         }
+                                    }
                                         <a href="@url" target="_blank">
                                             @if (set.WinnerId == entrant.Id)
                                             {

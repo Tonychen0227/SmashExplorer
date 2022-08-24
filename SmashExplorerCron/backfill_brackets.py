@@ -9,10 +9,24 @@ if __name__ == '__main__':
     operations = OperationsManager(logger)
     logger.log("Starting Backfill")
 
-    events_count = 1
-    new_events = ["613153"]
+    events_count = 0
+    new_events = [746249]
     if len(new_events) == 0:
-        new_events = operations.get_new_events(days_back=132, days_forward=-40)
+        days_back = 1330
+        days_forward = 965
+
+        current_days_forward = days_back
+        increment = 100
+
+        while current_days_forward > days_forward:
+            current_days_forward -= increment
+
+            if current_days_forward < days_forward:
+                current_days_forward = days_forward
+            new_events.extend(operations.get_new_events(days_back=days_back, days_forward=(-1 * current_days_forward)))
+
+            days_back = current_days_forward
+
     events_size = len(new_events)
     for event_id in new_events:
         events_count += 1
