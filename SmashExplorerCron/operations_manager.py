@@ -88,8 +88,8 @@ class OperationsManager:
 
             minimum_upset_factor = 3
 
-            if "upsetThreadFactor" in set and set["upsetThreadFactor"] is not None and set["upsetThreadFactor"] != False:
-                minimum_upset_factor = int(set["upsetThreadFactor"])
+            if "upsetThreadFactor" in event and event["upsetThreadFactor"] is not None and event["upsetThreadFactor"] != False:
+                minimum_upset_factor = int(event["upsetThreadFactor"])
 
             if not set["isUpsetOrNotable"] or set["detailedScore"] is None or set["upsetFactor"] < minimum_upset_factor:
                 continue

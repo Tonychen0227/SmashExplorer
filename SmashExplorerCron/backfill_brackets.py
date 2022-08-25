@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from logger import Logger
 from operations_manager import OperationsManager
@@ -10,7 +11,7 @@ if __name__ == '__main__':
     logger.log("Starting Backfill")
 
     events_count = 0
-    new_events = [746249]
+    new_events = [768909]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 1330
@@ -42,4 +43,5 @@ if __name__ == '__main__':
             operations.get_and_create_entrants_for_event(event_id, created_event)
             operations.update_event_sets(event_id, created_event, bypass_last_updated=True)
         except:
+            traceback.print_exc()
             logger.log(f"Issue backfilling {event_id}, skipping")
