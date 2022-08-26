@@ -364,6 +364,9 @@ class API:
         winner = [x for x in return_set["entrants"] if str(return_set["winnerId"]) == str(x["id"])][0]
         loser = [x for x in return_set["entrants"] if str(return_set["winnerId"]) != str(x["id"])][0]
 
+        if winner["initialSeedNum"] is None or loser["initialSeedNum"] is None:
+            return return_set
+
         winner_round_seed = self.placement_to_round[winner["initialSeedNum"]]
         loser_round_seed = self.placement_to_round[loser["initialSeedNum"]]
 
