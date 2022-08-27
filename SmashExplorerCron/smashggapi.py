@@ -352,73 +352,76 @@ class API:
             "isUpsetOrNotable": False,
             "detailedScore": None
         }
-
-        if return_set["displayScore"] is None or return_set["winnerId"] is None \
-                or return_set["displayScore"] == "Bye" or return_set["displayScore"] == "DQ":
-            return return_set
-
-        if len(return_set["entrants"]) != 2:
-            self.logger.log(f"WTF: Not 2 entrants {return_set}")
-            return return_set
-
-        winner = [x for x in return_set["entrants"] if str(return_set["winnerId"]) == str(x["id"])][0]
-        loser = [x for x in return_set["entrants"] if str(return_set["winnerId"]) != str(x["id"])][0]
-
-        if winner["initialSeedNum"] is None or loser["initialSeedNum"] is None:
-            return return_set
-
-        winner_round_seed = self.placement_to_round[winner["initialSeedNum"]]
-        loser_round_seed = self.placement_to_round[loser["initialSeedNum"]]
-
-        return_set["upsetFactor"] = abs(winner_round_seed - loser_round_seed)
-
-        if winner_round_seed > loser_round_seed:
-            return_set["isUpsetOrNotable"] = True
-
-        display_score = return_set["displayScore"]
-        display_score_end = display_score[:-2]
-
-        test_1 = (display_score.startswith(winner['name']) and not display_score.startswith(loser['name'])) or \
-                 (display_score_end.endswith(loser['name']) and not display_score_end.endswith(winner['name']))
-        test_2 = (display_score.startswith(loser['name']) and not display_score.startswith(winner['name'])) or \
-                 (display_score_end.endswith(winner['name']) and not display_score_end.endswith(loser['name']))
-
+        
         try:
-            if test_1 and test_2:
-                self.logger.log(f"WTF: Both Regex Matched {return_set}")
+            if return_set["displayScore"] is None or return_set["winnerId"] is None \
+                    or return_set["displayScore"] == "Bye" or return_set["displayScore"] == "DQ":
                 return return_set
-            elif test_1:
-                display_score = display_score.replace(f"{winner['name']} ", "", 1)
-                winner_score = display_score[:1]
-                loser_score = display_score[-1:]
-                return_set["detailedScore"] = {
-                    winner["id"]: winner_score,
-                    loser["id"]: loser_score
-                }
-            elif test_2:
-                display_score = display_score.replace(f"{loser['name']} ", "", 1)
-                loser_score = display_score[:1]
-                winner_score = display_score[-1:]
-                return_set["detailedScore"] = {
-                    winner["id"]: winner_score,
-                    loser["id"]: loser_score
-                }
-            else:
-                raise IndexError()
-        except IndexError:
-            self.logger.log(f"WTF: No Regex Matching {return_set}")
-            return return_set
 
-        if winner_round_seed == loser_round_seed:
-            return return_set
-        try:
-            if abs(int(winner_score) - int(loser_score)) == 1:
+            if len(return_set["entrants"]) != 2:
+                self.logger.log(f"WTF: Not 2 entrants {return_set}")
+                return return_set
+
+            winner = [x for x in return_set["entrants"] if str(return_set["winnerId"]) == str(x["id"])][0]
+            loser = [x for x in return_set["entrants"] if str(return_set["winnerId"]) != str(x["id"])][0]
+
+            if winner["initialSeedNum"] is None or loser["initialSeedNum"] is None:
+                return return_set
+
+            winner_round_seed = self.placement_to_round[winner["initialSeedNum"]]
+            loser_round_seed = self.placement_to_round[loser["initialSeedNum"]]
+
+            return_set["upsetFactor"] = abs(winner_round_seed - loser_round_seed)
+
+            if winner_round_seed > loser_round_seed:
                 return_set["isUpsetOrNotable"] = True
-                return return_set
-        except ValueError:
-            return return_set
 
-        return return_set
+            display_score = return_set["displayScore"]
+            display_score_end = display_score[:-2]
+
+            test_1 = (display_score.startswith(winner['name']) and not display_score.startswith(loser['name'])) or \
+                     (display_score_end.endswith(loser['name']) and not display_score_end.endswith(winner['name']))
+            test_2 = (display_score.startswith(loser['name']) and not display_score.startswith(winner['name'])) or \
+                     (display_score_end.endswith(winner['name']) and not display_score_end.endswith(loser['name']))
+
+            try:
+                if test_1 and test_2:
+                    self.logger.log(f"WTF: Both Regex Matched {return_set}")
+                    return return_set
+                elif test_1:
+                    display_score = display_score.replace(f"{winner['name']} ", "", 1)
+                    winner_score = display_score[:1]
+                    loser_score = display_score[-1:]
+                    return_set["detailedScore"] = {
+                        winner["id"]: winner_score,
+                        loser["id"]: loser_score
+                    }
+                elif test_2:
+                    display_score = display_score.replace(f"{loser['name']} ", "", 1)
+                    loser_score = display_score[:1]
+                    winner_score = display_score[-1:]
+                    return_set["detailedScore"] = {
+                        winner["id"]: winner_score,
+                        loser["id"]: loser_score
+                    }
+                else:
+                    raise IndexError()
+            except IndexError:
+                self.logger.log(f"WTF: No Regex Matching {return_set}")
+                return return_set
+
+            if winner_round_seed == loser_round_seed:
+                return return_set
+            try:
+                if abs(int(winner_score) - int(loser_score)) == 1:
+                    return_set["isUpsetOrNotable"] = True
+                    return return_set
+            except ValueError:
+                return return_set
+
+            return return_set
+        except:
+            return return_est
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
