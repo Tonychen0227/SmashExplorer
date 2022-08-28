@@ -319,15 +319,16 @@ class API:
         ]
 
     def __process_set(self, event_id, tournament_set):
-        if "phaseGroup" not in tournament_set:
+        if "phaseGroup" not in tournament_set or tournament_set["phaseGroup"] is None:
             tournament_set["phaseGroup"] = {
                 "id": "NONE",
                 "displayIdentifier": "NONE"
             }
-        if "phase" not in tournament_set["phaseGroup"]:
+
+        if "phase" not in tournament_set["phaseGroup"] or tournament_set["phaseGroup"]["phase"] is None:
             tournament_set["phaseGroup"]["phase"] = {
                 "bracketType": "NONE",
-                "phaseOrder": 0,
+                "phaseOrder": 1,
                 "name": "NONE",
                 "id": "NONE"
             }
