@@ -421,7 +421,7 @@ class API:
 
             return return_set
         except:
-            return return_est
+            return return_set
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
         query_string = '''
