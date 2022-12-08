@@ -173,6 +173,9 @@ class API:
 
         result = self.__call_api("Get single event", query_string, {"eventId": event_id})
 
+        if result is None:
+            return None
+        
         event = result["event"]
 
         if event is None:

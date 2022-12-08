@@ -11,7 +11,7 @@ if __name__ == '__main__':
     logger.log("Starting Backfill")
 
     events_count = 0
-    new_events = [768909]
+    new_events = [609074]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 1330
@@ -31,6 +31,7 @@ if __name__ == '__main__':
 
     events_size = len(new_events)
     for event_id in new_events:
+        event_id = str(event_id)
         events_count += 1
         logger.log(f"Backfill operation creating new events - {events_count} of {events_size}")
         existing_event = operations.get_event_from_db(event_id)

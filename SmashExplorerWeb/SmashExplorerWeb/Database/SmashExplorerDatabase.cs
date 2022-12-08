@@ -111,7 +111,14 @@ public class SmashExplorerDatabase
             return cachedEvent.Item2;
         }
 
-        Event result = await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
+        Event result;
+        try
+        {
+            result = await EventsContainer.ReadItemAsync<Event>(eventId, new PartitionKey(eventId));
+        } catch (CosmosException ce)
+        {
+            return null;
+        }
 
         if (result.TournamentOwner?.Id != null && BannedOwners.Contains(result.TournamentOwner.Id))
         {
