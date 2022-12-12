@@ -134,7 +134,7 @@ class OperationsManager:
             args = [heading, display_score]
 
             if set["round"] < 0:
-                args.append(f"{loser_entrant['name']} -> out @ {ordinal(set['lPlacement'])} in {set['phaseName']}")
+                args.append(f"{loser_entrant['name']} -> out @ {ordinal(set['lPlacement'])} in phase {set['phaseName']}")
 
             upset_thread_root = self.twitter.make_tweet(args, upset_thread_root)
 
