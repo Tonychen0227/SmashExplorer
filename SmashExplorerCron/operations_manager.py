@@ -17,6 +17,12 @@ class OperationsManager:
         self.logger = logger
         self.twitter = TwitterClient(logger)
 
+    def ensure_and_add_mutex(self, name_mutex):
+        return self.cosmos.ensure_and_add_mutex(name_mutex)
+
+    def remove_mutex(self, name_mutex):
+        return self.cosmos.remove_mutex(name_mutex)
+
     def get_all_events_from_db(self):
         return self.cosmos.get_all_events()
 

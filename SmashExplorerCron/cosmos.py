@@ -1,6 +1,7 @@
 import datetime
 
 from azure.cosmos import CosmosClient, exceptions
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 
 class CosmosDB:
@@ -10,7 +11,26 @@ class CosmosDB:
         self.events = self.database.get_container_client("Events")
         self.vanityLinks = self.database.get_container_client("VanityLinks")
         self.sets = self.database.get_container_client("Sets")
+        self.mutex = self.database.get_container_client("Mutex")
         self.logger = logger
+
+    def remove_mutex(self, name_mutex):
+        try:
+            self.mutex.delete_item(item=name_mutex, partition_key=name_mutex)
+        except CosmosResourceNotFoundError:
+            self.logger.log("Cannot delete mutex as it is already gone")
+            pass
+
+        return
+
+    def ensure_and_add_mutex(self, name_mutex):
+        try:
+            self.mutex.read_item(item=name_mutex, partition_key=name_mutex)
+        except CosmosResourceNotFoundError:
+            self.mutex.upsert_item(body={"id": name_mutex})
+            return True
+
+        return False
 
     # region Entrants
     def __upsert_entrant(self, entrant):
