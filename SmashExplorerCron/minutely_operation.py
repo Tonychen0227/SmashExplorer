@@ -1,4 +1,5 @@
 import os
+import time
 
 from logger import Logger
 from operations_manager import OperationsManager
@@ -7,7 +8,19 @@ from operations_manager import OperationsManager
 if __name__ == '__main__':
     logger = Logger(f"{os.environ['SMASH_EXPLORER_LOG_ROOT']}/minutely")
     operations = OperationsManager(logger)
+
+    file_name = "minutely.txt"
+
+    if os.path.exists(file_name):
+        logger.log("Quitting out because there is an ongoing minutely script")
+        exit()
+
     logger.log("Starting Minutely Script")
+    logger.log("Writing lock file")
+
+    f = open(file_name, "a")
+    f.write("Running")
+    f.close()
 
     event_count = 0
     event_ids = list(operations.get_active_event_ids())
@@ -22,4 +35,6 @@ if __name__ == '__main__':
         operations.get_and_create_entrants_for_event(event_id, created_event)
         operations.update_event_sets(event_id, created_event)
 
+    logger.log("Removing lock file")
+    os.remove(file_name)
     logger.log("Minutely Script Complete")
