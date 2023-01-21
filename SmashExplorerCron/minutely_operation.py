@@ -35,6 +35,18 @@ if __name__ == '__main__':
         operations.get_and_create_entrants_for_event(event_id, created_event)
         operations.update_event_sets(event_id, created_event)
 
-    logger.log("Removing lock file")
-    os.remove(file_name)
-    logger.log("Minutely Script Complete")
+    attempt = 0
+
+    while attempt < 5:
+        try:
+            logger.log(f"Removing lock file retry #{attempt}")
+            os.remove(file_name)
+            attempt += 1
+            time.sleep(1)
+        except OSError:
+            logger.log("Lock file successfully removed")
+            logger.log("Minutely Script Complete")
+            exit()
+
+    logger.log("Lock file not successfully removed")
+    exit()
