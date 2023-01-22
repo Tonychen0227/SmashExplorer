@@ -3,7 +3,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<script>
+    <script>
 var config = null;
 var chart = null;
 
@@ -186,6 +186,11 @@ function toggleLabel() {
     chart.update();
 }
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
 </head>
 <body>
     <div class="jumbotron">
@@ -204,23 +209,34 @@ function toggleLabel() {
         <div class="col-sm-12">
             <h3>Standings and SPR (Top 128 only)</h3>
             <div style="overflow-y: scroll; height: 500px; margin-top: 30px">
-                <table class="table table-hover">
-                    <tr>
-                        <th>Entrant</th>
-                        <th>Placement</th>
-                        <th>Seed</th>
-                        <th>SPR</th>
-                    </tr>
-                    @foreach (var dataPoint in Model.DataPoints)
-                    {
+                <table class="table table-hover sortable" id="sortTable">
+                    <thead>
                         <tr>
-                            <td>@dataPoint.Name</td>
-                            <td>@dataPoint.Placement</td>
-                            <td>@dataPoint.Seed</td>
-                            <td>@dataPoint.SPR</td>
+                            <th>Entrant</th>
+                            <th>Placement</th>
+                            <th>Seed</th>
+                            <th>SPR</th>
                         </tr>
-                    }
+                    </thead>
+                    <tbody>
+                        @foreach (var dataPoint in Model.DataPoints)
+                        {
+                            <tr>
+                                <td>@dataPoint.Name</td>
+                                <td>@dataPoint.Placement</td>
+                                <td>@dataPoint.Seed</td>
+                                <td>@dataPoint.SPR</td>
+                            </tr>
+                        }
+                    </tbody>
                 </table>
+                <script>
+                    $('#sortTable').dataTable({
+                        paging: false,
+                        searching: false,
+                        order: [[1, 'asc']],
+                    });
+                </script>
             </div>
         </div>
     }
