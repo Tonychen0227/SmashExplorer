@@ -160,6 +160,7 @@ class API:
               standings(query: {perPage: 128}) {
                 nodes {
                   placement
+                  isFinal
                   entrant {
                     name
                     initialSeedNum
