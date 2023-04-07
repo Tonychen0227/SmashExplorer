@@ -55,11 +55,12 @@
                     </tr>
                     @foreach (Event returnedEvent in Model.Events)
                     {
+                        var items = new List<string>() { returnedEvent.TournamentLocation.City, returnedEvent.TournamentLocation.AddrState, returnedEvent.TournamentLocation.CountryCode };
                         <tr>
                             <td>
                                 <a href="https://www.start.gg/@returnedEvent.Slug" target="_blank">@returnedEvent.TournamentName - @returnedEvent.Name</a>
                             </td>
-                            @if (returnedEvent.TournamentLocation.City == null)
+                            @if (items.Where(x => !string.IsNullOrEmpty(x)).Count() == 0)
                             {
                                 <td>
                                     No location
@@ -67,8 +68,9 @@
                             }
                             else
                             {
+                                
                                 <td>
-                                    @returnedEvent.TournamentLocation.City, @returnedEvent.TournamentLocation.AddrState, @returnedEvent.TournamentLocation.CountryCode
+                                    @string.Join(", ", items.Where(x => !string.IsNullOrEmpty(x)))
                                 </td>
                             }
                             <td>

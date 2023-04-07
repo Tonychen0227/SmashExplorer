@@ -25,7 +25,17 @@ class CosmosDB:
 
     def ensure_and_add_mutex(self, name_mutex):
         try:
-            self.mutex.read_item(item=name_mutex, partition_key=name_mutex)
+            mutex = self.mutex.read_item(item=name_mutex, partition_key=name_mutex)
+
+            date_now = datetime.datetime.now(datetime.timezone.utc)
+            cutoff_time = int((date_now - datetime.timedelta(minutes=10)).timestamp())
+            mutex_time = int(mutex["_ts"])
+
+            if mutex_time < cutoff_time:
+                self.logger.log("Removing mutex as it became stale!")
+                self.remove_mutex(name_mutex)
+                self.mutex.upsert_item(body={"id": name_mutex})
+                return True
         except CosmosResourceNotFoundError:
             self.mutex.upsert_item(body={"id": name_mutex})
             return True

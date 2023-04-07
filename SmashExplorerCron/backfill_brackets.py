@@ -14,7 +14,7 @@ if __name__ == '__main__':
     new_events = []
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
-        days_back = 2
+        days_back = 30
         days_forward = 1
 
         current_days_forward = days_back
@@ -36,7 +36,7 @@ if __name__ == '__main__':
         logger.log(f"Backfill operation creating new events - {events_count} of {events_size}")
         existing_event = operations.get_event_from_db(event_id)
 
-        if existing_event is not None and not hardcoded_events:
+        if existing_event is not None and not hardcoded_events and len(new_events) == 0:
             logger.log(f"Skipping existing event {event_id}")
             continue
         try:
