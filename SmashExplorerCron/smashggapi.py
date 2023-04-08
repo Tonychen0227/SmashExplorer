@@ -193,6 +193,11 @@ class API:
         if tournament["owner"]["player"] is not None and "gamerTag" in tournament["owner"]["player"]:
             tournament_owner["gamerTag"] = tournament["owner"]["player"]["gamerTag"]
 
+        standings = None
+
+        if event["standings"] is not None and "nodes" in event["standings"]:
+            standings = event["standings"]["nodes"]
+
         return {
                 "tournamentSlug": tournament["slug"],
                 "tournamentName": tournament["name"],
@@ -211,7 +216,7 @@ class API:
                 "updatedAt": event["updatedAt"],
                 "slug": event["slug"],
                 "numEntrants": event["numEntrants"],
-                "standings": event["standings"]["nodes"]
+                "standings": standings
             }
 
     def get_ult_tournament_events(self, tournament_slug):
