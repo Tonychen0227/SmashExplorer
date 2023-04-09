@@ -246,6 +246,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\EventAPIController.cs" />
+    <Compile Include="Controllers\FullEventAPIController.cs" />
     <Compile Include="Controllers\ScoreboardController.cs" />
     <Compile Include="Controllers\ExploreController.cs" />
     <Compile Include="Controllers\FAQController.cs" />
