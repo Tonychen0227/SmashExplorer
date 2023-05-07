@@ -319,7 +319,7 @@ class API:
                 "seeding": entrant["initialSeedNum"],
                 "additionalInfo": [
                     {
-                        "urls": [x for x in participant["user"]["authorizations"] if x is not None],
+                        "urls": [x for x in participant["user"]["authorizations"] if x is not None]  if participant["user"]["authorizations"] is not None else [],
                         "location": participant["user"]["location"]
                     } if participant["user"] is not None else None
                     for participant in entrant["participants"]
