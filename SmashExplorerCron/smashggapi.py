@@ -252,6 +252,7 @@ class API:
                   authorizations(types: [TWITTER, TWITCH]) {
                     url
                   }
+                  slug
                   address {
                     city
                     state
@@ -293,6 +294,7 @@ class API:
                         authorizations(types: [TWITTER, TWITCH]) {
                           url
                         }
+                        slug
                         location {
                           city
                           state
@@ -319,11 +321,15 @@ class API:
                 "seeding": entrant["initialSeedNum"],
                 "additionalInfo": [
                     {
-                        "urls": [x for x in participant["user"]["authorizations"] if x is not None]  if participant["user"]["authorizations"] is not None else [],
+                        "urls": [x for x in participant["user"]["authorizations"] if x is not None] if participant["user"]["authorizations"] is not None else [],
                         "location": participant["user"]["location"]
                     } if participant["user"] is not None else None
                     for participant in entrant["participants"]
-                ]
+                ],
+                "userSlugs": [x for x in [
+                    participant["user"]["slug"] if participant["user"] is not None else None
+                    for participant in entrant["participants"]
+                ] if x is not None],
             } for entrant in entrants
         ]
 
