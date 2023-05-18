@@ -6,11 +6,11 @@ from smashggapi import API
 from twitter_engine import TwitterClient
 
 class OperationsManager:
-    def __init__(self, logger):
+    def __init__(self, logger, env_keys="SMASHGG_KEYS"):
         endpoint = os.environ["COSMOS_ENDPOINT"]
         key = os.environ["COSMOS_KEY"]
         cosmos = CosmosDB(endpoint, key, logger)
-        api = API(os.environ["SMASHGG_KEYS"], logger)
+        api = API(os.environ[env_keys], logger)
 
         self.cosmos = cosmos
         self.api = api
@@ -62,8 +62,8 @@ class OperationsManager:
 
         return upcoming_event_ids
 
-    def update_event_sets(self, event_id, created_event, bypass_last_updated=False, disable_backfill=False):
-        current_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).timestamp())
+    def update_event_sets(self, event_id, created_event, bypass_last_updated=False, disable_backfill=False, lookback_duration_minutes=10):
+        current_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=lookback_duration_minutes)).timestamp())
 
         event = created_event
 

@@ -9,6 +9,7 @@ public class Entrant
     public int? Seeding { get; set; }
     public int? Standing { get; set; }
     public string EventId { get; set; }
+    public List<string> UserSlugs { get; set; }
     public List<EntrantInfo> AdditionalInfo { get; set; }
     public string PrereqId { get; set; }
     public string PrereqType { get; set; }

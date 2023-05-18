@@ -10,21 +10,11 @@ namespace SmashExplorerWeb.Controllers
     public class FullEventAPIController : Controller
     {
         private Dictionary<string, Tuple<DateTime, ExploreModel>> Cache = new Dictionary<string, Tuple<DateTime, ExploreModel>>();
-        private static readonly int CacheTTLSeconds = 86400;
+        private static readonly int CacheTTLSeconds = 0;
 
         [HttpGet]
         public async Task<ActionResult> Index(string id)
         {
-            List<string> allowlistedIds = new List<string>()
-            {
-                "850303", "769488"
-            };
-
-            if (!allowlistedIds.Contains(id))
-            {
-                return HttpNotFound();
-            }
-
             if (Cache.ContainsKey(id) && DateTime.UtcNow - Cache[id].Item1 < TimeSpan.FromSeconds(CacheTTLSeconds))
             {
                 return Content(JsonConvert.SerializeObject(Cache[id].Item2), "application/json");
