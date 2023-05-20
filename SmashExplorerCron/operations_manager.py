@@ -173,11 +173,11 @@ class OperationsManager:
 
         return self.cosmos.create_event(event)
 
-    def get_and_create_entrants_for_event(self, event_id, created_event, is_minutely_operation=True):
+    def get_and_create_entrants_for_event(self, event_id, created_event, is_minutely_operation=True, cooldown_duration_minutes=10):
         event = created_event
 
         if event["state"] == "ACTIVE" or is_minutely_operation:
-            start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=10)).timestamp())
+            start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=cooldown_duration_minutes)).timestamp())
         else:
             start_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=8)).timestamp())
 

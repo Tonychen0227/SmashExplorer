@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
         try:
             created_event = operations.get_and_create_event(event_id)
-            operations.get_and_create_entrants_for_event(event_id, created_event)
+            operations.get_and_create_entrants_for_event(event_id, created_event, cooldown_duration_minutes=2)
             operations.update_event_sets(event_id, created_event, bypass_last_updated=False, lookback_duration_minutes=30)
         except:
             traceback.print_exc()
