@@ -13,14 +13,18 @@ if __name__ == '__main__':
     phrase = "has been deleted"
 
     root_dir = "/home/azureuser/logs/daily"
+    removed_events = []
     for x in os.listdir(root_dir):
         with open(f"{root_dir}/{x}") as f:
             f = f.readlines()
 
         for line in f:
             if phrase in line:
-                print(line.split(" ")[5])
-                break
+                event_id = line.split(" ")[4]
+                removed_events.append(event_id)
+                print(f"Event ID {event_id} recovered")
+
+    print(removed_events)
 
     exit()
     events_count = 0
