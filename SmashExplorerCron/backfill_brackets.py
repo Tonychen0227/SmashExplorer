@@ -10,7 +10,16 @@ if __name__ == '__main__':
     operations = OperationsManager(logger, "SMASHGG_KEYS_BOBC")
     logger.log("Starting Backfill")
 
-    print(os.listdir("backfill"))
+    phrase = "has been deleted"
+    for x in os.listdir("backfill"):
+        with open(x) as f:
+            f = f.readlines()
+
+        for line in f:
+            if phrase in line:
+                print(line)
+                break
+
     exit()
     events_count = 0
     new_events = []
