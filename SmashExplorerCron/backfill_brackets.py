@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     phrase = "has been deleted"
 
-    root_dir = "/home/aszureuser/logs/daily"
+    root_dir = "/home/azureuser/logs/daily"
     for x in os.listdir(root_dir):
         with open(f"{root_dir}/{x}") as f:
             f = f.readlines()
