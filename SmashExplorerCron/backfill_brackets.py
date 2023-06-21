@@ -16,6 +16,7 @@ if __name__ == '__main__':
             f = f.readlines()
 
         for line in f:
+            print(line)
             if phrase in line:
                 print(line)
                 break
