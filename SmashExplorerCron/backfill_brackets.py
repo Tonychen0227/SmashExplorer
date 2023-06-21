@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
         for line in f:
             if phrase in line:
-                print(line)
+                print(line[6:6])
                 break
 
     exit()
