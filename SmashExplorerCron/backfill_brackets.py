@@ -11,8 +11,10 @@ if __name__ == '__main__':
     logger.log("Starting Backfill")
 
     phrase = "has been deleted"
-    for x in os.listdir("backfill"):
-        with open(f"backfill/{x}") as f:
+
+    root_dir = "/home/aszureuser/logs/daily"
+    for x in os.listdir(root_dir):
+        with open(f"{root_dir}/{x}") as f:
             f = f.readlines()
 
         for line in f:
