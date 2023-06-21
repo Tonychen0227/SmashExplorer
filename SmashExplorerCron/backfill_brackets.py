@@ -26,9 +26,8 @@ if __name__ == '__main__':
 
     print(removed_events)
 
-    exit()
     events_count = 0
-    new_events = []
+    new_events = removed_events
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 5
