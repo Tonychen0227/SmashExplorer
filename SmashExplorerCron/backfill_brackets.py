@@ -10,12 +10,14 @@ if __name__ == '__main__':
     operations = OperationsManager(logger, "SMASHGG_KEYS_BOBC")
     logger.log("Starting Backfill")
 
+    print(os.listdir("backfill"))
+    exit()
     events_count = 0
     new_events = []
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
-        days_back = 900
-        days_forward = 500
+        days_back = 5
+        days_forward = -15
 
         current_days_forward = days_back
         increment = 100
