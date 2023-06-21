@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     phrase = "has been deleted"
     for x in os.listdir("backfill"):
-        with open(x) as f:
+        with open(f"backfill/{x}") as f:
             f = f.readlines()
 
         for line in f:
