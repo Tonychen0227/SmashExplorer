@@ -10,24 +10,8 @@ if __name__ == '__main__':
     operations = OperationsManager(logger, "SMASHGG_KEYS_BOBC")
     logger.log("Starting Backfill")
 
-    phrase = "has been deleted"
-
-    root_dir = "/home/azureuser/logs/daily"
-    removed_events = []
-    for x in os.listdir(root_dir):
-        with open(f"{root_dir}/{x}") as f:
-            f = f.readlines()
-
-        for line in f:
-            if phrase in line:
-                event_id = line.split(" ")[4]
-                removed_events.append(event_id)
-                print(f"Event ID {event_id} recovered")
-
-    print(removed_events)
-
     events_count = 0
-    new_events = removed_events
+    new_events = [829437]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 5

@@ -106,7 +106,7 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, Event> cachedEvent = EventsCache[eventId];
 
-        if (DateTime.UtcNow - cachedEvent.Item1 < TimeSpan.FromSeconds(EventsCacheTTLSeconds))
+        if (DateTime.UtcNow - cachedEvent.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : EventsCacheTTLSeconds))
         {
             return cachedEvent.Item2;
         }
@@ -167,7 +167,7 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, List<Entrant>> cachedEntrants = EntrantsCache[eventId];
 
-        if (DateTime.UtcNow - cachedEntrants.Item1 < TimeSpan.FromSeconds(EntrantsCacheTTLSeconds))
+        if (DateTime.UtcNow - cachedEntrants.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : EntrantsCacheTTLSeconds))
         {
             return cachedEntrants.Item2;
         }
@@ -200,7 +200,7 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, List<Set>> cachedSets = SetsCache[eventId];
 
-        if (DateTime.UtcNow - cachedSets.Item1 < TimeSpan.FromSeconds(SetsCacheTTLSeconds))
+        if (DateTime.UtcNow - cachedSets.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : SetsCacheTTLSeconds))
         {
             return cachedSets.Item2;
         }
@@ -280,7 +280,7 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, IEnumerable<Upset>> cachedUpsets = UpsetsCache[eventId];
 
-        if (DateTime.UtcNow - cachedUpsets.Item1 < TimeSpan.FromSeconds(UpsetsCacheTTLSeconds))
+        if (DateTime.UtcNow - cachedUpsets.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : UpsetsCacheTTLSeconds))
         {
             return cachedUpsets.Item2;
         }

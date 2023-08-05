@@ -9,7 +9,7 @@ SMASH_MELEE_GAME_ID = 1
 RIVALS_OF_AETHER_ID = 24
 SMASH_ULTIMATE_GAME_ID = 1386
 
-KEY_PLACEMENTS = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097]
+KEY_PLACEMENTS = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193]
 
 
 class API:
@@ -347,6 +347,9 @@ class API:
                 "name": "NONE",
                 "id": "NONE"
             }
+
+        startedAt = tournament_set["startedAt"]
+        completedAt = tournament_set["completedAt"]
             
         return_set = {
             "id": str(tournament_set["id"]),
@@ -356,6 +359,7 @@ class API:
             "winnerId": str(tournament_set["winnerId"]),
             "round": tournament_set["round"],
             "createdAt": tournament_set["createdAt"],
+            "startedAt": tournament_set["startedAt"],
             "completedAt": tournament_set["completedAt"],
             "wPlacement": tournament_set["wPlacement"],
             "lPlacement": tournament_set["lPlacement"],
@@ -449,7 +453,8 @@ class API:
                 return return_set
 
             return return_set
-        except:
+        except Exception as e:
+            self.logger.log(f"WTF: Shit Happened {return_set['id']}")
             return return_set
 
     def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
@@ -470,6 +475,7 @@ class API:
                     displayScore
                     winnerId
                     completedAt
+                    startedAt
                     createdAt
                     round
                     wPlacement
