@@ -56,7 +56,7 @@ public class SmashExplorerDatabase
 
         PlacementToRounds = new Dictionary<int, int>();
 
-        var keyPlacements = new List<int>() { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097 };
+        var keyPlacements = new List<int>() { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193 };
 
         for (var index = 0; index < keyPlacements.Count - 1; index++)
         {
