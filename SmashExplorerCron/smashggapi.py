@@ -340,6 +340,15 @@ class API:
                 "displayIdentifier": "NONE"
             }
 
+        if "station" not in tournament_set or tournament_set["station"] is None:
+            tournament_set["station"] = {
+                "number": -1,
+                "identifier": -1,
+                "prefix": "NONE",
+                "clusterPrefix": -1,
+                "clusterNumber": "NONE"
+            }
+
         if "phase" not in tournament_set["phaseGroup"] or tournament_set["phaseGroup"]["phase"] is None:
             tournament_set["phaseGroup"]["phase"] = {
                 "bracketType": "NONE",
@@ -370,6 +379,13 @@ class API:
             "phaseName": tournament_set["phaseGroup"]["phase"]["name"],
             "phaseId": tournament_set["phaseGroup"]["phase"]["id"],
             "games": tournament_set["games"],
+            "station": {
+                "number": tournament_set["station"]["number"],
+                "identifier": tournament_set["station"]["identifier"],
+                "prefix": tournament_set["station"]["prefix"],
+                "clusterPrefix": tournament_set["station"]["clusterPrefix"],
+                "clusterNumber": tournament_set["station"]["clusterNumber"]
+            },
             "entrants":
                 [
                     {
@@ -503,6 +519,13 @@ class API:
                         bracketType
                         id
                       }
+                    }
+                    station {
+                      identifier
+                      number
+                      prefix
+                      clusterNumber
+                      clusterPrefix
                     }
                     slots {
                       entrant{
