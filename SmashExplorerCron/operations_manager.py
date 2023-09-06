@@ -132,8 +132,8 @@ class OperationsManager:
 
             heading = f"UPSET FACTOR {set['upsetFactor']} - {'LOSERS' if set['round'] < 0 else 'WINNERS'} {set['phaseName']}"
 
-            display_score = f"{winner_display} ({winner_entrant['seeding']}) {detailed_score[winner_entrant['id']]} - " \
-                            f"{detailed_score[loser_id]} {loser_entrant['name']} ({loser_entrant['seeding']})"
+            display_score = f"{winner_display} ({winner_entrant['initialSeedNum']}) {detailed_score[winner_entrant['id']]} - " \
+                            f"{detailed_score[loser_id]} {loser_entrant['name']} ({loser_entrant['initialSeedNum']})"
 
             args = [heading, display_score]
 

@@ -318,7 +318,7 @@ class API:
                 "standing": None if entrant["standing"] is None else entrant["standing"]["placement"],
                 "id": str(entrant["id"]),
                 "isDisqualified": entrant["isDisqualified"],
-                "seeding": entrant["initialSeedNum"],
+                "initialSeedNum": entrant["initialSeedNum"],
                 "additionalInfo": [
                     {
                         "urls": [x for x in participant["user"]["authorizations"] if x is not None] if participant["user"]["authorizations"] is not None else [],
