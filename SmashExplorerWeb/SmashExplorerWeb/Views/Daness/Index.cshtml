@@ -1,0 +1,89 @@
+﻿@model DanessModel
+
+<script>
+    function foo(element) {
+        console.log(element);
+
+        if (element.id == "#0") {
+            console.log("Dantotto is stupid");
+            return;
+        }
+
+        var currentStreamElement = document.getElementById("#0");
+        console.log("Stream element")
+        console.log(currentStreamElement);
+
+        console.log("Setting", element.id, "to stream");
+        console.log("Setting stream to", element.id);
+
+        currentStreamElement.id = element.id;
+        element.id = "#0";
+        element.innerHTML = "<img src=\"/Content/twitch.png\" alt=\"Twitch\" style=\"height:15px;width:15px\" />";
+        currentStreamElement.innerHTML = "Station " + currentStreamElement.id.substring(1);
+    }
+</script>
+<div class="jumbotron">
+    <h1>Microspacing Swiss Thing</h1>
+</div> 
+<h3>Last Completed <b>Swiss Round @Model.LastCompletedSwissRound</b>; Current <b>@(Model.LastCompletedSwissRound == 5 ? "Bracket Stage" : "Swiss Round " + (Model.LastCompletedSwissRound + 1).ToString())</b></h3>
+<h3>Pairings</h3>
+@{  var currentStationNumber = 0;
+    foreach (var key in Model.Pairings.Keys) {
+
+    <h4>@key Wins</h4>
+    <table class="table">
+        @foreach (var pairing in Model.Pairings[key])
+        {
+            var streamString = currentStationNumber == 0 ?
+                "<img src=\"~/Content/twitch.png\" alt=\"Twitch\" style=\"height:20px;width:20px\" />" : $"Station {currentStationNumber}";
+            <tr>
+                @if (currentStationNumber == 0) { 
+                    <td id="#@currentStationNumber" onclick="foo(this)"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px" /></td>
+                } else { 
+                    <td id="#@currentStationNumber" onclick="foo(this)">@streamString</td>
+                }
+                <td>@($"{pairing.Item1.Name} (Seed {pairing.Item1.Seeds.First().SeedNum})")</td>
+                <td>@($"{pairing.Item2.Name} (Seed {pairing.Item2.Seeds.First().SeedNum})")</td>
+            </tr>
+            currentStationNumber++;
+        }
+    </table>
+}}
+<h3>Seeding will become scuffed! Here's original seeding.</h3>
+<table class="table">
+    <tr>
+        <th>Seed</th>
+        <th>Entrant</th>
+    </tr>
+    @{ 
+        foreach (var cachedSeed in Model.CachedEntrantSeeding.OrderBy(x => x.Value.Seeding))
+            {
+                <tr>
+                    <td>@cachedSeed.Value.Seeding</td>
+                    <td>@cachedSeed.Value.Name</td>
+                </tr>
+            }
+    }
+</table>
+<h3>All Matches</h3>
+<table class="table">
+    <tr>
+        <th>Set ID</th>
+        <th>Winner</th>
+        <th>Swiss Round</th>
+        <th>Player1</th>
+        <th>Player2</th>
+    </tr>
+    @{
+        foreach (var set in Model.StartGGEventResponse.Event.Sets.Nodes.OrderBy(x => x.Round).ThenBy(x => x.Slots.First().Entrant.Seeds.First().SeedNum))
+        {
+        <tr>
+            <td>@set.Id</td>
+            <td>@(set.WinnerId != null ? (set.WinnerId == set.Slots[0].Entrant.Id ? set.Slots[0].Entrant.Name : set.Slots[1].Entrant.Name) : "")</td>
+            <td>@set.Round</td>
+            <td>@($"{set.Slots[0].Entrant.Name} (Seed {set.Slots[0].Entrant.Seeds.First().SeedNum})") </td>
+            <td>@($"{set.Slots[1].Entrant.Name} (Seed {set.Slots[1].Entrant.Seeds.First().SeedNum})") </td>
+        </tr>
+        }
+    }
+</table>

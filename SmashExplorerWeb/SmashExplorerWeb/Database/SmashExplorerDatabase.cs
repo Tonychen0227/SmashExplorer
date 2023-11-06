@@ -12,6 +12,7 @@ public class SmashExplorerDatabase
     private readonly Container VanityLinksContainer;
     private readonly Container EventsContainer;
     private readonly Container ScoreboardsContainer;
+    private readonly Container DanessSeedingContainer;
 
     public static Dictionary<int, int> PlacementToRounds;
 
@@ -31,6 +32,8 @@ public class SmashExplorerDatabase
 
     private Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>>();
     private static readonly int UpsetsCacheTTLSeconds = 120;
+
+    private Dictionary<string, Dictionary<string, (string Name, int Seeding)>> CachedEntrantSeedingCache = new Dictionary<string, Dictionary<string, (string Name, int Seeding)>>();
 
     private static readonly List<int> BannedOwners = new List<int>() { 1819468 };
 
@@ -53,6 +56,7 @@ public class SmashExplorerDatabase
         VanityLinksContainer = GetContainer("VanityLinks");
         EventsContainer = GetContainer("Events");
         ScoreboardsContainer = GetContainer("Scoreboards");
+        DanessSeedingContainer = GetContainer("DanessSeedingContainer");
 
         PlacementToRounds = new Dictionary<int, int>();
 
@@ -128,6 +132,51 @@ public class SmashExplorerDatabase
         EventsCache[eventId] = Tuple.Create(DateTime.UtcNow, result);
 
         return result;
+    }
+
+    public async Task<Dictionary<string, (string Name, int Seeding)>> GetCachedEntrantSeeding(string eventId)
+    {
+        if (CachedEntrantSeedingCache.ContainsKey(eventId))
+        {
+            return CachedEntrantSeedingCache[eventId];
+        }
+
+        DanessEntrantSeeding result;
+        try
+        {
+            result = await DanessSeedingContainer.ReadItemAsync<DanessEntrantSeeding>(eventId, new PartitionKey(eventId));
+        }
+        catch (CosmosException)
+        {
+            return null;
+        }
+
+        CachedEntrantSeedingCache[eventId] = result.CachedEntrantSeeding;
+
+        return CachedEntrantSeedingCache[eventId];
+    }
+
+    public async Task<Dictionary<string, (string Name, int Seeding)>> UpsertDanessSeeding(string eventId, Dictionary<string, (string Name, int Seeding)> cachedEntrantSeeding)
+    {
+        DanessEntrantSeeding result;
+        try
+        {
+            var danessSeeding = new DanessEntrantSeeding()
+            {
+                Id = eventId,
+                CachedEntrantSeeding = cachedEntrantSeeding
+            };
+
+            result = await DanessSeedingContainer.CreateItemAsync(danessSeeding, new PartitionKey(eventId));
+        }
+        catch (CosmosException)
+        {
+            return cachedEntrantSeeding;
+        }
+
+        CachedEntrantSeedingCache[eventId] = cachedEntrantSeeding;
+
+        return cachedEntrantSeeding;
     }
 
     public async Task<List<Event>> GetEventsBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
