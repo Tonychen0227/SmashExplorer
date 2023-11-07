@@ -1,68 +1,111 @@
 ﻿@model DanessModel
 
 <script>
-    function foo(element) {
-        console.log(element);
+    function setStreamElement(newStreamElement) {
+        var currentSetupNumber = 1;
+        for (var index = 0; index <= 16; index++) {
+            var elementId = "#" + index;
+            var currentElement = document.getElementById(elementId);
 
-        if (element.id == "#0") {
-            console.log("Dantotto is stupid");
-            return;
+            if (currentElement == null) {
+                continue;
+            }
+
+            if (elementId == newStreamElement.id) {
+                currentElement.innerHTML = "<img src=\"/Content/twitch.png\" alt=\"Twitch\" style=\"height:15px;width:15px\" />";
+            } else {
+                currentElement.innerHTML = "Station " + currentSetupNumber;
+                currentSetupNumber++;
+            }
         }
-
-        var currentStreamElement = document.getElementById("#0");
-        console.log("Stream element")
-        console.log(currentStreamElement);
-
-        console.log("Setting", element.id, "to stream");
-        console.log("Setting stream to", element.id);
-
-        currentStreamElement.id = element.id;
-        element.id = "#0";
-        element.innerHTML = "<img src=\"/Content/twitch.png\" alt=\"Twitch\" style=\"height:15px;width:15px\" />";
-        currentStreamElement.innerHTML = "Station " + currentStreamElement.id.substring(1);
     }
 </script>
 <div class="jumbotron">
     <h1>Microspacing Swiss Thing</h1>
-</div> 
+</div>
 <h3>Last Completed <b>Swiss Round @Model.LastCompletedSwissRound</b>; Current <b>@(Model.LastCompletedSwissRound == 5 ? "Bracket Stage" : "Swiss Round " + (Model.LastCompletedSwissRound + 1).ToString())</b></h3>
-<h3>Pairings</h3>
-@{  var currentStationNumber = 0;
-    foreach (var key in Model.Pairings.Keys) {
 
-    <h4>@key Wins</h4>
-    <table class="table">
-        @foreach (var pairing in Model.Pairings[key])
+<h3>Pairings</h3>
+<table class="table">
+    @{
+        var currentStationNumber = 0;
+        foreach (var key in Model.Pairings.Keys)
         {
-            var streamString = currentStationNumber == 0 ?
-                "<img src=\"~/Content/twitch.png\" alt=\"Twitch\" style=\"height:20px;width:20px\" />" : $"Station {currentStationNumber}";
-            <tr>
-                @if (currentStationNumber == 0) { 
-                    <td id="#@currentStationNumber" onclick="foo(this)"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px" /></td>
-                } else { 
-                    <td id="#@currentStationNumber" onclick="foo(this)">@streamString</td>
+            foreach (var pairing in Model.Pairings[key])
+            {
+                var streamString = currentStationNumber == 0 ?
+                    "<img src=\"~/Content/twitch.png\" alt=\"Twitch\" style=\"height:20px;width:20px\" />" : $"Station {currentStationNumber}";
+                <tr>
+                    @if (currentStationNumber == 0)
+                    {
+                        <td id="#@currentStationNumber" onclick="setStreamElement(this)"><img src="~/Content/twitch.png" alt="Twitch" style="height:20px;width:20px" /></td>
+                    }
+                    else
+                    {
+                        <td id="#@currentStationNumber" onclick="setStreamElement(this)">@streamString</td>
+                    }
+                    <td>@($"{pairing.Item1.Name} (Seed {pairing.Item1.Seeds.First().SeedNum})")</td>
+                    <td>@($"{pairing.Item2.Name} (Seed {pairing.Item2.Seeds.First().SeedNum})")</td>
+                </tr>
+                currentStationNumber++;
+            }
+        }}
+</table>
+
+@if (Model.LastCompletedSwissRound == 5)
+{
+    <h3>Standings to be finalized after Swiss</h3>
+    <table class="table">
+        @{
+            foreach (var key in Model.Pairings.Keys)
+            {
+                var seedingList = new List<Tuple<int, int>> {
+                    new Tuple<int, int>(1, 16),
+                    new Tuple<int, int>(8, 9),
+                    new Tuple<int, int>(4, 13),
+                    new Tuple<int, int>(5, 12),
+                    new Tuple<int, int>(2, 15),
+                    new Tuple<int, int>(7, 10),
+                    new Tuple<int, int>(3, 14),
+                    new Tuple<int, int>(6, 11)};
+                var entrantsBySeed = new Dictionary<int, StartGGEntrant>();
+
+                foreach (var pairing in Model.Pairings[key].Select((item, index) => new Tuple<Tuple<StartGGEntrant, StartGGEntrant>, int>(new Tuple<StartGGEntrant, StartGGEntrant>(item.Item1, item.Item2), index))) {
+                    if (key == 420) {
+                        entrantsBySeed[seedingList[pairing.Item2].Item1] = pairing.Item1.Item1;
+                        entrantsBySeed[seedingList[pairing.Item2].Item2] = pairing.Item1.Item2;
+                    } else {
+                        entrantsBySeed[seedingList[pairing.Item2].Item1 + 16] = pairing.Item1.Item1;
+                        entrantsBySeed[seedingList[pairing.Item2].Item2 + 16] = pairing.Item1.Item2;
+                    }
                 }
-                <td>@($"{pairing.Item1.Name} (Seed {pairing.Item1.Seeds.First().SeedNum})")</td>
-                <td>@($"{pairing.Item2.Name} (Seed {pairing.Item2.Seeds.First().SeedNum})")</td>
-            </tr>
-            currentStationNumber++;
+
+                foreach (var seeding in entrantsBySeed.Keys.OrderBy(x => x)) {
+                    <tr>
+                        <td>@seeding</td>
+                        <td>@entrantsBySeed[seeding].Name</td>
+                    </tr>
+                }
+            }
         }
     </table>
-}}
+}
+
+
 <h3>Seeding will become scuffed! Here's original seeding.</h3>
 <table class="table">
     <tr>
         <th>Seed</th>
         <th>Entrant</th>
     </tr>
-    @{ 
+    @{
         foreach (var cachedSeed in Model.CachedEntrantSeeding.OrderBy(x => x.Value.Seeding))
-            {
-                <tr>
-                    <td>@cachedSeed.Value.Seeding</td>
-                    <td>@cachedSeed.Value.Name</td>
-                </tr>
-            }
+        {
+            <tr>
+                <td>@cachedSeed.Value.Seeding</td>
+                <td>@cachedSeed.Value.Name</td>
+            </tr>
+        }
     }
 </table>
 <h3>All Matches</h3>
@@ -77,13 +120,13 @@
     @{
         foreach (var set in Model.StartGGEventResponse.Event.Sets.Nodes.OrderBy(x => x.Round).ThenBy(x => x.Slots.First().Entrant.Seeds.First().SeedNum))
         {
-        <tr>
-            <td>@set.Id</td>
-            <td>@(set.WinnerId != null ? (set.WinnerId == set.Slots[0].Entrant.Id ? set.Slots[0].Entrant.Name : set.Slots[1].Entrant.Name) : "")</td>
-            <td>@set.Round</td>
-            <td>@($"{set.Slots[0].Entrant.Name} (Seed {set.Slots[0].Entrant.Seeds.First().SeedNum})") </td>
-            <td>@($"{set.Slots[1].Entrant.Name} (Seed {set.Slots[1].Entrant.Seeds.First().SeedNum})") </td>
-        </tr>
+            <tr>
+                <td>@set.Id</td>
+                <td>@(set.WinnerId != null ? (set.WinnerId == set.Slots[0].Entrant.Id ? set.Slots[0].Entrant.Name : set.Slots[1].Entrant.Name) : "")</td>
+                <td>@set.Round</td>
+                <td>@($"{set.Slots[0].Entrant.Name} (Seed {set.Slots[0].Entrant.Seeds.First().SeedNum})") </td>
+                <td>@($"{set.Slots[1].Entrant.Name} (Seed {set.Slots[1].Entrant.Seeds.First().SeedNum})") </td>
+            </tr>
         }
     }
 </table>

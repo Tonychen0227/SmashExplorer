@@ -177,7 +177,6 @@ namespace SmashExplorerWeb.Controllers
 
         private List<(StartGGEntrant, StartGGEntrant)> GetSwissPairings(List<StartGGEntrant> entrants, Dictionary<string, List<string>> entrantOpponents)
         {
-            var currentPairings = new List<(StartGGEntrant, StartGGEntrant)>();
             var entrantsToOrderMap = new Dictionary<string, int>();
 
             for (var currentIndex = 0; currentIndex < entrants.Count; currentIndex++)
@@ -185,41 +184,93 @@ namespace SmashExplorerWeb.Controllers
                 entrantsToOrderMap[entrants[currentIndex].Id] = currentIndex;
             }
 
+            var firstHalfEntrants = entrants.OrderBy(x => x.Seeds.First().SeedNum).Take(entrants.Count / 2);
+            var secondHalfEntrants = entrants.OrderByDescending(x => x.Seeds.First().SeedNum).Take(entrants.Count / 2);
+
             var count = entrants.Count();
-
-            var eligiblePairings = new Dictionary<string, List<StartGGEntrant>>();
-
             var averageDistance = count / 2;
+            var random = new Random();
 
-            foreach (var entrant in entrants)
+            var validPairingSets = new List<List<(StartGGEntrant, StartGGEntrant)>>();
+
+            for (var x = 0; x < 500; x++)
             {
-                eligiblePairings[entrant.Id] = entrants
-                    .Where(x => !entrantOpponents[x.Id].Contains(x.Id))
-                    .OrderBy(x => Math.Abs(Math.Abs(entrantsToOrderMap[x.Id] - entrantsToOrderMap[entrant.Id]) - averageDistance)).ToList();
-            }
+                var currentPairings = new List<(StartGGEntrant, StartGGEntrant)>();
+                var eligiblePairings = new Dictionary<string, List<StartGGEntrant>>();
 
-            while (eligiblePairings.Count > 0)
-            {
-                var nextPair = eligiblePairings
-                    .OrderBy(x => x.Value.Count)
-                    .ThenByDescending(x => Math.Abs(Math.Abs(entrantsToOrderMap[x.Key] - entrantsToOrderMap[x.Value.First().Id]) - averageDistance))
-                    .First();
-
-                var nextPairEntrant = entrants.Where(x => x.Id == nextPair.Key).First();
-                var toPair = nextPair.Value.First();
-
-                currentPairings.Add((nextPairEntrant, toPair));
-                eligiblePairings.Remove(nextPairEntrant.Id);
-                eligiblePairings.Remove(toPair.Id);
-
-                foreach (var eligiblePairing in eligiblePairings)
+                foreach (var firstHalfEntrant in firstHalfEntrants)
                 {
-                    eligiblePairing.Value.Remove(nextPairEntrant);
-                    eligiblePairing.Value.Remove(toPair);
+                    eligiblePairings[firstHalfEntrant.Id] = secondHalfEntrants.Where(e => !entrantOpponents[firstHalfEntrant.Id].Contains(e.Id)).ToList();
+                    if (eligiblePairings[firstHalfEntrant.Id].Count == 0)
+                    {
+                        eligiblePairings[firstHalfEntrant.Id] = firstHalfEntrants.Where(e => !entrantOpponents[firstHalfEntrant.Id].Contains(e.Id) && e.Id != firstHalfEntrant.Id).ToList();
+                    }
+                }
+
+                foreach (var secondHalfEntrant in secondHalfEntrants)
+                {
+                    eligiblePairings[secondHalfEntrant.Id] = firstHalfEntrants.Where(e => !entrantOpponents[secondHalfEntrant.Id].Contains(e.Id)).ToList();
+                    if (eligiblePairings[secondHalfEntrant.Id].Count == 0)
+                    {
+                        eligiblePairings[secondHalfEntrant.Id] = secondHalfEntrants.Where(e => !entrantOpponents[secondHalfEntrant.Id].Contains(e.Id) && e.Id != secondHalfEntrant.Id).ToList();
+                    }
+                }
+
+                while (eligiblePairings.Count > 0)
+                {
+                    var leftEntrantId = eligiblePairings.Keys.ToList()[random.Next(eligiblePairings.Keys.Count)];
+
+                    if (eligiblePairings.Any(pairings => pairings.Value.Count == 1))
+                    {
+                        leftEntrantId = eligiblePairings.First(pairings => pairings.Value.Count == 1).Key;
+                    }
+
+                    var leftEntrantEligiblePairings = eligiblePairings[leftEntrantId];
+
+                    if (leftEntrantEligiblePairings.Count == 0)
+                    {
+                        break;
+                    }
+
+                    var rightEntrantId = leftEntrantEligiblePairings[random.Next(leftEntrantEligiblePairings.Count)].Id;
+
+                    var leftEntrant = entrants.Where(e => e.Id == leftEntrantId).First();
+                    var rightEntrant = entrants.Where(e => e.Id == rightEntrantId).First();
+
+                    if (leftEntrant.Seeds.First().SeedNum > rightEntrant.Seeds.First().SeedNum)
+                    {
+                        currentPairings.Add((rightEntrant, leftEntrant));
+                    } else
+                    {
+                        currentPairings.Add((leftEntrant, rightEntrant));
+                    }
+
+                    eligiblePairings.Remove(leftEntrant.Id);
+                    eligiblePairings.Remove(rightEntrant.Id);
+
+                    foreach (var eligiblePairing in eligiblePairings)
+                    {
+                        eligiblePairing.Value.Remove(leftEntrant);
+                        eligiblePairing.Value.Remove(rightEntrant);
+                    }
+                }
+
+                if (eligiblePairings.Count == 0)
+                {
+                    validPairingSets.Add(currentPairings);
                 }
             }
 
-            return currentPairings.OrderBy(x => x.Item1.Seeds.First().SeedNum).ToList();
+            Func<List<(StartGGEntrant, StartGGEntrant)>, double> minimumGap = (pairingSet) =>
+            {
+                return pairingSet.Select(x => Math.Abs(entrantsToOrderMap[x.Item1.Id] - entrantsToOrderMap[x.Item2.Id])).ToList().Min();
+            };
+
+            return validPairingSets
+                .OrderByDescending(set => minimumGap(set))
+                .First()
+                .OrderBy(x => x.Item1.Seeds.First().SeedNum)
+                .ToList();
         }
 
         private List<(StartGGEntrant, StartGGEntrant)> GetBracketPairings(List<StartGGEntrant> entrants, Dictionary<string, List<string>> entrantOpponents)
