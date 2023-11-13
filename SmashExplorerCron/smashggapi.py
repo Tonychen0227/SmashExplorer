@@ -147,6 +147,7 @@ class API:
                   }
                   name
                 }
+                id
                 addrState
                 city
                 countryCode
@@ -199,6 +200,7 @@ class API:
             standings = event["standings"]["nodes"]
 
         return {
+                "tournamentId": tournament["id"],
                 "tournamentSlug": tournament["slug"],
                 "tournamentName": tournament["name"],
                 "tournamentOwner": tournament_owner,
