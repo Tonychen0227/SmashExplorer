@@ -67,3 +67,65 @@ public class StartGGEventPhase
     public string Name { get; set; }
     public string Id { get; set; }
 }
+
+public class StartGGVideogameResponse
+{
+    public StartGGVideogame Videogame { get; set; }
+}
+
+public class StartGGVideogame
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public List<StartGGCharacter> Characters { get; set; }
+    public List<StartGGStage> Stages { get; set; }
+}
+
+public class StartGGCharacter
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public List<StartGGImage> Images { get; set; }
+}
+
+public class StartGGStage
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class StartGGImage
+{
+    public string Url { get; set; }
+    public int Height { get; set; }
+    public int Width { get; set; }
+    public double Ratio { get; set; }
+    public string Type { get; set; }
+}
+
+public class StartGGUserResponse
+{
+    public StartGGUser CurrentUser { get; set; }
+}
+
+public class StartGGUser
+{
+    public string Id { get; set; }
+    public string GenderPronoun { get; set; }
+    public string Name { get; set; }
+    public string Slug { get; set; }
+    public string Email { get; set; }
+    public string Discrminator { get; set; }
+    public StartGGUserTournamentsConnection Tournaments { get; set; }
+}
+
+public class StartGGUserTournamentsConnection
+{
+    public List<StartGGUserTournament> Nodes { get; set; } 
+}
+
+public class StartGGUserTournament
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
