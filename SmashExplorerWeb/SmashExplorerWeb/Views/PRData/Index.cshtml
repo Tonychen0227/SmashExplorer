@@ -1,0 +1,130 @@
+﻿@model PRDataModel
+
+<script>
+    function clicky(kek) {
+        console.log();
+    }
+</script>
+<div class="jumbotron">
+    <h1>@Model.Title</h1>
+</div>
+<div class="row">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Tournament</th>
+                <th>Tracked Players</th>
+                <th>Bracket Size</th>
+                <th>Score</th>
+                <th>Link</th>
+                <th>Placements</th>
+            </tr>
+        </thead>
+        @foreach (var rankingEvent in Model.RankingEvents)
+        {
+            <tr>
+                <td>@rankingEvent.Date</td>
+                <td>@rankingEvent.EventName</td>
+                <td>@rankingEvent.RankingConsideredPlayers</td>
+                <td>@rankingEvent.NumEntrants</td>
+                <td style="background-color:@rankingEvent.ColorCode;">@rankingEvent.Score</td>
+                <td><a href="@rankingEvent.Link" target="_blank">Link</a></td>
+                <td>@string.Join(", ", rankingEvent.Placements.OrderBy(x => x.Value).Select(x => $"{x.Key} ({x.Value.DisplayWithSuffix()})"))</td>
+            </tr>
+        }
+    </table>
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                @{
+                    var index = 0;
+                    foreach (var headToHead in Model.HeadToHead)
+                    {
+                        <th>@headToHead.Key</th>
+                        index++;
+                    }
+                }
+                <th>Overall</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var headToHead in Model.HeadToHead)
+            {
+                <tr>
+                    <td><strong>@headToHead.Key</strong></td>
+                    @foreach (var comparison in headToHead.Value)
+                    {
+                        if (comparison.Key == headToHead.Key)
+                        {
+                            <td style="background-color:black;"></td>
+                        }
+                        else
+                        {
+                            if ((comparison.Value.Wins + comparison.Value.Losses == 0) && comparison.Key != "Overall") { 
+                                <td style="background-color:@comparison.Value.ColorCode;"><i>@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</i></td>
+                            } else if (Math.Abs(comparison.Value.Wins - comparison.Value.Losses) >= 5 && comparison.Key != "Overall") {
+                                <td style="background-color:@comparison.Value.ColorCode;"><strong style="color:white;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</strong></td>
+                            } else if (Math.Abs(comparison.Value.Wins - comparison.Value.Losses) >= 4 && comparison.Key != "Overall") {
+                                <td style="background-color:@comparison.Value.ColorCode;"><span style="color:white;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</span></td>
+                            } else { 
+                                <td style="background-color:@comparison.Value.ColorCode;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</td>
+                            }
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Performance</th>
+                <th>Wins</th>
+                <th>Losses</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var playerPerformance in Model.PlayerEventPerformances.Where(x => x.Value.Count > 0))
+            {
+                var first = playerPerformance.Value.First();
+                <tr>
+                    <td><strong>@playerPerformance.Key</strong></td>
+                    <td style="background-color:@first.TournamentColorCode">@($"{first.Placement.DisplayWithSuffix()} - {first.TournamentName}")</td>
+                    <td>@string.Join(", ", first.Wins.GroupBy(x => x.PlayerName).Select(x => x.Count() <= 1 ? x.Key : $"{x.Key} (x{x.Count()})"))</td>
+                    <td>@string.Join(", ", first.Losses.GroupBy(x => x.PlayerName).Select(x => x.Count() <= 1 ? x.Key : $"{x.Key} (x{x.Count()})"))</td>
+                </tr>
+
+                playerPerformance.Value.RemoveAt(0);
+
+                if (playerPerformance.Value.Count > 0)
+                {
+                    foreach (var performance in playerPerformance.Value)
+                    {
+                    <tr>
+                        <td></td>
+                        <td style="background-color:@performance.TournamentColorCode">@($"{performance.Placement.DisplayWithSuffix()} - {performance.TournamentName}")</td>
+                        <td>@string.Join(", ", performance.Wins.GroupBy(x => x.PlayerName).Select(x => x.Count() <= 1 ? x.Key : $"{x.Key} (x{x.Count()})"))</td>
+                        <td>@string.Join(", ", performance.Losses.GroupBy(x => x.PlayerName).Select(x => x.Count() <= 1 ? x.Key : $"{x.Key} (x{x.Count()})"))</td>
+                    </tr>
+                    }
+                }
+
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -268,8 +268,8 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\DanessController.cs" />
     <Compile Include="Controllers\EventAPIController.cs" />
-    <Compile Include="Controllers\FTPController.cs" />
     <Compile Include="Controllers\GameMetadataController.cs" />
+    <Compile Include="Controllers\PRDataController.cs" />
     <Compile Include="Controllers\UserTokenAPIController.cs" />
     <Compile Include="Controllers\FullEventAPIController.cs" />
     <Compile Include="Controllers\ScoreboardController.cs" />
@@ -533,7 +533,7 @@
     <Content Include="Views\CreateScoreboard\Index.cshtml" />
     <Content Include="Views\Scoreboard\Index.cshtml" />
     <Content Include="Views\Daness\Index.cshtml" />
-    <Content Include="Views\FTP\Index.cshtml" />
+    <Content Include="Views\PRData\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,7 +1,9 @@
 ﻿using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 
 public class SmashExplorerDatabase
@@ -13,6 +15,7 @@ public class SmashExplorerDatabase
     private readonly Container EventsContainer;
     private readonly Container ScoreboardsContainer;
     private readonly Container DanessSeedingContainer;
+    private readonly Container PRDataContainer;
 
     public static Dictionary<int, int> PlacementToRounds;
 
@@ -57,6 +60,7 @@ public class SmashExplorerDatabase
         EventsContainer = GetContainer("Events");
         ScoreboardsContainer = GetContainer("Scoreboards");
         DanessSeedingContainer = GetContainer("DanessSeedingContainer");
+        PRDataContainer = GetContainer("PRData");
 
         PlacementToRounds = new Dictionary<int, int>();
 
@@ -207,7 +211,7 @@ public class SmashExplorerDatabase
         return entrants.Where(x => x.IsDisqualified == true).ToList();
     }
 
-    public async Task<List<Entrant>> GetEntrantsAsync(string eventId)
+    public async Task<List<Entrant>> GetEntrantsAsync(string eventId, bool useLongerCache = false)
     {
         if (!EntrantsCache.ContainsKey(eventId))
         {
@@ -216,7 +220,8 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, List<Entrant>> cachedEntrants = EntrantsCache[eventId];
 
-        if (DateTime.UtcNow - cachedEntrants.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : EntrantsCacheTTLSeconds))
+        // 864717 is EVO 2023
+        if (DateTime.UtcNow - cachedEntrants.Item1 < TimeSpan.FromSeconds(eventId == "864717" || useLongerCache ? 86400 : EntrantsCacheTTLSeconds))
         {
             return cachedEntrants.Item2;
         }
@@ -240,7 +245,7 @@ public class SmashExplorerDatabase
         return resultsList;
     }
 
-    public async Task<List<Set>> GetSetsAsync(string eventId)
+    public async Task<List<Set>> GetSetsAsync(string eventId, bool useLongerCache = false)
     {
         if (!SetsCache.ContainsKey(eventId))
         {
@@ -249,7 +254,8 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, List<Set>> cachedSets = SetsCache[eventId];
 
-        if (DateTime.UtcNow - cachedSets.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : SetsCacheTTLSeconds))
+        // 864717 is EVO 2023
+        if (DateTime.UtcNow - cachedSets.Item1 < TimeSpan.FromSeconds(eventId == "864717" || useLongerCache ? 86400 : SetsCacheTTLSeconds))
         {
             return cachedSets.Item2;
         }
@@ -498,5 +504,34 @@ public class SmashExplorerDatabase
             UpsetFactor = upsetFactor,
             NewDisplayScore = newDisplayScore
         };
+    }
+
+    public async Task<PRDataSet> GetPRDataset(string id)
+    {
+        PRDataSet result;
+        try
+        {
+            result = await PRDataContainer.ReadItemAsync<PRDataSet>(id, new PartitionKey(id));
+        }
+        catch (CosmosException ce)
+        {
+            return null;
+        }
+
+        return result;
+    }
+
+    public async Task UpsertPRDataSet(PRDataSet dataSet)
+    {
+        try
+        {
+            await PRDataContainer.UpsertItemAsync(dataSet, new PartitionKey(dataSet.Id));
+        }
+        catch (Exception ce)
+        {
+            return;
+        }
+
+        return;
     }
 }
