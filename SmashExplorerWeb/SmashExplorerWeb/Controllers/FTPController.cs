@@ -151,7 +151,7 @@ namespace SmashExplorerWeb.Controllers
                 Placements = good.Item2.Where(x => x.IsDisqualified == null || !x.IsDisqualified.Value).Select(x => (x.UserSlugs.First(), x.Standing)).ToDictionary(x => x.Item1, x => x.Standing.Value).OrderBy(x => x.Value).ToDictionary(x => Players[x.Key.Split('/')[1]], x => x.Value)
             });
 
-            var headToHead = Players.ToDictionary(x => x.Key, x => Players.Where(k => k.Key != x.Key).ToDictionary(k => k.Key, k => new HeadToHead()));
+            var headToHead = Players.ToDictionary(x => x.Key, x => Players.ToDictionary(k => k.Key, k => new HeadToHead()));
 
             foreach (var tournament in _goods)
             {
@@ -213,7 +213,7 @@ namespace SmashExplorerWeb.Controllers
             {
                 var temp = new Dictionary<string, HeadToHead>();
 
-                foreach (var oppKey in headToHeadKeysOrder.Where(x => x != key))
+                foreach (var oppKey in headToHeadKeysOrder)
                 {
                     temp[oppKey] = headToHeadFixed[key][oppKey];
                 }
