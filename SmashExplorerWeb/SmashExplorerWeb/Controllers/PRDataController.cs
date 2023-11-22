@@ -24,10 +24,17 @@ namespace SmashExplorerWeb.Controllers
                 return new HttpNotFoundResult();
             }
 
-            var tasks = existingData.Events.Select(slug => SmashExplorerDatabase.Instance.GetEventsBySlugAndDatesAsync(slug, DateTime.UtcNow.Subtract(TimeSpan.FromDays(120)), DateTime.UtcNow));
-            var tournaments = await Task.WhenAll(tasks);
+            var tasks = existingData.Events
+                .Select(slug => 
+                    (existingData.EventSlugToIdMapping.ContainsKey(slug) ? SmashExplorerDatabase.Instance.GetEventAsync(existingData.EventSlugToIdMapping[slug])
+                    : SmashExplorerDatabase.Instance.GetEventBySlugAndDatesAsync(slug, DateTime.UtcNow.Subtract(TimeSpan.FromDays(120)), DateTime.UtcNow)))
+                .ToList();
 
-            var tournamentsList = tournaments.Select(x => x.First());
+            var tournamentsList = await Task.WhenAll(tasks);
+
+            existingData.EventSlugToIdMapping = tournamentsList.ToDictionary(x => x.Slug, x => x.Id);
+
+            await SmashExplorerDatabase.Instance.UpsertPRDataSet(existingData);
 
             data = (await Task.WhenAll(
                 tournamentsList.Select(async tournament => (
@@ -48,10 +55,16 @@ namespace SmashExplorerWeb.Controllers
         {
             var rankingEvents = data.Select((good) => {
                 var topEntrantStanding = GetTournamentTopEntrantsMinimumStanding(good);
-                var players = good.TopPlacingPlayers
-                    .Where(x => x.Standing <= GetTournamentTopEntrantsMinimumStanding(good)
-                           && (x.UserSlugs.Count == 0 || !dataSet.Players.ContainsKey(x.UserSlugs.First().Split('/')[1])))
-                    .ToDictionary(x => x.Name.Split('|').Last(), x => x.Standing.Value);
+
+                var players = new Dictionary<string, int>();
+
+                if (dataSet.IsWWA)
+                {
+                    players = good.TopPlacingPlayers
+                        .Where(x => x.Standing <= GetTournamentTopEntrantsMinimumStanding(good)
+                               && (x.UserSlugs.Count == 0 || !dataSet.Players.ContainsKey(x.UserSlugs.First().Split('/')[1])))
+                        .ToDictionary(x => x.Name.Split('|').Last(), x => x.Standing.Value);
+                }
 
                 good.RankingConsideredPlayers
                     .Select(x => (x.UserSlugs.First(), x.Standing))
@@ -66,7 +79,7 @@ namespace SmashExplorerWeb.Controllers
                     NumEntrants = good.Event.NumEntrants,
                     Link = $"https://start.gg/{good.Event.Slug}",
                     Placements = players,
-                    ColorCode = GetTournamentColorCodeAndScore(good).Color,
+                    ColorCode = dataSet.IsWWA ? GetTournamentColorCodeAndScore(good).Color : "",
                     Score = GetTournamentColorCodeAndScore(good).Score
                 };
             });
@@ -129,7 +142,7 @@ namespace SmashExplorerWeb.Controllers
             var orderedByOverallWinRate = headToHeadFixed
                 .ToDictionary(x => x.Key, x => x.Value["Overall"])
                 .ToDictionary(x => x.Key, x => (x.Value.Wins, x.Value.Losses))
-                .OrderByDescending(x => x.Value.Wins + x.Value.Wins > 5 ? 5 : 0)
+                .OrderByDescending(x => x.Value.Wins + x.Value.Losses > 5 ? 5 : 0)
                 .ThenByDescending(x => (double) x.Value.Wins == 0 ? 0 : (double) x.Value.Wins / ((double) x.Value.Wins + (double) x.Value.Losses))
                 .Select(x => x.Key);
 
@@ -162,7 +175,7 @@ namespace SmashExplorerWeb.Controllers
                         Seed = entrant.Seeding ?? entrant.InitialSeedNum.Value,
                         TournamentName = tournament.Event.TournamentName,
                         Placement = entrant.Standing ?? -1,
-                        TournamentColorCode = GetTournamentColorCodeAndScore(tournament).Color,
+                        TournamentColorCode = dataSet.IsWWA ? GetTournamentColorCodeAndScore(tournament).Color : "",
                         EntrantTournamentUrl = $"https://start.gg/{tournament.Event.Slug}/entrant/{entrant.Id}"
                     };
 
@@ -200,6 +213,7 @@ namespace SmashExplorerWeb.Controllers
 
             return new PRDataModel()
             {
+                IsWWA = dataSet.IsWWA,
                 Title = dataSet.Title,
                 RankingEvents = rankingEvents,
                 HeadToHead = finalHeadToHead,
@@ -353,4 +367,6 @@ public class PRDataSet
     public string Title { get; set; }
     public Dictionary<string, string> Players { get; set; }
     public List<string> Events { get; set; }
+    public Dictionary<string, string> EventSlugToIdMapping { get; set; } = new Dictionary<string, string>();
+    public bool IsWWA { get; set; } = false;
 }

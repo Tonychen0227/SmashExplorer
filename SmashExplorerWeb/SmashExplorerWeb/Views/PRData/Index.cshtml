@@ -16,7 +16,10 @@
                 <th>Tournament</th>
                 <th>Tracked Players</th>
                 <th>Bracket Size</th>
-                <th>Score</th>
+                @if (Model.IsWWA)
+                {
+                    <th>Score</th>
+                }
                 <th>Link</th>
                 <th>Placements</th>
             </tr>
@@ -28,7 +31,10 @@
                 <td>@rankingEvent.EventName</td>
                 <td>@rankingEvent.RankingConsideredPlayers</td>
                 <td>@rankingEvent.NumEntrants</td>
-                <td style="background-color:@rankingEvent.ColorCode;">@rankingEvent.Score</td>
+                @if (Model.IsWWA)
+                {
+                    <td style="background-color:@rankingEvent.ColorCode;">@rankingEvent.Score</td>
+                }
                 <td><a href="@rankingEvent.Link" target="_blank">Link</a></td>
                 <td>@string.Join(", ", rankingEvent.Placements.OrderBy(x => x.Value).Select(x => $"{x.Key} ({x.Value.DisplayWithSuffix()})"))</td>
             </tr>

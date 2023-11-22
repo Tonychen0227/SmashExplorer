@@ -7,4 +7,5 @@ public class PRDataModel
 
     public Dictionary<string, Dictionary<string, HeadToHead>> HeadToHead { get; set; }
     public Dictionary<string, List<PlayerEventPerformance>> PlayerEventPerformances { get; set; }
+    public bool IsWWA { get; set; }
 }

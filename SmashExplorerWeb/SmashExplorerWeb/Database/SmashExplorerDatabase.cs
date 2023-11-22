@@ -105,7 +105,7 @@ public class SmashExplorerDatabase
         return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
 
-    public async Task<Event> GetEventAsync(string eventId)
+    public async Task<Event> GetEventAsync(string eventId, bool useLongerCache = false)
     {
         if (!EventsCache.ContainsKey(eventId))
         {
@@ -114,7 +114,7 @@ public class SmashExplorerDatabase
 
         Tuple<DateTime, Event> cachedEvent = EventsCache[eventId];
 
-        if (DateTime.UtcNow - cachedEvent.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : EventsCacheTTLSeconds))
+        if (DateTime.UtcNow - cachedEvent.Item1 < TimeSpan.FromSeconds(eventId == "864717" || useLongerCache ? 86400 : EventsCacheTTLSeconds))
         {
             return cachedEvent.Item2;
         }
@@ -181,6 +181,11 @@ public class SmashExplorerDatabase
         CachedEntrantSeedingCache[eventId] = cachedEntrantSeeding;
 
         return cachedEntrantSeeding;
+    }
+
+    public async Task<Event> GetEventBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
+    {
+        return (await GetEventsBySlugAndDatesAsync(slug, startAt, endAt)).First();
     }
 
     public async Task<List<Event>> GetEventsBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
