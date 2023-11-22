@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class StartGGTournamentResponse
 {
@@ -110,12 +111,15 @@ public class StartGGUserResponse
 
 public class StartGGUser
 {
+    [JsonProperty("id")]
     public string Id { get; set; }
     public string GenderPronoun { get; set; }
     public string Name { get; set; }
     public string Slug { get; set; }
     public string Email { get; set; }
     public string Discrminator { get; set; }
+    [JsonProperty("token")]
+    public string Token { get; set; }
     public StartGGUserTournamentsConnection Tournaments { get; set; }
 }
 

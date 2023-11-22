@@ -71,6 +71,11 @@ namespace SmashExplorerWeb.Controllers
                     .ToDictionary(x => dataSet.Players[x.Item1.Split('/')[1]], x => x.Standing.Value)
                     .ToList().ForEach(x => players.Add(x.Key, x.Value));
 
+                var placementToPlayersDict = players
+                    .GroupBy(x => x.Value, x => x.Key)
+                    .OrderBy(x => x.Key)
+                    .ToDictionary(x => string.Join("/", x.ToList()), x => x.Key);
+
                 return new RankingEvent()
                 {
                     Date = DateTimeOffset.FromUnixTimeSeconds(good.Event.StartAt).DateTime.ToShortDateString(),
@@ -78,7 +83,7 @@ namespace SmashExplorerWeb.Controllers
                     RankingConsideredPlayers = good.RankingConsideredPlayers.Count(),
                     NumEntrants = good.Event.NumEntrants,
                     Link = $"https://start.gg/{good.Event.Slug}",
-                    Placements = players,
+                    Placements = placementToPlayersDict,
                     ColorCode = dataSet.IsWWA ? GetTournamentColorCodeAndScore(good).Color : "",
                     Score = GetTournamentColorCodeAndScore(good).Score
                 };
@@ -124,7 +129,7 @@ namespace SmashExplorerWeb.Controllers
                 }
             }
 
-            var headToHeadFixed = headToHead.ToDictionary(x => dataSet.Players[x.Key], x => x.Value.ToDictionary(y => dataSet.Players[y.Key], y => y.Value));
+            var headToHeadFixed = headToHead.ToDictionary(x => x.Key, x => x.Value.ToDictionary(y => y.Key, y => y.Value));
 
             foreach (var key in headToHeadFixed.Keys)
             {
@@ -154,16 +159,16 @@ namespace SmashExplorerWeb.Controllers
 
                 foreach (var oppKey in orderedByOverallWinRate)
                 {
-                    temp[oppKey] = headToHeadFixed[key][oppKey];
-                    temp[oppKey].ColorCode = GetHeadToHeadColorCode(temp[oppKey]);
+                    temp[dataSet.Players[oppKey]] = headToHeadFixed[key][oppKey];
+                    temp[dataSet.Players[oppKey]].ColorCode = GetHeadToHeadColorCode(temp[dataSet.Players[oppKey]]);
                 }
 
                 temp["Overall"] = headToHeadFixed[key]["Overall"];
 
-                finalHeadToHead[key] = temp;
+                finalHeadToHead[dataSet.Players[key]] = temp;
             }
 
-            var playerEventPerformances = dataSet.Players.ToDictionary(x => x.Key, x => new List<PlayerEventPerformance>());
+            var playerEventPerformances = orderedByOverallWinRate.ToDictionary(x => x, x => new List<PlayerEventPerformance>());
 
             foreach (var tournament in data)
             {

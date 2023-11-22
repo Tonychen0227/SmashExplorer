@@ -16,6 +16,7 @@ public class SmashExplorerDatabase
     private readonly Container ScoreboardsContainer;
     private readonly Container DanessSeedingContainer;
     private readonly Container PRDataContainer;
+    private readonly Container GalintAuthenticationContainer;
 
     public static Dictionary<int, int> PlacementToRounds;
 
@@ -61,6 +62,7 @@ public class SmashExplorerDatabase
         ScoreboardsContainer = GetContainer("Scoreboards");
         DanessSeedingContainer = GetContainer("DanessSeedingContainer");
         PRDataContainer = GetContainer("PRData");
+        GalintAuthenticationContainer = GetContainer("GalintAuthenticationTokens");
 
         PlacementToRounds = new Dictionary<int, int>();
 
@@ -80,6 +82,37 @@ public class SmashExplorerDatabase
     }
 
     public static SmashExplorerDatabase Instance { get { return lazy.Value; } }
+
+    public async Task<StartGGUser> GetGalintAuthenticatedUserAsync(string token)
+    {
+        var results = new List<StartGGUser>();
+
+        using (var iterator = EntrantsContainer.GetItemQueryIterator<StartGGUser>($"select * from t where t.token = \"{token}\"",
+                                                                              requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(token) }))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
+            }
+        }
+        
+        return results.FirstOrDefault();
+    }
+
+    public async Task UpsertGalintAuthenticationTokenAsync(StartGGUser user)
+    {
+        try
+        {
+            await GalintAuthenticationContainer.UpsertItemAsync(user, new PartitionKey(user.Token));
+        }
+        catch (Exception ce)
+        {
+            return;
+        }
+
+        return;
+    }
 
     public async Task<List<Event>> GetUpcomingEventsAsync()
     {

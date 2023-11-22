@@ -69,13 +69,13 @@
                         else
                         {
                             if ((comparison.Value.Wins + comparison.Value.Losses == 0) && comparison.Key != "Overall") { 
-                                <td style="background-color:@comparison.Value.ColorCode;"><i>@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</i></td>
+                                <td style="background-color:@comparison.Value.ColorCode;"><span style="white-space: nowrap;"><i>@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</i></span></td>
                             } else if (Math.Abs(comparison.Value.Wins - comparison.Value.Losses) >= 5 && comparison.Key != "Overall") {
-                                <td style="background-color:@comparison.Value.ColorCode;"><strong style="color:white;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</strong></td>
+                                <td style="background-color:@comparison.Value.ColorCode;"><span style="white-space: nowrap;"><strong style="color: white;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</strong></span></td>
                             } else if (Math.Abs(comparison.Value.Wins - comparison.Value.Losses) >= 4 && comparison.Key != "Overall") {
-                                <td style="background-color:@comparison.Value.ColorCode;"><span style="color:white;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</span></td>
+                                <td style="background-color:@comparison.Value.ColorCode;"><span style="white-space: nowrap; color: white;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</span></td>
                             } else { 
-                                <td style="background-color:@comparison.Value.ColorCode;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</td>
+                                <td style="background-color:@comparison.Value.ColorCode;"><span style="white-space: nowrap;">@($"{comparison.Value.Wins}-{comparison.Value.Losses}")</span></td>
                             }
                         }
                     }
