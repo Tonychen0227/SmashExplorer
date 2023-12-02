@@ -218,7 +218,7 @@ public class SmashExplorerDatabase
 
     public async Task<Event> GetEventBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)
     {
-        return (await GetEventsBySlugAndDatesAsync(slug, startAt, endAt)).First();
+        return (await GetEventsBySlugAndDatesAsync(slug, startAt, endAt)).FirstOrDefault();
     }
 
     public async Task<List<Event>> GetEventsBySlugAndDatesAsync(string slug, DateTime startAt, DateTime endAt)

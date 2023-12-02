@@ -26,11 +26,14 @@ namespace SmashExplorerWeb.Controllers
 
             var tasks = existingData.Events
                 .Select(slug => 
-                    (existingData.EventSlugToIdMapping.ContainsKey(slug) ? SmashExplorerDatabase.Instance.GetEventAsync(existingData.EventSlugToIdMapping[slug])
+                    (existingData.EventSlugToIdMapping.ContainsKey(slug) ? SmashExplorerDatabase.Instance.GetEventAsync(existingData.EventSlugToIdMapping[slug], useLongerCache: true)
                     : SmashExplorerDatabase.Instance.GetEventBySlugAndDatesAsync(slug, DateTime.UtcNow.Subtract(TimeSpan.FromDays(120)), DateTime.UtcNow)))
                 .ToList();
 
             var tournamentsList = await Task.WhenAll(tasks);
+            tournamentsList = tournamentsList.Where(x => x != null).ToArray();
+
+            var notFoundSlugs = existingData.Events.Where(slug => !tournamentsList.Select(x => x.Slug).Contains(slug)).ToList();
 
             existingData.EventSlugToIdMapping = tournamentsList.ToDictionary(x => x.Slug, x => x.Id);
 
@@ -46,12 +49,15 @@ namespace SmashExplorerWeb.Controllers
                         x.Item2,
                         x.Item3)).ToList();
 
-            var model = GetRankingsStructFromData(existingData, data);
+            var model = GetRankingsStructFromData(existingData, data, notFoundSlugs);
 
             return View(model);
         }
 
-        private static PRDataModel GetRankingsStructFromData(PRDataSet dataSet, List<(Event Event, List<Entrant> RankingConsideredPlayers, List<Entrant> TopPlacingPlayers, List<Set> Sets)> data)
+        private static PRDataModel GetRankingsStructFromData(
+            PRDataSet dataSet,
+            List<(Event Event, List<Entrant> RankingConsideredPlayers, List<Entrant> TopPlacingPlayers, List<Set> Sets)> data,
+            List<string> notFoundSlugs)
         {
             var rankingEvents = data.Select((good) => {
                 var topEntrantStanding = GetTournamentTopEntrantsMinimumStanding(good);
@@ -222,7 +228,8 @@ namespace SmashExplorerWeb.Controllers
                 Title = dataSet.Title,
                 RankingEvents = rankingEvents,
                 HeadToHead = finalHeadToHead,
-                PlayerEventPerformances = playerEventPerformances.ToDictionary(x => dataSet.Players[x.Key], x => x.Value)
+                PlayerEventPerformances = playerEventPerformances.ToDictionary(x => dataSet.Players[x.Key], x => x.Value),
+                NotFoundSlugs = notFoundSlugs
             };
         }
 

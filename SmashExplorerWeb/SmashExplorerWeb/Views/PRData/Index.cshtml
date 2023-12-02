@@ -8,6 +8,9 @@
 <div class="jumbotron">
     <h1>@Model.Title</h1>
 </div>
+@if (Model.NotFoundSlugs.Count > 0) {
+    <p>Tournaments not found - @string.Join(";", Model.NotFoundSlugs.Select(x => $"https://start.gg/{x}"))</p>
+}
 <div class="row">
     <table class="table table-bordered table-hover">
         <thead>
