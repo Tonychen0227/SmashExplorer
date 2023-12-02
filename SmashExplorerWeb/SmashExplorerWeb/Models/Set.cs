@@ -3,6 +3,7 @@
 public class Set
 {
     public string Id { get; set; }
+    public string EventId { get; set; }
     public string FullRoundText { get; set; }
     public string DisplayScore { get; set; }
     public string WinnerId { get; set; }

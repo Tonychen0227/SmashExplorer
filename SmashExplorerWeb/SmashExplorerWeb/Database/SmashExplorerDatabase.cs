@@ -28,6 +28,9 @@ public class SmashExplorerDatabase
     private Dictionary<string, Tuple<DateTime, Event>> EventsCache = new Dictionary<string, Tuple<DateTime, Event>>();
     private static readonly int EventsCacheTTLSeconds = 60;
 
+    private Dictionary<string, Tuple<DateTime, Entrant>> EntrantCache = new Dictionary<string, Tuple<DateTime, Entrant>>();
+    private static readonly int EntrantCacheTTLSeconds = 60;
+
     private Dictionary<string, Tuple<DateTime, List<Entrant>>> EntrantsCache = new Dictionary<string, Tuple<DateTime, List<Entrant>>>();
     private static readonly int EntrantsCacheTTLSeconds = 60;
 
@@ -242,11 +245,62 @@ public class SmashExplorerDatabase
         return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
 
+    public async Task<Entrant> GetEntrantBySlugAndEventAsync(string slug, string eventId)
+    {
+        var matchingEntrants = new List<Entrant>();
+        var options = new QueryRequestOptions()
+        {
+            PartitionKey = new PartitionKey(eventId)
+        };
+
+        using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"SELECT * FROM c WHERE ARRAY_CONTAINS(c.userSlugs, \"{slug}\")", requestOptions: options))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                matchingEntrants.AddRange(next.Resource);
+            }
+        }
+
+        return matchingEntrants.FirstOrDefault();
+    }
+
     public async Task<List<Entrant>> GetDQdEntrantsAsync(string eventId)
     {
         var entrants = await GetEntrantsAsync(eventId);
 
         return entrants.Where(x => x.IsDisqualified == true).ToList();
+    }
+
+    public async Task<Entrant> GetEntrantAsync(string entrantId)
+    {
+        if (!EntrantCache.ContainsKey(entrantId))
+        {
+            EntrantCache.Add(entrantId, Tuple.Create(DateTime.MinValue, new Entrant()));
+        }
+
+        Tuple<DateTime, Entrant> cachedEntrant = EntrantCache[entrantId];
+
+        if (DateTime.UtcNow - cachedEntrant.Item1 < TimeSpan.FromSeconds(EntrantCacheTTLSeconds))
+        {
+            return cachedEntrant.Item2;
+        }
+
+        var entrantsList = new List<Entrant>();
+        using (var iterator = EntrantsContainer.GetItemQueryIterator<Entrant>($"SELECT * FROM c WHERE c.id = \"{entrantId}\""))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                entrantsList.AddRange(next.Resource);
+            }
+        }
+
+        var retEntrant = entrantsList.FirstOrDefault();
+
+        EntrantCache[entrantId] = Tuple.Create(DateTime.UtcNow, retEntrant);
+
+        return retEntrant;
     }
 
     public async Task<List<Entrant>> GetEntrantsAsync(string eventId, bool useLongerCache = false)
@@ -281,6 +335,22 @@ public class SmashExplorerDatabase
         EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, resultsList);
 
         return resultsList;
+    }
+
+    public async Task<Set> GetSetAsync(string setId)
+    {
+        var results = new List<Set>();
+
+        using (var iterator = SetsContainer.GetItemQueryIterator<Set>($"select * from t where t.id = \"{setId}\""))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
+            }
+        }
+
+        return results.FirstOrDefault();
     }
 
     public async Task<List<Set>> GetSetsAsync(string eventId, bool useLongerCache = false)

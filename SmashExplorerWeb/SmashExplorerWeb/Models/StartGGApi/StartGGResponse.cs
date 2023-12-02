@@ -21,6 +21,11 @@ public class StartGGEvent
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    public string Slug { get; set; }
+    public long StartAt { get; set; }
+    public int NumEntrants { get; set; }
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public List<Upset> TournamentUpsets { get; set; }
     public List<StartGGEventPhase> Phases { get; set; }
     public StartGGSetConnection Sets { get; set; }
 }

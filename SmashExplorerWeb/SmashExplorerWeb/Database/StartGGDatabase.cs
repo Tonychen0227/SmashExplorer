@@ -12,6 +12,9 @@ public class StartGGDatabase
 
     private static readonly Lazy<StartGGDatabase> lazy = new Lazy<StartGGDatabase>(() => new StartGGDatabase());
 
+    private Dictionary<string, Tuple<DateTime, StartGGTournamentResponse>> TournamentEventsCache = new Dictionary<string, Tuple<DateTime, StartGGTournamentResponse>>();
+    private static readonly int TournamentEventsCacheTTLSeconds = 600;
+
     private StartGGDatabase()
     {
         var keys = Environment.GetEnvironmentVariable("STARTGG_KEYS");
@@ -134,6 +137,41 @@ query TournamentSlugQuery($slug: String) {
         var eventId = response.Data.Tournament.Events.First().Id;
 
         return eventId;
+    }
+
+    public async Task<StartGGTournamentResponse> GetTournamentEvents(string id)
+    {
+        var entryExists = TournamentEventsCache.TryGetValue(id, out var cachedData);
+
+        if (entryExists && DateTime.UtcNow - cachedData.Item1 < TimeSpan.FromSeconds(TournamentEventsCacheTTLSeconds))
+        {
+            return cachedData.Item2;
+        }
+
+        var query = new GraphQLRequest
+        {
+            Query = @"
+query TournamentIdQuery($id: ID) {
+  tournament(id:$id){
+    id
+    events(filter: {videogameId: [1386]}) {
+      name
+      id
+      startAt
+      slug
+      numEntrants
+    }
+  }
+}",
+            Variables = new
+            {
+                id = id
+            }
+        };
+
+        var response = await SendQueryAsync<StartGGTournamentResponse>(query);
+
+        return response.Data;
     }
 
     public async Task<string> GetPhaseId(string eventId, string stringToSearch)

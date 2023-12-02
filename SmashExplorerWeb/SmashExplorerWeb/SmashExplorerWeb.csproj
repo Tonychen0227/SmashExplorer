@@ -267,9 +267,13 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\DanessController.cs" />
+    <Compile Include="Controllers\EntrantMatchesAPIController.cs" />
     <Compile Include="Controllers\EventAPIController.cs" />
+    <Compile Include="Controllers\EventUserAvatarsAPIController.cs" />
     <Compile Include="Controllers\GameMetadataController.cs" />
     <Compile Include="Controllers\PRDataController.cs" />
+    <Compile Include="Controllers\SetAPIController.cs" />
+    <Compile Include="Controllers\TournamentAPIController.cs" />
     <Compile Include="Controllers\UserTokenAPIController.cs" />
     <Compile Include="Controllers\FullEventAPIController.cs" />
     <Compile Include="Controllers\ScoreboardController.cs" />

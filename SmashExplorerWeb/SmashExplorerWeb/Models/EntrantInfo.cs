@@ -4,6 +4,7 @@ using System.Linq;
 public class EntrantInfo
 {
     public List<UrlObject> Urls { get; set; }
+    public List<Image> Images { get; set; }
     public EntrantLocation Location { get; set; }
     public string LocationString { get
         {
