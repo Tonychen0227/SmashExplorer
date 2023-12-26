@@ -18,6 +18,7 @@ public class StartGGDatabase
     private StartGGDatabase()
     {
         var keys = Environment.GetEnvironmentVariable("STARTGG_KEYS");
+        var mutationKeys = Environment.GetEnvironmentVariable("STARTGG_KEYS_MUTATION");
         var clients = new List<GraphQLHttpClient>();
 
         foreach (var key in keys.Split(' '))
@@ -154,7 +155,7 @@ query TournamentSlugQuery($slug: String) {
 query TournamentIdQuery($id: ID) {
   tournament(id:$id){
     id
-    events(filter: {videogameId: [1386]}) {
+    events(filter: {videogameId: [1, 1386]}) {
       name
       id
       startAt

@@ -7,15 +7,15 @@ from operations_manager import OperationsManager
 
 if __name__ == '__main__':
     logger = Logger(f"backfill")
-    operations = OperationsManager(logger, "SMASHGG_KEYS_BOBC")
+    operations = OperationsManager(logger, "SMASHGG_KEYS")
     logger.log("Starting Backfill")
 
     events_count = 0
-    new_events = [829437]
+    new_events = [1020145]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
-        days_back = 5
-        days_forward = -15
+        days_back = 14
+        days_forward = 3
 
         current_days_forward = days_back
         increment = 100
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         try:
             created_event = operations.get_and_create_event(event_id)
             operations.get_and_create_entrants_for_event(event_id, created_event)
-            operations.update_event_sets(event_id, created_event, bypass_last_updated=True)
+            operations.update_event_sets(event_id, created_event, bypass_last_updated=True, delete_bogus_sets=True)
         except:
             traceback.print_exc()
             logger.log(f"Issue backfilling {event_id}, skipping")

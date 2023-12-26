@@ -272,6 +272,7 @@
     <Compile Include="Controllers\EventUserAvatarsAPIController.cs" />
     <Compile Include="Controllers\GameMetadataController.cs" />
     <Compile Include="Controllers\PRDataController.cs" />
+    <Compile Include="Controllers\ReportScoreAPIController.cs" />
     <Compile Include="Controllers\SetAPIController.cs" />
     <Compile Include="Controllers\TournamentAPIController.cs" />
     <Compile Include="Controllers\UserTokenAPIController.cs" />
@@ -304,6 +305,7 @@
     <Compile Include="Models\GameSelection.cs" />
     <Compile Include="Models\Image.cs" />
     <Compile Include="Models\PRDataModel.cs" />
+    <Compile Include="Models\ReportScoreAPIRequestBody.cs" />
     <Compile Include="Models\ScoreboardAction.cs" />
     <Compile Include="Models\ScoreboardLog.cs" />
     <Compile Include="Models\Scoreboard.cs" />

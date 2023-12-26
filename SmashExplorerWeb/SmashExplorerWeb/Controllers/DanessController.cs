@@ -288,7 +288,7 @@ namespace SmashExplorerWeb.Controllers
 
             foreach (var entrantId in entrantIds)
             {
-                eligiblePairings[entrantId] = entrantIds.Where(x => !entrantOpponents[entrantId].Contains(x)).ToList();
+                eligiblePairings[entrantId] = entrantIds.Where(x => !entrantOpponents[entrantId].Contains(x) && x != entrantId).ToList();
             };
 
             while (entrantIds.Count > 0) {
@@ -314,7 +314,7 @@ namespace SmashExplorerWeb.Controllers
                 }
             }
 
-            currentPairings.OrderBy(x => Math.Min(entrantsToOrderMap[x.Item1.Id], entrantsToOrderMap[x.Item2.Id]));
+            currentPairings = currentPairings.OrderBy(x => Math.Min(entrantsToOrderMap[x.Item1.Id], entrantsToOrderMap[x.Item2.Id])).ToList();
 
             var finalPairings = new List<(StartGGEntrant, StartGGEntrant)>();
 

@@ -122,7 +122,7 @@ public class StartGGUser
     public string Name { get; set; }
     public string Slug { get; set; }
     public string Email { get; set; }
-    public string Discrminator { get; set; }
+    public string Discriminator { get; set; }
     [JsonProperty("token")]
     public string Token { get; set; }
     public StartGGUserTournamentsConnection Tournaments { get; set; }
