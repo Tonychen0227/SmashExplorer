@@ -62,7 +62,7 @@ class OperationsManager:
 
         return upcoming_event_ids
 
-    def update_event_sets(self, event_id, created_event, bypass_last_updated=False, disable_backfill=False, lookback_duration_minutes=10):
+    def update_event_sets(self, event_id, created_event, bypass_last_updated=False, disable_backfill=False, lookback_duration_minutes=10, delete_bogus_sets=False):
         current_time = int((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=lookback_duration_minutes)).timestamp())
 
         event = created_event
@@ -158,6 +158,11 @@ class OperationsManager:
             self.logger.log(f"WTF: Something wrong happened with cosmos create sets on {event_id}, creating 1by1")
             for tournament_set in sets:
                 self.cosmos.create_set(tournament_set)
+
+        if delete_bogus_sets:
+            for cosmos_set in self.cosmos.get_event_sets(event_id):
+                if cosmos_set["id"] not in [x["id"] for x in sets]:
+                    self.cosmos.delete_set(event_id, cosmos_set["id"])
 
     def delete_event(self, event_id):
         self.cosmos.delete_event(event_id)
