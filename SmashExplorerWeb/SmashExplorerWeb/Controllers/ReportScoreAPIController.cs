@@ -29,7 +29,9 @@ namespace SmashExplorerWeb.Controllers
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Set is already completed!");
                 }
 
-                return Content(JsonConvert.SerializeObject(retrievedSet), "application/json");
+                await StartGGDatabase.Instance.ReportSet(id, body);
+
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, e.Message);

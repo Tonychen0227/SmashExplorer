@@ -7,7 +7,7 @@ from operations_manager import OperationsManager
 
 if __name__ == '__main__':
     logger = Logger(f"backfill")
-    operations = OperationsManager(logger, "SMASHGG_KEYS")
+    operations = OperationsManager(logger, "SMASHGG_KEYS_BACKFILL")
     logger.log("Starting Backfill")
 
     events_count = 0

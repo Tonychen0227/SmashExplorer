@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 public class StartGGDatabase
 {
     private readonly List<GraphQLHttpClient> Clients;
+    private readonly List<GraphQLHttpClient> MutationClients;
 
     private static readonly Lazy<StartGGDatabase> lazy = new Lazy<StartGGDatabase>(() => new StartGGDatabase());
 
@@ -26,7 +27,15 @@ public class StartGGDatabase
             clients.Add(GetClient(key));
         }
 
+        var mutationClients = new List<GraphQLHttpClient>();
+
+        foreach (var mutationkey in mutationKeys.Split(' '))
+        {
+            mutationClients.Add(GetClient(mutationkey));
+        }
+
         Clients = clients;
+        MutationClients = mutationClients;
     }
 
     private GraphQLHttpClient GetClient(string token)
@@ -37,6 +46,32 @@ public class StartGGDatabase
     }
 
     public static StartGGDatabase Instance { get { return lazy.Value; } }
+
+    public async Task ReportSet(string setId, ReportScoreAPIRequestBody scoreReportRequest)
+    {
+        var mutation = new GraphQLRequest
+        {
+            Query = @"
+mutation ReportBracketSet($id: ID!, $winnerId: ID, $gameData: [BracketSetGameDataInput]) {
+  reportBracketSet(setId:$id, winnerId:$winnerId, gameData:$gameData){
+    id
+  }
+}",
+            Variables = new
+            {
+                id = setId,
+                winnerId = scoreReportRequest.WinnerId,
+                gameData = scoreReportRequest.GameData.Select(x => new { winnerId = x.WinnerId, gameNum = x.GameNum })
+            }
+        };
+
+        var response = await SendMutationQueryAsync<object>(mutation);
+
+        if (response.Errors != null)
+        {
+            throw new Exception(string.Join(", ", response.Errors.Select(x => x.Message)));
+        }
+    }
 
     public async Task<StartGGUser> GetUserTokenDetails(string token)
     {
@@ -200,6 +235,22 @@ query EventPhaseQuery($eventId: ID) {
         return swissPhaseId;
     }
 
+    private async Task<GraphQLResponse<T>> SendMutationQueryAsync<T>(GraphQLRequest query)
+    {
+        while (true)
+        {
+            try
+            {
+                var response = await GetMutationClient().SendMutationAsync<T>(query, new System.Threading.CancellationToken());
+                return response;
+            }
+            catch (Exception)
+            {
+                await Task.Delay(1000);
+            }
+        }
+    }
+
     private async Task<GraphQLResponse<T>> SendQueryAsync<T>(GraphQLRequest query, GraphQLHttpClient overrideClient = null)
     {
         while (true)
@@ -259,5 +310,10 @@ query EventSetsQuery($eventId: ID, $phaseId: ID) {
     private GraphQLHttpClient GetClient()
     {
         return Clients[new Random().Next(Clients.Count)];
+    }
+
+    private GraphQLHttpClient GetMutationClient()
+    {
+        return MutationClients[new Random().Next(MutationClients.Count)];
     }
 }
