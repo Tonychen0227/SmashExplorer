@@ -407,7 +407,9 @@ class API:
             "entrantIds": [str(x["entrant"]["id"]) for x in tournament_set["slots"] if x["entrant"] is not None],
             "stream": tournament_set["stream"],
             "isUpsetOrNotable": False,
-            "detailedScore": None
+            "detailedScore": None,
+            "setGamesType": tournament_set["setGamesType"],
+            "totalGames": tournament_set["totalGames"]
         }
         
         try:
@@ -518,6 +520,8 @@ class API:
                         selectionValue
                       }
                     }
+                    setGamesType
+                    totalGames
                     phaseGroup{
                       id
                       displayIdentifier
