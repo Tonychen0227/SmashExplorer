@@ -11,7 +11,7 @@ if __name__ == '__main__':
     logger.log("Starting Backfill")
 
     events_count = 0
-    new_events = [1020145]
+    new_events = [1020145, 1011026]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 14

@@ -12,6 +12,7 @@ public class SmashExplorerDatabase
     private readonly Container EntrantsContainer;
     private readonly Container SetsContainer;
     private readonly Container VanityLinksContainer;
+    private readonly Container CurrentTournamentsContainer;
     private readonly Container EventsContainer;
     private readonly Container ScoreboardsContainer;
     private readonly Container DanessSeedingContainer;
@@ -24,6 +25,9 @@ public class SmashExplorerDatabase
 
     private Tuple<DateTime, List<Event>> UpcomingEventsCache = new Tuple<DateTime, List<Event>>(DateTime.MinValue, new List<Event>());
     private static readonly int UpcomingEventsCacheTTLSeconds = 60;
+
+    private Tuple<DateTime, List<Tournament>> CurrentTournamentCache = new Tuple<DateTime, List<Tournament>>(DateTime.MinValue, new List<Tournament>());
+    private static readonly int CurrentTournamentCacheCacheTTLSeconds = 600;
 
     private Dictionary<string, Tuple<DateTime, Event>> EventsCache = new Dictionary<string, Tuple<DateTime, Event>>();
     private static readonly int EventsCacheTTLSeconds = 60;
@@ -61,6 +65,7 @@ public class SmashExplorerDatabase
         EntrantsContainer = GetContainer("Entrants");
         SetsContainer = GetContainer("Sets");
         VanityLinksContainer = GetContainer("VanityLinks");
+        CurrentTournamentsContainer = GetContainer("CurrentTournaments");
         EventsContainer = GetContainer("Events");
         ScoreboardsContainer = GetContainer("Scoreboards");
         DanessSeedingContainer = GetContainer("DanessSeedingContainer");
@@ -139,6 +144,29 @@ public class SmashExplorerDatabase
         UpcomingEventsCache = Tuple.Create(DateTime.UtcNow, results);
 
         return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
+    }
+
+    public async Task<List<Tournament>> GetTournamentsAsync()
+    {
+        if (DateTime.UtcNow - CurrentTournamentCache.Item1 < TimeSpan.FromSeconds(CurrentTournamentCacheCacheTTLSeconds))
+        {
+            return CurrentTournamentCache.Item2;
+        }
+
+        var results = new List<Tournament>();
+
+        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<Tournament>($"SELECT * FROM c WHERE c.isActive OFFSET 0 LIMIT 10"))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
+            }
+        }
+
+        CurrentTournamentCache = Tuple.Create(DateTime.UtcNow, results);
+
+        return results.ToList();
     }
 
     public async Task<Event> GetEventAsync(string eventId, bool useLongerCache = false)

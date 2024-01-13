@@ -24,4 +24,6 @@ public class Set
     public Stream Stream { get; set; }
     public Dictionary<string, string> DetailedScore { get; set; }
     public bool IsUpsetOrNotable { get; set; }
+    public int? SetGamesType { get; set; }
+    public int? TotalGames { get; set; }
 }

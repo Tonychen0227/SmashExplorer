@@ -4,12 +4,19 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Mvc;
+using HttpGetAttribute = System.Web.Mvc.HttpGetAttribute;
 using HttpPostAttribute = System.Web.Mvc.HttpPostAttribute;
 
 namespace SmashExplorerWeb.Controllers
 {
     public class ReportScoreAPIController : Controller
     {
+        [HttpGet]
+        public async Task<ActionResult> Index(string id)
+        {
+            return Content("", "application/json");
+        }
+
         [HttpPost]
         public async Task<ActionResult> Index(string id, [FromBody] ReportScoreAPIRequestBody body)
         {
