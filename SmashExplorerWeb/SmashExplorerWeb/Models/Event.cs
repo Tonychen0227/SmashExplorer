@@ -7,6 +7,7 @@ public class Event
     public string Id { get; set; }
     public ActivityState State { get; set; }
     public string TournamentName { get; set; }
+    public string TournamentId { get; set; }
     public string TournamentSlug { get; set; }
     public Location TournamentLocation { get; set; }
     private List<Image> tournamentImages { get; set; }

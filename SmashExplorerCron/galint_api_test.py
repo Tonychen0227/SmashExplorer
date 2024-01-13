@@ -1,6 +1,7 @@
 import requests
 import datetime
 import time
+import json
 
 from logger import Logger
 
@@ -16,7 +17,7 @@ if __name__ == '__main__':
         end = datetime.datetime.now()
         elapsed = end - start
         elapsed_seconds = elapsed.total_seconds()
-        result_string = str(result.json())
+        result_string = json.dumps(result.json())
         logger.log(f"Tournament API Call Elapsed {elapsed_seconds} seconds")
         if result_string not in unique_tournament_responses:
             unique_tournament_responses.add(result_string)
@@ -28,7 +29,7 @@ if __name__ == '__main__':
         end = datetime.datetime.now()
         elapsed = end - start
         elapsed_seconds = elapsed.total_seconds()
-        result_string = str(result.json())
+        result_string = json.dumps(result.json())
         logger.log(f"Entrant Matches API Call Elapsed {elapsed_seconds} seconds")
         if result_string not in unique_entrant_matches_responses:
             unique_entrant_matches_responses.add(result_string)
@@ -46,7 +47,7 @@ if __name__ == '__main__':
             end = datetime.datetime.now()
             elapsed = end - start
             elapsed_seconds = elapsed.total_seconds()
-            result_string = str(result.json())
+            result_string = json.dumps(result.json())
             logger.log(f"Set API Call for {set_id} Elapsed {elapsed_seconds} seconds")
 
             if result_string not in unique_sets_responses[set_id]:
