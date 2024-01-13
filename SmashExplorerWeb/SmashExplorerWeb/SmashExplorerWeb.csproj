@@ -266,6 +266,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\CurrentTournamentAPIController.cs" />
     <Compile Include="Controllers\DanessController.cs" />
     <Compile Include="Controllers\EntrantMatchesAPIController.cs" />
     <Compile Include="Controllers\EventAPIController.cs" />
@@ -317,6 +318,7 @@
     <Compile Include="Models\Standing.cs" />
     <Compile Include="Models\StartGGApi\StartGGResponse.cs" />
     <Compile Include="Models\Stream.cs" />
+    <Compile Include="Models\Tournament.cs" />
     <Compile Include="Models\TournamentLocation.cs" />
     <Compile Include="Models\Url.cs" />
     <Compile Include="Models\User.cs" />
