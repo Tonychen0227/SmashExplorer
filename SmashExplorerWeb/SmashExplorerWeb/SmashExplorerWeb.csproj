@@ -276,6 +276,7 @@
     <Compile Include="Controllers\ReportScoreAPIController.cs" />
     <Compile Include="Controllers\SetAPIController.cs" />
     <Compile Include="Controllers\TournamentAPIController.cs" />
+    <Compile Include="Controllers\TournamentUserAvatarsAPIController.cs" />
     <Compile Include="Controllers\UserTokenAPIController.cs" />
     <Compile Include="Controllers\FullEventAPIController.cs" />
     <Compile Include="Controllers\ScoreboardController.cs" />
@@ -287,6 +288,7 @@
     <Compile Include="Controllers\SelectEntrantsController.cs" />
     <Compile Include="Controllers\UpsetsController.cs" />
     <Compile Include="Controllers\SeedVisualizerController.cs" />
+    <Compile Include="Database\AvatarsDatabase.cs" />
     <Compile Include="Database\StartGGDatabase.cs" />
     <Compile Include="Database\SmashExplorerDatabase.cs" />
     <Compile Include="Global.asax.cs">
