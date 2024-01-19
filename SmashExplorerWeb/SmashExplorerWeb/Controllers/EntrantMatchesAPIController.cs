@@ -19,7 +19,17 @@ namespace SmashExplorerWeb.Controllers
             if (entrant != null)
             {
                 var entrantMatches = await SmashExplorerDatabase.Instance.GetSetsAsync(entrant.EventId);
-                ret = entrantMatches.Where(x => x.EntrantIds.Contains(id)).OrderBy(x => x.PhaseOrder).ThenBy(x => Math.Abs(x.Round ?? 999));
+                var eventReportedMatches = SmashExplorerDatabase.Instance.GetEventReportedSets(entrant.EventId);
+
+                foreach (var entrantMatch in entrantMatches)
+                {
+                    if (eventReportedMatches != null && eventReportedMatches.Keys.Contains(entrantMatch.Id))
+                    {
+                        entrantMatch.ReportedScoreViaAPI = eventReportedMatches[entrantMatch.Id].Item1;
+                    }
+                }
+
+                ret = entrantMatches.Where(x => x.EntrantIds.Contains(id)).OrderBy(x => x.PhaseOrder).ThenBy(x => Math.Abs(x.Round ?? 999)).ToList();
             }
 
             return Content(JsonConvert.SerializeObject(ret), "application/json");

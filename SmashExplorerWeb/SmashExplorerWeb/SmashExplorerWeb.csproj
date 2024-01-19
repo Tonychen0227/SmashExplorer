@@ -295,6 +295,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\Helpers.cs" />
+    <Compile Include="Helpers\NonOKWithMessageResult.cs" />
     <Compile Include="Models\ActivityState.cs" />
     <Compile Include="Models\CreateScoreboardModel.cs" />
     <Compile Include="Models\DanessModel.cs" />

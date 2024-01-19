@@ -26,4 +26,6 @@ public class Set
     public bool IsUpsetOrNotable { get; set; }
     public int? SetGamesType { get; set; }
     public int? TotalGames { get; set; }
+    public Station Station { get; set; }
+    public ReportScoreAPIRequestBody ReportedScoreViaAPI { get; set; }
 }

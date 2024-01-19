@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -31,12 +32,42 @@ namespace SmashExplorerWeb.Controllers
                     return new HttpNotFoundResult("Set not found");
                 }
 
+                if (body.AuthUserToken == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "No token passed!");
+                }
+
+                body.AuthUserToken = body.AuthUserToken.GetSha256Hash();
+
+                var retrievedAuth = await SmashExplorerDatabase.Instance.GetGalintAuthenticatedUserAsync(body.AuthUserToken);
+
+                if (retrievedAuth == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
+                }
+
+                var eventEntrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(retrievedSet.EventId, useLongerCache: true);
+                var authenticatedEntrant = eventEntrants.Where(x => x.UserSlugs.Contains(retrievedAuth.Slug)).FirstOrDefault();
+
+                if (authenticatedEntrant == null || !retrievedSet.EntrantIds.Contains(authenticatedEntrant.Id))
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
+                }
+
                 if (!(retrievedSet.WinnerId == null || retrievedSet.WinnerId == "None"))
                 {
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest, "Set is already completed!");
+                    return new HttpStatusCodeResult(HttpStatusCode.Conflict, "Set is already completed!");
+                }
+
+                var reportedSets = SmashExplorerDatabase.Instance.GetEventReportedSets(retrievedSet.EventId);
+
+                if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))
+                {
+                    return new NonOKWithMessageResult(JsonConvert.SerializeObject(reportedSets[retrievedSet.Id].Item1), (int)HttpStatusCode.Conflict);
                 }
 
                 await StartGGDatabase.Instance.ReportSet(id, body);
+                SmashExplorerDatabase.Instance.AddReportedSetToCache(retrievedSet.EventId, retrievedSet.Id, body);
 
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)

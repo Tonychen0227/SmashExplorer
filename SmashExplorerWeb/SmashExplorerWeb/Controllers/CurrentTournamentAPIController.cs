@@ -26,7 +26,7 @@ query ReportBracketSet {
         {
             ViewBag.Title = "Current Tournament API";
 
-            var retrievedEvent = await SmashExplorerDatabase.Instance.GetTournamentsAsync();
+            var retrievedEvent = await SmashExplorerDatabase.Instance.GetCurrentTournamentsAsync();
 
             if (retrievedEvent == null)
             {
