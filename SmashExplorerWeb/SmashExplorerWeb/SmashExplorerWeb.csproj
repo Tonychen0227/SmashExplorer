@@ -319,6 +319,7 @@
     <Compile Include="Models\Stage.cs" />
     <Compile Include="Models\Standing.cs" />
     <Compile Include="Models\StartGGApi\StartGGResponse.cs" />
+    <Compile Include="Models\Station.cs" />
     <Compile Include="Models\Stream.cs" />
     <Compile Include="Models\Tournament.cs" />
     <Compile Include="Models\TournamentLocation.cs" />
