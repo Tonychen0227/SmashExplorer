@@ -7,19 +7,19 @@ public class AvatarsDatabase
 {
     private static readonly Lazy<AvatarsDatabase> lazy = new Lazy<AvatarsDatabase>(() => new AvatarsDatabase());
 
-    private Dictionary<string, Tuple<DateTime, Dictionary<string, (string Name, List<(string Url, double Ratio)>)>>> AvatarsCache
-        = new Dictionary<string, Tuple<DateTime, Dictionary<string, (string Name, List<(string Url, double Ratio)>)>>>();
+    private Dictionary<string, Tuple<DateTime, Dictionary<string, (string Name, List<Image>)>>> AvatarsCache
+        = new Dictionary<string, Tuple<DateTime, Dictionary<string, (string Name, List<Image>)>>>();
     private static readonly int AvatarsCacheTTLSeconds = 86400;
 
     private AvatarsDatabase() { }
 
     public static AvatarsDatabase Instance { get { return lazy.Value; } }
 
-    public async Task<Dictionary<string, (string Name, List<(string Url, double Ratio)>)>> GetAvatars(string id)
+    public async Task<Dictionary<string, (string Name, List<Image>)>> GetAvatars(string id)
     {
         if (!AvatarsCache.ContainsKey(id))
         {
-            AvatarsCache.Add(id, Tuple.Create(DateTime.MinValue, new Dictionary<string, (string Name, List<(string Url, double Ratio)>)>()));
+            AvatarsCache.Add(id, Tuple.Create(DateTime.MinValue, new Dictionary<string, (string Name, List<Image>)>()));
         }
 
         var cachedAvatars = AvatarsCache[id];
@@ -31,7 +31,7 @@ public class AvatarsDatabase
 
         var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
 
-        var ret = new Dictionary<string, (string Name, List<(string Url, double Ratio)>)>();
+        var ret = new Dictionary<string, (string Name, List<Image>)>();
 
         foreach (var entrant in entrants)
         {
@@ -47,11 +47,11 @@ public class AvatarsDatabase
                 continue;
             }
 
-            var entrantInfoImages = (entrant.Name, images.Select(x => (x.url, x.ratio)).ToList());
+            var entrantInfoImages = (entrant.Name, images.ToList());
             ret[entrant.Id] = entrantInfoImages;
         }
 
-        AvatarsCache[id] = new Tuple<DateTime, Dictionary<string, (string Name, List<(string Url, double Ratio)>)>>(DateTime.UtcNow, ret);
+        AvatarsCache[id] = new Tuple<DateTime, Dictionary<string, (string Name, List<Image>)>>(DateTime.UtcNow, ret);
 
         return ret;
     }

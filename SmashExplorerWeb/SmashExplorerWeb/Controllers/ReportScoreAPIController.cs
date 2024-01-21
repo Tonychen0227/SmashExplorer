@@ -61,12 +61,22 @@ namespace SmashExplorerWeb.Controllers
 
                 var reportedSets = SmashExplorerDatabase.Instance.GetEventReportedSets(retrievedSet.EventId);
 
-                if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))
+                try
                 {
-                    return new NonOKWithMessageResult(JsonConvert.SerializeObject(reportedSets[retrievedSet.Id].Item1), (int)HttpStatusCode.Conflict);
+                    await StartGGDatabase.Instance.ReportSet(id, body);
+                } catch (Exception ex)
+                {
+                    if (ex.Message.Contains("Cannot report completed set"))
+                    {
+                        if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))
+                        {
+                            return new NonOKWithMessageResult(JsonConvert.SerializeObject(reportedSets[retrievedSet.Id].Item1), (int)HttpStatusCode.Conflict);
+                        }
+                    }
+
+                    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ex.Message);
                 }
 
-                await StartGGDatabase.Instance.ReportSet(id, body);
                 SmashExplorerDatabase.Instance.AddReportedSetToCache(retrievedSet.EventId, retrievedSet.Id, body);
 
                 return new HttpStatusCodeResult(HttpStatusCode.OK);

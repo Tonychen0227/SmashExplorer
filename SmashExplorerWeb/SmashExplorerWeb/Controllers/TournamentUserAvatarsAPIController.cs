@@ -14,7 +14,7 @@ namespace SmashExplorerWeb.Controllers
             var thing = await StartGGDatabase.Instance.GetTournamentEvents(id);
             var tournamentEvents = thing.Tournament.Events;
 
-            var ret = new Dictionary<string, Dictionary<string, (string Name, List<(string Url, double Ratio)>)>>();
+            var ret = new Dictionary<string, Dictionary<string, (string Name, List<Image>)>>();
 
             foreach (var tournamentEvent in tournamentEvents)
             {
