@@ -16,6 +16,7 @@ public class NonOKWithMessageResult : ActionResult
         // you need to do this before setting the body content
         context.HttpContext.Response.StatusCode = _statusCode;
 
+        context.HttpContext.Response.TrySkipIisCustomErrors = true;
         context.HttpContext.Response.Output.Write(_message);
         context.HttpContext.Response.ContentType = "application/json";
         context.HttpContext.Response.Output.Flush();

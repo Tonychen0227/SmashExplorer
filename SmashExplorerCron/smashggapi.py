@@ -305,6 +305,7 @@ class API:
                         images {
                           url
                           ratio
+                          type
                         }
                       }
                     }
