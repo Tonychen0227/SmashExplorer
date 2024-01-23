@@ -7,6 +7,7 @@ public class Tournament
     public List<TournamentEvent> Events { get; set; }
     public List<Image> Images { get; set; }
     public string Slug { get; set; }
+    public string Twitter { get; set; }
     public List<Stream> Streams { get; set; }
 }
 
