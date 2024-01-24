@@ -156,6 +156,7 @@ class API:
                 images {
                   url
                   ratio
+                  type
                 }
               }
               standings(query: {perPage: 128}) {
