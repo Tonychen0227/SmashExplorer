@@ -207,7 +207,7 @@ class API:
         videoGameId = None
         videoGameName = None
         if event["videogame"] is not None:
-            videoGameId = event["videogame"]["id"]
+            videoGameId = int(event["videogame"]["id"])
             videoGameName = event["videogame"]["displayName"]
 
         return {
@@ -355,7 +355,7 @@ class API:
             } for entrant in entrants
         ]
 
-    def __process_set(self, event_id, tournament_set):
+    def __process_set(self, event_id, video_game_id, video_game_name, tournament_set):
         if "phaseGroup" not in tournament_set or tournament_set["phaseGroup"] is None:
             tournament_set["phaseGroup"] = {
                 "id": "NONE",
@@ -384,6 +384,8 @@ class API:
             
         return_set = {
             "id": str(tournament_set["id"]),
+            "videoGameId": video_game_id,
+            "videoGameName": video_game_name,
             "eventId": str(event_id),
             "fullRoundText": tournament_set["fullRoundText"],
             "displayScore": tournament_set["displayScore"],
@@ -497,7 +499,7 @@ class API:
             self.logger.log(f"WTF: Shit Happened {return_set['id']}")
             return return_set
 
-    def get_event_sets_updated_after_timestamp(self, event_id: str, start_timestamp: int = None):
+    def get_event_sets_updated_after_timestamp(self, event_id: str, video_game_id: str, video_game_name: str, start_timestamp: int = None):
         query_string = '''
             query EventSetsQuery($eventId: ID, $page: Int, $updatedAfter: Timestamp) {
               event(id:$eventId) {
@@ -580,4 +582,4 @@ class API:
 
         sets = self.make_paginated_calls(query_string, ["event", "sets"], params)
 
-        return [self.__process_set(event_id, tournament_set) for tournament_set in sets]
+        return [self.__process_set(event_id, video_game_id, video_game_name, tournament_set) for tournament_set in sets]

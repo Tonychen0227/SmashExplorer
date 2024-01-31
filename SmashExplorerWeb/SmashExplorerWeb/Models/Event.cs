@@ -28,6 +28,8 @@ public class Event
     public long CreatedAt { get; set; }
     public long UpdatedAt { get; set; }
     public string Slug { get; set; }
+    public string VideoGameId { get; set; }
+    public string VideoGameName { get; set; }
     public int NumEntrants { get; set; }
     public long SetsLastUpdated { get; set; }
     public List<Standing> standings { get; set; }

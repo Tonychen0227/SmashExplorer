@@ -70,7 +70,10 @@ class OperationsManager:
         if bypass_last_updated:
             event["setsLastUpdated"] = 1
 
-        sets = self.api.get_event_sets_updated_after_timestamp(event_id, event["setsLastUpdated"])
+        video_game_id = event["videoGameId"]
+        video_game_name = event["videoGameName"]
+
+        sets = self.api.get_event_sets_updated_after_timestamp(event_id, video_game_id, video_game_name,  event["setsLastUpdated"])
 
         self.cosmos.update_event_sets_last_updated(event_id, current_time)
 
