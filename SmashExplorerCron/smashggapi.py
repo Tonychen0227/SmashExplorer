@@ -138,6 +138,10 @@ class API:
               name
               slug
               numEntrants
+              videogame {
+                id
+                displayName
+              }
               tournament {
                 owner {
                   id
@@ -200,6 +204,12 @@ class API:
         if event["standings"] is not None and "nodes" in event["standings"]:
             standings = event["standings"]["nodes"]
 
+        videoGameId = None
+        videoGameName = None
+        if event["videogame"] is not None:
+            videoGameId = event["videogame"]["id"]
+            videoGameName = event["videogame"]["displayName"]
+
         return {
                 "tournamentId": tournament["id"],
                 "tournamentSlug": tournament["slug"],
@@ -219,7 +229,9 @@ class API:
                 "updatedAt": event["updatedAt"],
                 "slug": event["slug"],
                 "numEntrants": event["numEntrants"],
-                "standings": standings
+                "standings": standings,
+                "videoGameId": videoGameId,
+                "videoGameName": videoGameName
             }
 
     def get_ult_tournament_events(self, tournament_slug):

@@ -46,7 +46,7 @@ namespace SmashExplorerWeb.Controllers
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
-                var eventEntrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(retrievedSet.EventId, useLongerCache: true);
+                var eventEntrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(retrievedSet.EventId);
                 var authenticatedEntrant = eventEntrants.Where(x => x.UserSlugs.Contains(retrievedAuth.Slug)).FirstOrDefault();
 
                 if (authenticatedEntrant == null || !retrievedSet.EntrantIds.Contains(authenticatedEntrant.Id))
