@@ -10,13 +10,29 @@ namespace SmashExplorerWeb.Controllers
 query ReportBracketSet {
   tournament(slug:"tournament/tony-chen-test-2-1"){
     id
+    slug
+    name
+    images {
+      ratio
+      type
+      url
+    }
     events{
       id
+      images {
+        ratio
+        type
+        url
+      }
       name
       phases{
         name
         id
       }
+    }
+    streams {
+      streamName
+      streamSource
     }
   }
 }
