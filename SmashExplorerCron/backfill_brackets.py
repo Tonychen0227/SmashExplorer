@@ -20,7 +20,7 @@ if __name__ == '__main__':
     logger.log("Starting Backfill, Mutex ensured")
 
     events_count = 0
-    new_events = [1062267, 1038301, 1038302]
+    new_events = [1057642]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 14
