@@ -265,4 +265,9 @@ public class CacheManager
         //TournamentEventsCache.InvalidateCache we almost never have to invalidate this
         //TournamentAvatarsCache.InvalidateCache we almost never have to invalidate this
     }
+
+    public void InvalidateSetsAndShortenTTL(string eventId, long shortenTTLDurationSeconds)
+    {
+        SetsCache.InvalidateCacheAndOverrideTTL(eventId, shortenTTLDurationSeconds);
+    }
 }

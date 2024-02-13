@@ -79,6 +79,9 @@ namespace SmashExplorerWeb.Controllers
 
                 CacheManager.Instance.AddEventReportedSet(retrievedSet.EventId, retrievedSet.Id, body);
 
+                // Invalidate Sets Cache and shorten TTL for 60 seconds
+                CacheManager.Instance.InvalidateSetsAndShortenTTL(retrievedSet.EventId, 60);
+
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)
             {
