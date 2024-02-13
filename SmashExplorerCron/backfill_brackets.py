@@ -21,7 +21,6 @@ if __name__ == '__main__':
 
     logger.log("Starting Backfill, Mutex ensured")
 
-    events_count = 0
     new_events = [1057642, 1020145]
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
@@ -44,6 +43,7 @@ if __name__ == '__main__':
 
     for x in range(0, 10):
         logger.log(f"Backfilling for the #{x + 1} time")
+        events_count = 0
         for event_id in new_events:
             event_id = str(event_id)
             events_count += 1
