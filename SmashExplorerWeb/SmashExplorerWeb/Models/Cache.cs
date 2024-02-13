@@ -57,6 +57,11 @@ public class Cache<T>
 
     public void InvalidateCache(string key)
     {
+        if (!ContainsKey(key))
+        {
+            return;
+        }
+
         lock (_lock)
         {
             _internalCache.Remove(key);

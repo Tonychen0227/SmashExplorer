@@ -297,6 +297,7 @@
     </Compile>
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Helpers\NonOKWithMessageResult.cs" />
+    <Compile Include="Controllers\InvalidateCacheAPIController.cs" />
     <Compile Include="Models\ActivityState.cs" />
     <Compile Include="Models\Cache.cs" />
     <Compile Include="Models\CreateScoreboardModel.cs" />
