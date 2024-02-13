@@ -6,10 +6,12 @@ public class CacheManager
 {
     private static readonly Lazy<CacheManager> lazy = new Lazy<CacheManager>(() => new CacheManager());
     private readonly Timer _cleanupTimer;
+    private static readonly string _defaultKey = string.Empty;
 
     private readonly Cache<string, Dictionary<string, ReportScoreAPIRequestBody>> ReportedSetsCache = new Cache<string, Dictionary<string, ReportScoreAPIRequestBody>>(6000);
     private readonly Cache<string, Dictionary<string, (string Name, int Seeding)>> CachedEntrantSeedingCache = new Cache<string, Dictionary<string, (string Name, int Seeding)>>(86400);
     private readonly Cache<string, List<Event>> UpcomingEventsCache = new Cache<string, List<Event>>(60);
+    private readonly Cache<string, List<Tournament>> CurrentTournamentsCache = new Cache<string, List<Tournament>>(600);
 
     private CacheManager() {
         _cleanupTimer = new Timer(TimeSpan.FromMinutes(2).TotalMilliseconds)
@@ -29,7 +31,7 @@ public class CacheManager
         return ReportedSetsCache.ContainsKey(eventId) ? ReportedSetsCache.GetFromCache(eventId) : null;
     }
 
-    public void AddReportedSetToCache(string eventId, string setId, ReportScoreAPIRequestBody reportedSet)
+    public void AddEventReportedSet(string eventId, string setId, ReportScoreAPIRequestBody reportedSet)
     {
         ReportedSetsCache.AddToCacheObject(eventId, (Dictionary<string, ReportScoreAPIRequestBody> cachedObject) =>
         {
@@ -37,13 +39,11 @@ public class CacheManager
         });
     }
 
-    public List<Event> GetCachedUpcomingEvents()
+    public List<Event> GetUpcomingEvents()
     {
-        var key = string.Empty;
-
-        if (UpcomingEventsCache.ContainsKey(key))
+        if (UpcomingEventsCache.ContainsKey(_defaultKey))
         {
-            return UpcomingEventsCache.GetFromCache(key);
+            return UpcomingEventsCache.GetFromCache(_defaultKey);
         }
         else
         {
@@ -53,10 +53,10 @@ public class CacheManager
 
     public void SetUpcomingEvents(List<Event> events)
     {
-        UpcomingEventsCache.SetCacheObject(string.Empty, events);
+        UpcomingEventsCache.SetCacheObject(_defaultKey, events);
     }
 
-    public Dictionary<string, (string Name, int Seeding)> GetCachedEntrantSeeding(string eventId)
+    public Dictionary<string, (string Name, int Seeding)> GetDanessEntrantSeeding(string eventId)
     {
         if (CachedEntrantSeedingCache.ContainsKey(eventId))
         {
@@ -68,9 +68,26 @@ public class CacheManager
         }
     }
 
-    public void UpdateCachedEntrantSeeding(string eventId, Dictionary<string, (string Name, int Seeding)> cachedSeeding)
+    public void SetDanessEntrantSeeding(string eventId, Dictionary<string, (string Name, int Seeding)> cachedSeeding)
     {
         CachedEntrantSeedingCache.SetCacheObject(eventId, cachedSeeding);
+    }
+
+    public List<Tournament> GetCurrentTournaments()
+    {
+        if (CurrentTournamentsCache.ContainsKey(_defaultKey))
+        {
+            return CurrentTournamentsCache.GetFromCache(_defaultKey);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetCurrentTournaments(List<Tournament> currentTournaments)
+    {
+        CurrentTournamentsCache.SetCacheObject(_defaultKey, currentTournaments);
     }
 
     private void CleanupCaches(object sender, ElapsedEventArgs e)
@@ -78,5 +95,14 @@ public class CacheManager
         ReportedSetsCache.CleanupCache();
         CachedEntrantSeedingCache.CleanupCache();
         UpcomingEventsCache.CleanupCache();
+        CurrentTournamentsCache.CleanupCache();
+    }
+
+    public void InvalidateCaches(string eventId)
+    {
+        ReportedSetsCache.InvalidateCache(eventId);
+        CachedEntrantSeedingCache.InvalidateCache(eventId);
+        UpcomingEventsCache.InvalidateCache(_defaultKey);
+        CurrentTournamentsCache.InvalidateCache(_defaultKey);
     }
 }

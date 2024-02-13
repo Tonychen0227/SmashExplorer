@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Cache<K, T>
 {
@@ -46,7 +47,7 @@ public class Cache<K, T>
     {
         lock (_lock)
         {
-            foreach (var key in _internalCache.Keys)
+            foreach (var key in _internalCache.Keys.ToList())
             {
                 if (_internalCache[key].expiry < DateTime.UtcNow)
                 {
@@ -71,7 +72,6 @@ public class Cache<K, T>
             if (!_internalCache.ContainsKey(key))
             {
                 _internalCache[key] = ((T) Activator.CreateInstance(typeof(T)), GetExpiry());
-                return;
             }
 
             mutationFunc.Invoke(_internalCache[key].cachedObject);

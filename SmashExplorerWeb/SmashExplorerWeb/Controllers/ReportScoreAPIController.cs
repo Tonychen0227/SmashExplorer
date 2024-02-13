@@ -77,7 +77,7 @@ namespace SmashExplorerWeb.Controllers
                     return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ex.Message);
                 }
 
-                CacheManager.Instance.AddReportedSetToCache(retrievedSet.EventId, retrievedSet.Id, body);
+                CacheManager.Instance.AddEventReportedSet(retrievedSet.EventId, retrievedSet.Id, body);
 
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)

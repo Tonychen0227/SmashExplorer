@@ -22,9 +22,6 @@ public class SmashExplorerDatabase
 
     private static readonly Lazy<SmashExplorerDatabase> lazy = new Lazy<SmashExplorerDatabase>(() => new SmashExplorerDatabase());
 
-    private Tuple<DateTime, List<Tournament>> CurrentTournamentCache = new Tuple<DateTime, List<Tournament>>(DateTime.MinValue, new List<Tournament>());
-    private static readonly int CurrentTournamentCacheCacheTTLSeconds = 600;
-
     private Dictionary<string, Tuple<DateTime, Event>> EventsCache = new Dictionary<string, Tuple<DateTime, Event>>();
     private static readonly int EventsCacheTTLSeconds = 60;
 
@@ -123,7 +120,7 @@ public class SmashExplorerDatabase
 
     public async Task<List<Event>> GetUpcomingEventsAsync()
     {
-        var cached = CacheManager.Instance.GetCachedUpcomingEvents();
+        var cached = CacheManager.Instance.GetUpcomingEvents();
 
         if (cached != null)
         {
@@ -149,9 +146,11 @@ public class SmashExplorerDatabase
 
     public async Task<List<Tournament>> GetCurrentTournamentsAsync()
     {
-        if (DateTime.UtcNow - CurrentTournamentCache.Item1 < TimeSpan.FromSeconds(CurrentTournamentCacheCacheTTLSeconds))
+        var cached = CacheManager.Instance.GetCurrentTournaments();
+
+        if (cached != null)
         {
-            return CurrentTournamentCache.Item2;
+            return cached;
         }
 
         var results = new List<Tournament>();
@@ -165,7 +164,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        CurrentTournamentCache = Tuple.Create(DateTime.UtcNow, results);
+        CacheManager.Instance.SetCurrentTournaments(results);
 
         return results.ToList();
     }
@@ -205,7 +204,7 @@ public class SmashExplorerDatabase
 
     public async Task<Dictionary<string, (string Name, int Seeding)>> GetCachedEntrantSeeding(string eventId)
     {
-        var cached = CacheManager.Instance.GetCachedEntrantSeeding(eventId);
+        var cached = CacheManager.Instance.GetDanessEntrantSeeding(eventId);
 
         if (cached != null)
         {
@@ -222,7 +221,7 @@ public class SmashExplorerDatabase
             return null;
         }
 
-        CacheManager.Instance.UpdateCachedEntrantSeeding(eventId, result.CachedEntrantSeeding);
+        CacheManager.Instance.SetDanessEntrantSeeding(eventId, result.CachedEntrantSeeding);
 
         return result.CachedEntrantSeeding;
     }
@@ -245,7 +244,7 @@ public class SmashExplorerDatabase
             return cachedEntrantSeeding;
         }
 
-        CacheManager.Instance.UpdateCachedEntrantSeeding(eventId, cachedEntrantSeeding);
+        CacheManager.Instance.SetDanessEntrantSeeding(eventId, cachedEntrantSeeding);
 
         return cachedEntrantSeeding;
     }
