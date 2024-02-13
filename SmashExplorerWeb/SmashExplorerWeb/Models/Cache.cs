@@ -44,13 +44,13 @@ public class Cache<T>
 
     public T GetFromCache(string key)
     {
+        if (!ContainsKey(key))
+        {
+            return default;
+        }
+
         lock (_lock)
         {
-            if (!_internalCache.ContainsKey(key))
-            {
-                return default;
-            }
-
             return _internalCache[key].cachedObject;
         }
     }

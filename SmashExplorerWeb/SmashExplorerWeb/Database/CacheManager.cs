@@ -268,6 +268,7 @@ public class CacheManager
 
     public void InvalidateSetsAndShortenTTL(string eventId, long shortenTTLDurationSeconds)
     {
+        UpsetsCache.InvalidateCacheAndOverrideTTL(eventId, shortenTTLDurationSeconds);
         SetsCache.InvalidateCacheAndOverrideTTL(eventId, shortenTTLDurationSeconds);
     }
 }
