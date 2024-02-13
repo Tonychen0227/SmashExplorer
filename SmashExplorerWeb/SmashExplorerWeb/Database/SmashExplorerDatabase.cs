@@ -47,12 +47,6 @@ public class SmashExplorerDatabase
 
     private static readonly List<int> BannedOwners = new List<int>() { 1819468 };
 
-    private Dictionary<string, Dictionary<string, (ReportScoreAPIRequestBody, DateTime)>> ReportedSetsCache = new Dictionary<string, Dictionary<string, (ReportScoreAPIRequestBody, DateTime)>>();
-    private static readonly int ReportedSetsCacheTTLSeconds = 6000;
-    private readonly object _reportedSetsCacheLock = new object();
-
-    private Timer CacheCleanupTimer;
-
     private Container GetContainer(string containerName)
     {
         var dbName = "smash-explorer-database";
@@ -92,66 +86,11 @@ public class SmashExplorerDatabase
                 PlacementToRounds[placement] = index;
             }
         }
-
-        CacheCleanupTimer = new Timer(60000)
-        {
-            Enabled = true,
-            AutoReset = true
-        };
-
-        CacheCleanupTimer.Elapsed += CleanupCaches;
-        CacheCleanupTimer.Start();
-    }
-
-    private void CleanupCaches(object sender, ElapsedEventArgs e)
-    {
-        lock (_reportedSetsCacheLock)
-        {
-            foreach (var eventId in ReportedSetsCache.Keys)
-            {
-                var eventReportedSetsCache = ReportedSetsCache[eventId];
-
-                foreach (var reportedSetId in eventReportedSetsCache.Keys)
-                {
-                    var reportedSet = eventReportedSetsCache[reportedSetId];
-
-                    if (reportedSet.Item2 < DateTime.UtcNow)
-                    {
-                        ReportedSetsCache.Remove(reportedSetId);
-                    }
-                }
-
-                if (ReportedSetsCache[eventId].Keys.Count == 0)
-                {
-                    ReportedSetsCache.Remove(eventId);
-                }
-            }
-        }
     }
 
     public Dictionary<string, (ReportScoreAPIRequestBody, DateTime)> GetEventReportedSets(string eventId)
     {
-        lock (_reportedSetsCacheLock)
-        {
-            return ReportedSetsCache.ContainsKey(eventId) ? ReportedSetsCache[eventId] : null;
-        }
-    }
-
-    public void AddReportedSetToCache(string eventId, string setId, ReportScoreAPIRequestBody reportedSet)
-    {
-        var expiry = DateTime.UtcNow.AddSeconds(ReportedSetsCacheTTLSeconds);
-
-        lock (_reportedSetsCacheLock)
-        {
-            if (!ReportedSetsCache.ContainsKey(eventId))
-            {
-                ReportedSetsCache.Add(eventId, new Dictionary<string, (ReportScoreAPIRequestBody, DateTime)>());
-            }
-
-            var eventCache = ReportedSetsCache[eventId];
-
-            eventCache[setId] = (reportedSet, expiry);
-        }
+        return CacheDatabase.Instance.GetEventReportedSets(eventId);
     }
 
     public static SmashExplorerDatabase Instance { get { return lazy.Value; } }
