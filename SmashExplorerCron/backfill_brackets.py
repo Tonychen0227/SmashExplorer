@@ -8,7 +8,7 @@ from operations_manager import OperationsManager
 
 
 if __name__ == '__main__':
-    logger = Logger(f"backfill")
+    logger = Logger(f"{os.environ['SMASH_EXPLORER_LOG_ROOT']}/backfill")
     operations = OperationsManager(logger, "SMASHGG_KEYS_BACKFILL")
 
     mutex_name = "backfill"
