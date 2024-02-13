@@ -64,7 +64,7 @@ if __name__ == '__main__':
         if datetime.now().second >= 45:
             break
         else:
-            sleep(20)
+            sleep(10)
 
     logger.log("Removing mutex lock")
     operations.remove_mutex(mutex_name)
