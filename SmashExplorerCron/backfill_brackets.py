@@ -43,7 +43,7 @@ if __name__ == '__main__':
     events_size = len(new_events)
 
     for x in range(0, 10):
-        logger.log(f"Backfilling for the #{x} time")
+        logger.log(f"Backfilling for the #{x + 1} time")
         for event_id in new_events:
             event_id = str(event_id)
             events_count += 1
