@@ -22,21 +22,6 @@ public class SmashExplorerDatabase
 
     private static readonly Lazy<SmashExplorerDatabase> lazy = new Lazy<SmashExplorerDatabase>(() => new SmashExplorerDatabase());
 
-    private Dictionary<string, Tuple<DateTime, Event>> EventsCache = new Dictionary<string, Tuple<DateTime, Event>>();
-    private static readonly int EventsCacheTTLSeconds = 60;
-
-    private Dictionary<string, Tuple<DateTime, Entrant>> EntrantCache = new Dictionary<string, Tuple<DateTime, Entrant>>();
-    private static readonly int EntrantCacheTTLSeconds = 60;
-
-    private Dictionary<string, Tuple<DateTime, List<Entrant>>> EntrantsCache = new Dictionary<string, Tuple<DateTime, List<Entrant>>>();
-    private static readonly int EntrantsCacheTTLSeconds = 60;
-
-    private Dictionary<string, Tuple<DateTime, List<Set>>> SetsCache = new Dictionary<string, Tuple<DateTime, List<Set>>>();
-    private static readonly int SetsCacheTTLSeconds = 30;
-
-    private Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>>();
-    private static readonly int UpsetsCacheTTLSeconds = 120;
-
     private static readonly List<int> BannedOwners = new List<int>() { 1819468 };
 
     private Container GetContainer(string containerName)
@@ -171,16 +156,10 @@ public class SmashExplorerDatabase
 
     public async Task<Event> GetEventAsync(string eventId, bool useLongerCache = false)
     {
-        if (!EventsCache.ContainsKey(eventId))
+        var cached = CacheManager.Instance.GetEvent(eventId);
+        if (cached != null)
         {
-            EventsCache.Add(eventId, Tuple.Create(DateTime.MinValue, (Event) null));
-        }
-
-        Tuple<DateTime, Event> cachedEvent = EventsCache[eventId];
-
-        if (DateTime.UtcNow - cachedEvent.Item1 < TimeSpan.FromSeconds(eventId == "864717" || useLongerCache ? 86400 : EventsCacheTTLSeconds))
-        {
-            return cachedEvent.Item2;
+            return cached;
         }
 
         Event result;
@@ -197,7 +176,7 @@ public class SmashExplorerDatabase
             result = null;
         }
 
-        EventsCache[eventId] = Tuple.Create(DateTime.UtcNow, result);
+        CacheManager.Instance.SetEvent(eventId, result);
 
         return result;
     }
@@ -304,16 +283,10 @@ public class SmashExplorerDatabase
 
     public async Task<Entrant> GetEntrantAsync(string entrantId)
     {
-        if (!EntrantCache.ContainsKey(entrantId))
+        var cached = CacheManager.Instance.GetEntrant(entrantId);
+        if (cached != null)
         {
-            EntrantCache.Add(entrantId, Tuple.Create(DateTime.MinValue, new Entrant()));
-        }
-
-        Tuple<DateTime, Entrant> cachedEntrant = EntrantCache[entrantId];
-
-        if (DateTime.UtcNow - cachedEntrant.Item1 < TimeSpan.FromSeconds(EntrantCacheTTLSeconds))
-        {
-            return cachedEntrant.Item2;
+            return cached;
         }
 
         var entrantsList = new List<Entrant>();
@@ -328,24 +301,17 @@ public class SmashExplorerDatabase
 
         var retEntrant = entrantsList.FirstOrDefault();
 
-        EntrantCache[entrantId] = Tuple.Create(DateTime.UtcNow, retEntrant);
+        CacheManager.Instance.SetEntrant(entrantId, retEntrant);
 
         return retEntrant;
     }
 
     public async Task<List<Entrant>> GetEntrantsAsync(string eventId, bool useLongerCache = false)
     {
-        if (!EntrantsCache.ContainsKey(eventId))
+        var cached = CacheManager.Instance.GetEventEntrants(eventId);
+        if (cached != null)
         {
-            EntrantsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Entrant>()));
-        }
-
-        Tuple<DateTime, List<Entrant>> cachedEntrants = EntrantsCache[eventId];
-
-        // 864717 is EVO 2023
-        if (DateTime.UtcNow - cachedEntrants.Item1 < TimeSpan.FromSeconds(eventId == "864717" || useLongerCache ? 86400 : EntrantsCacheTTLSeconds))
-        {
-            return cachedEntrants.Item2;
+            return cached;
         }
 
         List<Entrant> results = new List<Entrant>();
@@ -362,7 +328,8 @@ public class SmashExplorerDatabase
 
         List<Entrant> resultsList = results.OrderBy(x => x.Seeding == null).ThenBy(x => x.Seeding).ToList();
 
-        EntrantsCache[eventId] = Tuple.Create(DateTime.UtcNow, resultsList);
+        long? ttl = (eventId == "864717" || useLongerCache) ? (long?)86400 : null;
+        CacheManager.Instance.SetEventEntrants(eventId, results, ttl);
 
         return resultsList;
     }
@@ -385,17 +352,10 @@ public class SmashExplorerDatabase
 
     public async Task<List<Set>> GetSetsAsync(string eventId, bool useLongerCache = false)
     {
-        if (!SetsCache.ContainsKey(eventId))
+        var cached = CacheManager.Instance.GetEventSets(eventId);
+        if (cached != null)
         {
-            SetsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Set>()));
-        }
-
-        Tuple<DateTime, List<Set>> cachedSets = SetsCache[eventId];
-
-        // 864717 is EVO 2023
-        if (DateTime.UtcNow - cachedSets.Item1 < TimeSpan.FromSeconds(eventId == "864717" || useLongerCache ? 86400 : SetsCacheTTLSeconds))
-        {
-            return cachedSets.Item2;
+            return cached;
         }
 
         var results = new List<Set>();
@@ -410,7 +370,8 @@ public class SmashExplorerDatabase
             }
         }
 
-        SetsCache[eventId] = Tuple.Create(DateTime.UtcNow, results);
+        long? ttl = (eventId == "864717" || useLongerCache) ? (long?) 86400 : null;
+        CacheManager.Instance.SetEventSets(eventId, results, ttl);
 
         return results;
     }
@@ -466,23 +427,18 @@ public class SmashExplorerDatabase
 
     public async Task<IEnumerable<Upset>> GetUpsetsAndNotableAsync(string eventId)
     {
-        if (!UpsetsCache.ContainsKey(eventId))
+        var cached = CacheManager.Instance.GetEventUpsets(eventId);
+        if (cached != null)
         {
-            UpsetsCache.Add(eventId, Tuple.Create(DateTime.MinValue, new List<Upset>().AsEnumerable()));
-        }
-
-        Tuple<DateTime, IEnumerable<Upset>> cachedUpsets = UpsetsCache[eventId];
-
-        if (DateTime.UtcNow - cachedUpsets.Item1 < TimeSpan.FromSeconds(eventId == "864717" ? 86400 : UpsetsCacheTTLSeconds))
-        {
-            return cachedUpsets.Item2;
+            return cached;
         }
 
         var results = await GetSetsAsync(eventId);
 
         var ret = results.Where(x => x.IsUpsetOrNotable).Select(set => MapToUpset(set));
 
-        UpsetsCache[eventId] = Tuple.Create(DateTime.UtcNow, ret);
+        long? ttl = eventId == "864717" ? (long?)86400 : null;
+        CacheManager.Instance.SetEventUpsets(eventId, ret.ToList(), ttl);
 
         return ret;
     }

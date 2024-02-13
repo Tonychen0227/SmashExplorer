@@ -13,9 +13,6 @@ public class StartGGDatabase
 
     private static readonly Lazy<StartGGDatabase> lazy = new Lazy<StartGGDatabase>(() => new StartGGDatabase());
 
-    private Dictionary<string, Tuple<DateTime, StartGGTournamentResponse>> TournamentEventsCache = new Dictionary<string, Tuple<DateTime, StartGGTournamentResponse>>();
-    private static readonly int TournamentEventsCacheTTLSeconds = 600;
-
     private StartGGDatabase()
     {
         var keys = Environment.GetEnvironmentVariable("STARTGG_KEYS");
@@ -177,11 +174,10 @@ query TournamentSlugQuery($slug: String) {
 
     public async Task<StartGGTournamentResponse> GetTournamentEvents(string id)
     {
-        var entryExists = TournamentEventsCache.TryGetValue(id, out var cachedData);
-
-        if (entryExists && DateTime.UtcNow - cachedData.Item1 < TimeSpan.FromSeconds(TournamentEventsCacheTTLSeconds))
+        var cached = CacheManager.Instance.GetTournamentEvents(id);
+        if (cached != null)
         {
-            return cachedData.Item2;
+            return cached;
         }
 
         var query = new GraphQLRequest
@@ -206,6 +202,8 @@ query TournamentIdQuery($id: ID) {
         };
 
         var response = await SendQueryAsync<StartGGTournamentResponse>(query);
+
+        CacheManager.Instance.SetTournamentEvents(id, response.Data);
 
         return response.Data;
     }

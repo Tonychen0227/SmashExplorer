@@ -8,10 +8,18 @@ public class CacheManager
     private readonly Timer _cleanupTimer;
     private static readonly string _defaultKey = string.Empty;
 
-    private readonly Cache<string, Dictionary<string, ReportScoreAPIRequestBody>> ReportedSetsCache = new Cache<string, Dictionary<string, ReportScoreAPIRequestBody>>(6000);
-    private readonly Cache<string, Dictionary<string, (string Name, int Seeding)>> CachedEntrantSeedingCache = new Cache<string, Dictionary<string, (string Name, int Seeding)>>(86400);
-    private readonly Cache<string, List<Event>> UpcomingEventsCache = new Cache<string, List<Event>>(60);
-    private readonly Cache<string, List<Tournament>> CurrentTournamentsCache = new Cache<string, List<Tournament>>(600);
+    private readonly Cache<Dictionary<string, ReportScoreAPIRequestBody>> ReportedSetsCache = new Cache<Dictionary<string, ReportScoreAPIRequestBody>>(6000);
+    private readonly Cache<Dictionary<string, (string Name, int Seeding)>> CachedEntrantSeedingCache = new Cache<Dictionary<string, (string Name, int Seeding)>>(86400);
+    private readonly Cache<List<Event>> UpcomingEventsCache = new Cache<List<Event>>(60);
+    private readonly Cache<List<Tournament>> CurrentTournamentsCache = new Cache<List<Tournament>>(600);
+    private readonly Cache<List<Set>> SetsCache = new Cache<List<Set>>(30);
+    private readonly Cache<List<Upset>> UpsetsCache = new Cache<List<Upset>>(120);
+    private readonly Cache<List<Entrant>> EventEntrantsCache = new Cache<List<Entrant>>(60);
+    private readonly Cache<Entrant> EntrantsCache = new Cache<Entrant>(60);
+    private readonly Cache<Event> EventsCache = new Cache<Event>(60);
+    private readonly Cache<ExploreModel> FullEventsCache = new Cache<ExploreModel>(30);
+    private readonly Cache<StartGGTournamentResponse> TournamentEventsCache = new Cache<StartGGTournamentResponse>(600);
+    private readonly Cache<Dictionary<string, (string Name, List<Image>)>> TournamentAvatarsCache = new Cache<Dictionary<string, (string Name, List<Image>)>>(86400);
 
     private CacheManager() {
         _cleanupTimer = new Timer(TimeSpan.FromMinutes(2).TotalMilliseconds)
@@ -90,12 +98,156 @@ public class CacheManager
         CurrentTournamentsCache.SetCacheObject(_defaultKey, currentTournaments);
     }
 
+    public List<Set> GetEventSets(string eventId)
+    {
+        if (SetsCache.ContainsKey(eventId))
+        {
+            return SetsCache.GetFromCache(eventId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetEventSets(string eventId, List<Set> eventSets, long? overrideTTLSeconds)
+    {
+        SetsCache.SetCacheObject(eventId, eventSets, overrideTTLSeconds);
+    }
+
+    public List<Upset> GetEventUpsets(string eventId)
+    {
+        if (UpsetsCache.ContainsKey(eventId))
+        {
+            return UpsetsCache.GetFromCache(eventId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetEventUpsets(string eventId, List<Upset> eventUpsets, long? overrideTTLSeconds)
+    {
+        UpsetsCache.SetCacheObject(eventId, eventUpsets, overrideTTLSeconds);
+    }
+
+    public List<Entrant> GetEventEntrants(string eventId)
+    {
+        if (EventEntrantsCache.ContainsKey(eventId))
+        {
+            return EventEntrantsCache.GetFromCache(eventId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetEventEntrants(string eventId, List<Entrant> eventEntrants, long? overrideTTLSeconds)
+    {
+        EventEntrantsCache.SetCacheObject(eventId, eventEntrants, overrideTTLSeconds);
+    }
+
+    public Entrant GetEntrant(string entrantId)
+    {
+        if (EntrantsCache.ContainsKey(entrantId))
+        {
+            return EntrantsCache.GetFromCache(entrantId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetEntrant(string entrantId, Entrant entrant)
+    {
+        EntrantsCache.SetCacheObject(entrantId, entrant);
+    }
+
+    public Event GetEvent(string eventId)
+    {
+        if (EventsCache.ContainsKey(eventId))
+        {
+            return EventsCache.GetFromCache(eventId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetEvent(string eventId, Event eventObject)
+    {
+        EventsCache.SetCacheObject(eventId, eventObject);
+    }
+
+    public ExploreModel GetFullEvent(string eventId)
+    {
+        if (FullEventsCache.ContainsKey(eventId))
+        {
+            return FullEventsCache.GetFromCache(eventId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetFullEvent(string eventId, ExploreModel fullEvent)
+    {
+        FullEventsCache.SetCacheObject(eventId, fullEvent);
+    }
+
+    public StartGGTournamentResponse GetTournamentEvents(string tournamentId)
+    {
+        if (TournamentEventsCache.ContainsKey(tournamentId))
+        {
+            return TournamentEventsCache.GetFromCache(tournamentId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetTournamentEvents(string tournamentId, StartGGTournamentResponse fullEvent)
+    {
+        TournamentEventsCache.SetCacheObject(tournamentId, fullEvent);
+    }
+
+    public Dictionary<string, (string Name, List<Image>)> GetTournamentAvatars(string tournamentId)
+    {
+        if (TournamentAvatarsCache.ContainsKey(tournamentId))
+        {
+            return TournamentAvatarsCache.GetFromCache(tournamentId);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetTournamentEvents(string tournamentId, Dictionary<string, (string Name, List<Image>)> tournamentAvatars)
+    {
+        TournamentAvatarsCache.SetCacheObject(tournamentId, tournamentAvatars);
+    }
+
     private void CleanupCaches(object sender, ElapsedEventArgs e)
     {
         ReportedSetsCache.CleanupCache();
         CachedEntrantSeedingCache.CleanupCache();
         UpcomingEventsCache.CleanupCache();
         CurrentTournamentsCache.CleanupCache();
+        SetsCache.CleanupCache();
+        UpsetsCache.CleanupCache();
+        EventEntrantsCache.CleanupCache();
+        EntrantsCache.CleanupCache();
+        EventsCache.CleanupCache();
+        FullEventsCache.CleanupCache();
+        TournamentEventsCache.CleanupCache();
+        TournamentAvatarsCache.CleanupCache();
     }
 
     public void InvalidateCaches(string eventId)
@@ -104,5 +256,13 @@ public class CacheManager
         CachedEntrantSeedingCache.InvalidateCache(eventId);
         UpcomingEventsCache.InvalidateCache(_defaultKey);
         CurrentTournamentsCache.InvalidateCache(_defaultKey);
+        SetsCache.InvalidateCache(eventId);
+        UpsetsCache.InvalidateCache(eventId);
+        EventEntrantsCache.InvalidateCache(eventId);
+        //EntrantsCache.InvalidateCache we almost never have to invalidate this
+        EventsCache.InvalidateCache(eventId);
+        FullEventsCache.InvalidateCache(eventId);
+        //TournamentEventsCache.InvalidateCache we almost never have to invalidate this
+        //TournamentAvatarsCache.InvalidateCache we almost never have to invalidate this
     }
 }

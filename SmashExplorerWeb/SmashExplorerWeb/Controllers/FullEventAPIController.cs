@@ -9,15 +9,13 @@ namespace SmashExplorerWeb.Controllers
 {
     public class FullEventAPIController : Controller
     {
-        private Dictionary<string, Tuple<DateTime, ExploreModel>> Cache = new Dictionary<string, Tuple<DateTime, ExploreModel>>();
-        private static readonly int CacheTTLSeconds = 0;
-
         [HttpGet]
         public async Task<ActionResult> Index(string id)
         {
-            if (Cache.ContainsKey(id) && DateTime.UtcNow - Cache[id].Item1 < TimeSpan.FromSeconds(CacheTTLSeconds))
+            var cached = CacheManager.Instance.GetFullEvent(id);
+            if (cached != null)
             {
-                return Content(JsonConvert.SerializeObject(Cache[id].Item2), "application/json");
+                return Content(JsonConvert.SerializeObject(cached), "application/json");
             }
 
             string eventId = id;
@@ -75,13 +73,7 @@ namespace SmashExplorerWeb.Controllers
                 AllSets = sets
             };
 
-            if (!Cache.ContainsKey(id))
-            {
-                Cache.Add(id, Tuple.Create(DateTime.UtcNow, returnModel));
-            } else
-            {
-                Cache[id] = Tuple.Create(DateTime.UtcNow, returnModel);
-            }
+            CacheManager.Instance.SetFullEvent(id, returnModel);
 
             return Content(JsonConvert.SerializeObject(returnModel), "application/json");
         }

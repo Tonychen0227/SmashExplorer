@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 
-public class Cache<K, T>
+public class Cache<T>
 {
-    private readonly Dictionary<K, (T cachedObject, DateTime expiry)> _internalCache;
+    private readonly Dictionary<string, (T cachedObject, DateTime expiry)> _internalCache;
     private readonly long _ttlMilliseconds;
     private readonly object _lock = new object();
 
     public Cache(int ttlSeconds)
     {
-        _internalCache = new Dictionary<K, (T cachedObject, DateTime expiry)>();
+        _internalCache = new Dictionary<string, (T cachedObject, DateTime expiry)>();
         _ttlMilliseconds = ttlSeconds;
     }
 
-    public bool ContainsKey(K key)
+    public bool ContainsKey(string key)
     {
         lock (_lock)
         {
@@ -22,7 +22,7 @@ public class Cache<K, T>
         }
     }
 
-    public T GetFromCache(K key)
+    public T GetFromCache(string key)
     {
         lock (_lock)
         {
@@ -35,7 +35,7 @@ public class Cache<K, T>
         }
     }
 
-    public void InvalidateCache(K key)
+    public void InvalidateCache(string key)
     {
         lock (_lock)
         {
@@ -57,15 +57,15 @@ public class Cache<K, T>
         }
     }
 
-    public void SetCacheObject(K key, T toCacheObject)
+    public void SetCacheObject(string key, T toCacheObject, long? overrideTTLSeconds = null)
     {
         lock (_lock)
         {
-            _internalCache[key] = (toCacheObject, GetExpiry());
+            _internalCache[key] = (toCacheObject, GetExpiry(overrideTTLSeconds));
         }
     }
 
-    public void AddToCacheObject(K key, Action<T> mutationFunc)
+    public void AddToCacheObject(string key, Action<T> mutationFunc)
     {
         lock (_lock)
         {
@@ -79,8 +79,8 @@ public class Cache<K, T>
         }
     }
 
-    private DateTime GetExpiry()
+    private DateTime GetExpiry(long? overrideTTLSeconds = null)
     {
-        return DateTime.UtcNow.AddSeconds(_ttlMilliseconds);
+        return DateTime.UtcNow.AddSeconds(overrideTTLSeconds ?? _ttlMilliseconds);
     }
 }
