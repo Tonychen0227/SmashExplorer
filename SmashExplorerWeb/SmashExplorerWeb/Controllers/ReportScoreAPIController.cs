@@ -70,14 +70,14 @@ namespace SmashExplorerWeb.Controllers
                     {
                         if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))
                         {
-                            return new NonOKWithMessageResult(JsonConvert.SerializeObject(reportedSets[retrievedSet.Id].Item1), (int)HttpStatusCode.Conflict);
+                            return new NonOKWithMessageResult(JsonConvert.SerializeObject(reportedSets[retrievedSet.Id]), (int)HttpStatusCode.Conflict);
                         }
                     }
 
                     return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ex.Message);
                 }
 
-                SmashExplorerDatabase.Instance.AddReportedSetToCache(retrievedSet.EventId, retrievedSet.Id, body);
+                CacheManager.Instance.AddReportedSetToCache(retrievedSet.EventId, retrievedSet.Id, body);
 
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)

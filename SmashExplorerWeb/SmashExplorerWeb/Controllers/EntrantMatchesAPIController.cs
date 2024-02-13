@@ -25,7 +25,7 @@ namespace SmashExplorerWeb.Controllers
                 {
                     if (eventReportedMatches != null && eventReportedMatches.Keys.Contains(entrantMatch.Id))
                     {
-                        entrantMatch.ReportedScoreViaAPI = eventReportedMatches[entrantMatch.Id].Item1;
+                        entrantMatch.ReportedScoreViaAPI = eventReportedMatches[entrantMatch.Id];
                     }
                 }
 

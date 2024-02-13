@@ -289,6 +289,7 @@
     <Compile Include="Controllers\UpsetsController.cs" />
     <Compile Include="Controllers\SeedVisualizerController.cs" />
     <Compile Include="Database\AvatarsDatabase.cs" />
+    <Compile Include="Database\CacheManager.cs" />
     <Compile Include="Database\StartGGDatabase.cs" />
     <Compile Include="Database\SmashExplorerDatabase.cs" />
     <Compile Include="Global.asax.cs">
@@ -297,6 +298,7 @@
     <Compile Include="Helpers\Helpers.cs" />
     <Compile Include="Helpers\NonOKWithMessageResult.cs" />
     <Compile Include="Models\ActivityState.cs" />
+    <Compile Include="Models\Cache.cs" />
     <Compile Include="Models\CreateScoreboardModel.cs" />
     <Compile Include="Models\DanessModel.cs" />
     <Compile Include="Models\DanessEntrantSeeding.cs" />

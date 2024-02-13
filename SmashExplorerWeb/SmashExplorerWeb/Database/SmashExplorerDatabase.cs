@@ -22,9 +22,6 @@ public class SmashExplorerDatabase
 
     private static readonly Lazy<SmashExplorerDatabase> lazy = new Lazy<SmashExplorerDatabase>(() => new SmashExplorerDatabase());
 
-    private Tuple<DateTime, List<Event>> UpcomingEventsCache = new Tuple<DateTime, List<Event>>(DateTime.MinValue, new List<Event>());
-    private static readonly int UpcomingEventsCacheTTLSeconds = 60;
-
     private Tuple<DateTime, List<Tournament>> CurrentTournamentCache = new Tuple<DateTime, List<Tournament>>(DateTime.MinValue, new List<Tournament>());
     private static readonly int CurrentTournamentCacheCacheTTLSeconds = 600;
 
@@ -42,8 +39,6 @@ public class SmashExplorerDatabase
 
     private Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>> UpsetsCache = new Dictionary<string, Tuple<DateTime, IEnumerable<Upset>>>();
     private static readonly int UpsetsCacheTTLSeconds = 120;
-
-    private Dictionary<string, Dictionary<string, (string Name, int Seeding)>> CachedEntrantSeedingCache = new Dictionary<string, Dictionary<string, (string Name, int Seeding)>>();
 
     private static readonly List<int> BannedOwners = new List<int>() { 1819468 };
 
@@ -88,9 +83,9 @@ public class SmashExplorerDatabase
         }
     }
 
-    public Dictionary<string, (ReportScoreAPIRequestBody, DateTime)> GetEventReportedSets(string eventId)
+    public Dictionary<string, ReportScoreAPIRequestBody> GetEventReportedSets(string eventId)
     {
-        return CacheDatabase.Instance.GetEventReportedSets(eventId);
+        return CacheManager.Instance.GetEventReportedSets(eventId);
     }
 
     public static SmashExplorerDatabase Instance { get { return lazy.Value; } }
@@ -128,9 +123,11 @@ public class SmashExplorerDatabase
 
     public async Task<List<Event>> GetUpcomingEventsAsync()
     {
-        if (DateTime.UtcNow - UpcomingEventsCache.Item1 < TimeSpan.FromSeconds(UpcomingEventsCacheTTLSeconds))
+        var cached = CacheManager.Instance.GetCachedUpcomingEvents();
+
+        if (cached != null)
         {
-            return UpcomingEventsCache.Item2;
+            return cached;
         }
 
         var results = new List<Event>();
@@ -145,7 +142,7 @@ public class SmashExplorerDatabase
             }
         }
 
-        UpcomingEventsCache = Tuple.Create(DateTime.UtcNow, results);
+        CacheManager.Instance.SetUpcomingEvents(results);
 
         return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
@@ -208,9 +205,11 @@ public class SmashExplorerDatabase
 
     public async Task<Dictionary<string, (string Name, int Seeding)>> GetCachedEntrantSeeding(string eventId)
     {
-        if (CachedEntrantSeedingCache.ContainsKey(eventId))
+        var cached = CacheManager.Instance.GetCachedEntrantSeeding(eventId);
+
+        if (cached != null)
         {
-            return CachedEntrantSeedingCache[eventId];
+            return cached;
         }
 
         DanessEntrantSeeding result;
@@ -223,9 +222,9 @@ public class SmashExplorerDatabase
             return null;
         }
 
-        CachedEntrantSeedingCache[eventId] = result.CachedEntrantSeeding;
+        CacheManager.Instance.UpdateCachedEntrantSeeding(eventId, result.CachedEntrantSeeding);
 
-        return CachedEntrantSeedingCache[eventId];
+        return result.CachedEntrantSeeding;
     }
 
     public async Task<Dictionary<string, (string Name, int Seeding)>> UpsertDanessSeeding(string eventId, Dictionary<string, (string Name, int Seeding)> cachedEntrantSeeding)
@@ -246,7 +245,7 @@ public class SmashExplorerDatabase
             return cachedEntrantSeeding;
         }
 
-        CachedEntrantSeedingCache[eventId] = cachedEntrantSeeding;
+        CacheManager.Instance.UpdateCachedEntrantSeeding(eventId, cachedEntrantSeeding);
 
         return cachedEntrantSeeding;
     }

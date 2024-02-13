@@ -17,7 +17,7 @@ namespace SmashExplorerWeb.Controllers
 
             if (eventReportedMatches != null && eventReportedMatches.Keys.Contains(set.Id))
             {
-                set.ReportedScoreViaAPI = eventReportedMatches[set.Id].Item1;
+                set.ReportedScoreViaAPI = eventReportedMatches[set.Id];
             }
 
             return Content(JsonConvert.SerializeObject(await SmashExplorerDatabase.Instance.GetSetAsync(id)), "application/json");
