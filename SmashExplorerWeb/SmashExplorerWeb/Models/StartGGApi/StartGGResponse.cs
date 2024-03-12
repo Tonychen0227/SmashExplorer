@@ -1,6 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
+public class StartGGGalintTournamentResponse
+{
+    public BackendTournament Tournament { get; set; }
+}
+
 public class StartGGTournamentResponse
 {
     public StartGGTournament Tournament { get; set; }

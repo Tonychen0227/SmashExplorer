@@ -140,7 +140,7 @@ public class SmashExplorerDatabase
 
         var results = new List<Tournament>();
 
-        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<Tournament>($"SELECT * FROM c WHERE c.isActive OFFSET 0 LIMIT 10"))
+        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<Tournament>($"SELECT * FROM c WHERE (c.isActive or c.IsActive) OFFSET 0 LIMIT 10"))
         {
             while (iterator.HasMoreResults)
             {
@@ -152,6 +152,26 @@ public class SmashExplorerDatabase
         CacheManager.Instance.SetCurrentTournaments(results);
 
         return results.ToList();
+    }
+
+    public async Task AddCurrentTournamentAndSetAsActiveAsync(BackendTournament tournament)
+    {
+        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<BackendTournament>($"SELECT * FROM c WHERE (c.isActive or c.IsActive) OFFSET 0 LIMIT 10"))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+
+                foreach (var resource in next.Resource)
+                {
+                    resource.IsActive = false;
+                    await CurrentTournamentsContainer.UpsertItemAsync(resource, new PartitionKey(resource.Id));
+                }
+            }
+        }
+
+        tournament.IsActive = true;
+        await CurrentTournamentsContainer.UpsertItemAsync(tournament, new PartitionKey(tournament.Id));
     }
 
     public async Task<Event> GetEventAsync(string eventId, bool useLongerCache = false)

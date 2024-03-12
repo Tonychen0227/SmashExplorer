@@ -305,6 +305,52 @@ query EventSetsQuery($eventId: ID, $phaseId: ID) {
         return httpResponse;
     }
 
+    public async Task<GraphQLHttpResponse<StartGGGalintTournamentResponse>> GetTournament(string tournamentId)
+    {
+        var query = new GraphQLRequest
+        {
+            Query = @"
+query GetGalintAppData($tournamentId: ID) {
+  tournament(id: $tournamentId){
+    id
+    slug
+    name
+    images {
+      ratio
+      type
+      url
+    }
+    events{
+      id
+      images {
+        ratio
+        type
+        url
+      }
+      name
+      phases{
+        name
+        id
+      }
+    }
+    streams {
+      streamName
+      streamSource
+    }
+  }
+}",
+            Variables = new
+            {
+                tournamentId = tournamentId
+            }
+        };
+
+        var response = await SendQueryAsync<StartGGGalintTournamentResponse>(query);
+        var httpResponse = response.AsGraphQLHttpResponse();
+
+        return httpResponse;
+    }
+
     private GraphQLHttpClient GetClient()
     {
         return Clients[new Random().Next(Clients.Count)];

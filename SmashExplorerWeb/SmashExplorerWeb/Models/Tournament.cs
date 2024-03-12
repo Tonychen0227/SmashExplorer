@@ -1,8 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
+
+public class BackendTournament
+{
+    [JsonProperty("id")]
+    public string Id { get; set; }
+    public bool IsActive { get; set; }
+    public string Name { get; set; }
+    public List<TournamentEvent> Events { get; set; }
+    public List<Image> Images { get; set; }
+    public string Slug { get; set; }
+    public string Twitter { get; set; }
+    public List<Stream> Streams { get; set; }
+}
 
 public class Tournament
 {
     public string Id { get; set; }
+    public bool IsActive { get; set; }
     public string Name { get; set; }
     public List<TournamentEvent> Events { get; set; }
     public List<Image> Images { get; set; }

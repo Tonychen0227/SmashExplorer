@@ -272,6 +272,7 @@
     <Compile Include="Controllers\EventAPIController.cs" />
     <Compile Include="Controllers\EventUserAvatarsAPIController.cs" />
     <Compile Include="Controllers\GameMetadataController.cs" />
+    <Compile Include="Controllers\OnboardNewGalintTournamentAPIController.cs" />
     <Compile Include="Controllers\PRDataController.cs" />
     <Compile Include="Controllers\ReportScoreAPIController.cs" />
     <Compile Include="Controllers\SetAPIController.cs" />
