@@ -15,7 +15,9 @@ namespace SmashExplorerWeb.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(string id)
         {
-            CacheManager.Instance.InvalidateCaches(id);
+            var retrievedEvent = await SmashExplorerDatabase.Instance.GetEventAsync(id);
+
+            CacheManager.Instance.InvalidateCaches(retrievedEvent.Id, retrievedEvent.TournamentId);
 
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }

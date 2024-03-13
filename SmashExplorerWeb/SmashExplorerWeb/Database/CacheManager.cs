@@ -250,7 +250,7 @@ public class CacheManager
         TournamentAvatarsCache.CleanupCache();
     }
 
-    public void InvalidateCaches(string eventId)
+    public void InvalidateCaches(string eventId, string tournamentId)
     {
         ReportedSetsCache.InvalidateCache(eventId);
         CachedEntrantSeedingCache.InvalidateCache(eventId);
@@ -262,8 +262,8 @@ public class CacheManager
         //EntrantsCache.InvalidateCache we almost never have to invalidate this
         EventsCache.InvalidateCache(eventId);
         FullEventsCache.InvalidateCache(eventId);
+        TournamentAvatarsCache.InvalidateCache(tournamentId);
         //TournamentEventsCache.InvalidateCache we almost never have to invalidate this
-        //TournamentAvatarsCache.InvalidateCache we almost never have to invalidate this
     }
 
     public void InvalidateSetsAndShortenTTL(string eventId, long shortenTTLDurationSeconds)

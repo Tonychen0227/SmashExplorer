@@ -320,7 +320,7 @@ query GetGalintAppData($tournamentId: ID) {
       type
       url
     }
-    events{
+    events(filter: {videogameId: [1, 1386]}){
       id
       images {
         ratio
