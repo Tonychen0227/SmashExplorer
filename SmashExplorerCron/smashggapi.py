@@ -247,44 +247,6 @@ class API:
 
         return self.__call_api("Get Ult Tournament Events", query_string, params)
 
-    def get_ult_entrant(self, entrant_id):
-        query_string = '''
-          query EntrantQuery($entrantId: ID!) {
-            entrant(id: $entrantId) {
-              name
-              initialSeedNum
-              id
-              standing {
-                placement
-              }
-              event {
-                id
-                name
-                slug
-              }
-              participants {
-                user {
-                  authorizations(types: [TWITTER, TWITCH]) {
-                    url
-                  }
-                  slug
-                  address {
-                    city
-                    state
-                    country
-                  }
-                }
-              }
-            }
-          }
-          '''
-
-        params = {"entrantId": entrant_id}
-
-        result = self.__call_api("Get Entrants For Event", query_string, params)
-
-        return result["entrant"]["event"], result["entrant"]
-
     def get_ult_event_entrants(self, event_id):
         query_string = '''
             query EventEntrantsQuery($eventId: ID, $page: Int) {
