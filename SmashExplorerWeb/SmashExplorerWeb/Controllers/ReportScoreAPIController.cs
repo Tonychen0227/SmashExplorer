@@ -34,10 +34,9 @@ namespace SmashExplorerWeb.Controllers
 
                 System.Diagnostics.Trace.TraceInformation($"Reporting set {id} with token {body.AuthUserToken}");
 
-                /*
-                 * 
                 if (body.AuthUserToken == null)
                 {
+                    System.Diagnostics.Trace.TraceError($"Failing set report due to no token passed");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "No token passed!");
                 }
 
@@ -47,6 +46,7 @@ namespace SmashExplorerWeb.Controllers
 
                 if (retrievedAuth == null)
                 {
+                    System.Diagnostics.Trace.TraceError($"Failing set report due to token not being in server");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
@@ -55,14 +55,15 @@ namespace SmashExplorerWeb.Controllers
 
                 if (authenticatedEntrant == null || !retrievedSet.EntrantIds.Contains(authenticatedEntrant.Id))
                 {
+                    System.Diagnostics.Trace.TraceError($"Failing set report due to token not correctly matching an entrant");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
                 if (!(retrievedSet.WinnerId == null || retrievedSet.WinnerId == "None"))
                 {
+                    System.Diagnostics.Trace.TraceError($"Set is already finished");
                     return new HttpStatusCodeResult(HttpStatusCode.Conflict, "Set is already completed!");
                 }
-                */
 
                 var reportedSets = SmashExplorerDatabase.Instance.GetEventReportedSets(retrievedSet.EventId);
 
@@ -71,6 +72,7 @@ namespace SmashExplorerWeb.Controllers
                     await StartGGDatabase.Instance.ReportSet(id, body);
                 } catch (Exception ex)
                 {
+                    System.Diagnostics.Trace.TraceError($"Exception from StartGG: {ex.Message}");
                     if (ex.Message.Contains("Cannot report completed set"))
                     {
                         if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))
@@ -90,6 +92,7 @@ namespace SmashExplorerWeb.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)
             {
+                System.Diagnostics.Trace.TraceError($"Exception reporting set: {e.Message}");
                 return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, e.Message);
             }
         }

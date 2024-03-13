@@ -12,6 +12,8 @@ namespace SmashExplorerWeb.Controllers
             var retObject = await StartGGDatabase.Instance.GetUserTokenDetails(id);
             retObject.Token = id.GetSha256Hash();
 
+            System.Diagnostics.Trace.TraceInformation($"Saved token details for user with token {id}");
+
             await SmashExplorerDatabase.Instance.UpsertGalintAuthenticationTokenAsync(retObject);
 
             return Content(JsonConvert.SerializeObject(retObject), "application/json");
