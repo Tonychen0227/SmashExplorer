@@ -9,6 +9,7 @@ class CosmosDB:
         self.database = CosmosClient(endpoint, key).get_database_client("smash-explorer-database")
         self.entrants = self.database.get_container_client("Entrants")
         self.events = self.database.get_container_client("Events")
+        self.current_tournaments = self.database.get_container_client("CurrentTournaments")
         self.vanityLinks = self.database.get_container_client("VanityLinks")
         self.sets = self.database.get_container_client("Sets")
         self.mutex = self.database.get_container_client("Mutex")
@@ -164,3 +165,11 @@ class CosmosDB:
         for db_set in self.get_event_sets(event_id):
             self.delete_set(event_id, db_set)
     # endregion Sets
+
+    # region Tournaments
+    def get_active_current_tournaments(self):
+        response = self.current_tournaments.query_items(
+            query=f"SELECT * FROM k WHERE (k.isActive or k.IsActive)",
+            enable_cross_partition_query=True)
+        return response
+    # endregion Tournaments
