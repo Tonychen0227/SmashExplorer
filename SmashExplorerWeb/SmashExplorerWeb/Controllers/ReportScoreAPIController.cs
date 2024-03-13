@@ -32,6 +32,10 @@ namespace SmashExplorerWeb.Controllers
                     return new HttpNotFoundResult("Set not found");
                 }
 
+                System.Diagnostics.Trace.TraceInformation($"Reporting set {id} with token {body.AuthUserToken}");
+
+                /*
+                 * 
                 if (body.AuthUserToken == null)
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "No token passed!");
@@ -47,7 +51,7 @@ namespace SmashExplorerWeb.Controllers
                 }
 
                 var eventEntrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(retrievedSet.EventId);
-                var authenticatedEntrant = eventEntrants.Where(x => x.UserSlugs.Contains(retrievedAuth.Slug)).FirstOrDefault();
+                var authenticatedEntrant = eventEntrants.Where(x => x.UserSlugs != null && x.UserSlugs.Contains(retrievedAuth.Slug)).FirstOrDefault();
 
                 if (authenticatedEntrant == null || !retrievedSet.EntrantIds.Contains(authenticatedEntrant.Id))
                 {
@@ -58,6 +62,7 @@ namespace SmashExplorerWeb.Controllers
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.Conflict, "Set is already completed!");
                 }
+                */
 
                 var reportedSets = SmashExplorerDatabase.Instance.GetEventReportedSets(retrievedSet.EventId);
 
