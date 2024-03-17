@@ -287,6 +287,8 @@ namespace SmashExplorerWeb.Controllers
                 Events = new
                 {
                     Id = eventData.Id,
+                    TournamentName = eventData.TournamentName,
+                    Slug = eventData.Slug,
                     Name = eventData.Name,
                     TournamentLocation = eventData.TournamentLocation,
                     StartAt = eventData.StartAt,
