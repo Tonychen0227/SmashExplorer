@@ -266,6 +266,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\HistoricalMatchesAPIController.cs" />
     <Compile Include="Controllers\CurrentTournamentAPIController.cs" />
     <Compile Include="Controllers\DanessController.cs" />
     <Compile Include="Controllers\EntrantMatchesAPIController.cs" />
