@@ -161,7 +161,6 @@ namespace SmashExplorerWeb.Controllers
             // Let"s make Big Moves 2022
             "582812",
             #endregion Ultimate 2022
-            */
 
             #region Ultimate 2023
             // Kagaribi 10
@@ -194,6 +193,7 @@ namespace SmashExplorerWeb.Controllers
             "813968",
             // Let"s make big moves 2023
             "728892"
+            #endregion Ultimate 2023
         };
 
         private readonly static List<string> BattleOfBC6EventIds = new List<string>() { "999586", "999585" };
