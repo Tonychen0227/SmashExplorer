@@ -255,7 +255,7 @@ namespace SmashExplorerWeb.Controllers
                 sets = setsApiCall;
             }
 
-            sets = sets.Where(x => !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
+            sets = sets.Where(x => x.DisplayScore != "DQ" && !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
 
             if (!string.IsNullOrEmpty(setsAfterTimestampEpochSeconds) && int.TryParse(setsAfterTimestampEpochSeconds, out var timestampEpochSeconds))
             {
