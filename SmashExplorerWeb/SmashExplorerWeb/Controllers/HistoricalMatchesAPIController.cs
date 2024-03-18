@@ -199,7 +199,7 @@ namespace SmashExplorerWeb.Controllers
         private readonly static List<string> BattleOfBC6EventIds = new List<string>() { "999586", "999585" };
 
         [HttpGet]
-        public async Task<ActionResult> Index(string id)
+        public async Task<ActionResult> Index(string id, string setsAfterTimestampEpochSeconds)
         {
             ViewBag.Title = "Production Thing API";
 
@@ -215,7 +215,7 @@ namespace SmashExplorerWeb.Controllers
                 eventData.Standings = null;
 
                 entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
-                sets = await SmashExplorerDatabase.Instance.GetSetsAsync(id);
+                sets = (await SmashExplorerDatabase.Instance.GetSetsAsync(id));
             }
             else
             {
@@ -255,7 +255,12 @@ namespace SmashExplorerWeb.Controllers
                 sets = setsApiCall;
             }
 
-            sets = sets.Where(x => x.DisplayScore != "DQ" && !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
+            sets = sets.Where(x => !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
+
+            if (!string.IsNullOrEmpty(setsAfterTimestampEpochSeconds) && int.TryParse(setsAfterTimestampEpochSeconds, out var timestampEpochSeconds))
+            {
+                sets = sets.Where(x => x.CompletedAt != null && x.CompletedAt > timestampEpochSeconds);
+            }
 
             List<Set> goodSets = new List<Set>();
 
@@ -264,13 +269,6 @@ namespace SmashExplorerWeb.Controllers
                 try
                 {
                     if (set.EntrantIds.Any(x => !entrants.Any(entrant => entrant.Id == x)))
-                    {
-                        continue;
-                    }
-
-                    var entrantSlugs = set.EntrantIds.Select(x => entrants.First(e => e.Id == x)).Select(x => x.UserSlugs?.FirstOrDefault());
-
-                    if (entrantSlugs.Any(x => string.IsNullOrEmpty(x)))
                     {
                         continue;
                     }
@@ -323,6 +321,7 @@ namespace SmashExplorerWeb.Controllers
                                 se.Name
                         };
                         }),
+                        set.FullRoundText,
                         set.EntrantIds,
                         EntrantSlugs = set.EntrantIds.Select(x => entrants.First(e => e.Id == x)).Select(x => x.UserSlugs?.FirstOrDefault()),
                         set.DetailedScore,
