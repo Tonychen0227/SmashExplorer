@@ -29,6 +29,7 @@ namespace SmashExplorerWeb.Controllers
             ViewBag.Title = $"Smash Explorer - Select Entrants {id}";
 
             var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
+            entrants = entrants.OrderBy(x => x.Seeding == null).ThenBy(x => x.Seeding).ToList();
             var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
             var selectedEntrants = entrants.Where(x => selectedEntrantIds.Contains(x.Id)).ToList();
@@ -58,6 +59,7 @@ namespace SmashExplorerWeb.Controllers
             ViewBag.Title = $"Smash Explorer - Select Entrants {model.EventId}";
 
             var entrants = await SmashExplorerDatabase.Instance.GetEntrantsAsync(model.EventId);
+            entrants = entrants.OrderBy(x => x.Seeding == null).ThenBy(x => x.Seeding).ToList();
             var db_event = await SmashExplorerDatabase.Instance.GetEventAsync(model.EventId);
 
             model.SelectedEntrantIds = model.SelectedEntrantIds ?? new List<string>();
