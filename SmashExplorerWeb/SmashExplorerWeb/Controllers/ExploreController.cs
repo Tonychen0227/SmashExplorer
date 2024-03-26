@@ -11,6 +11,8 @@ namespace SmashExplorerWeb.Controllers
         {
             VanityLink vanityLink = await SmashExplorerDatabase.Instance.GetVanityLinkAsync(id);
 
+            MetricsManager.Instance.AddPageView(nameof(ExploreController), id);
+
             if (id.StartsWith("admin-"))
             {
                 string eventId = id.Substring(6);

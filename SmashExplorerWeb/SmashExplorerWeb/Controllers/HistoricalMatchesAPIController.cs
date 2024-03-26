@@ -203,11 +203,15 @@ namespace SmashExplorerWeb.Controllers
         {
             ViewBag.Title = "Production Thing API";
 
+            int timestampEpochSeconds = 0;
+
             var isBOBC = BattleOfBC6EventIds.Contains(id);
+            var isTimestamped = !string.IsNullOrEmpty(setsAfterTimestampEpochSeconds) && int.TryParse(setsAfterTimestampEpochSeconds, out timestampEpochSeconds);
 
             Event eventData;
             IEnumerable<Entrant> entrants;
             IEnumerable<Set> sets;
+            Dictionary<string, Upset> upsets;
 
             if (isBOBC)
             {
@@ -257,7 +261,7 @@ namespace SmashExplorerWeb.Controllers
 
             sets = sets.Where(x => x.DisplayScore != "DQ" && !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
 
-            if (!string.IsNullOrEmpty(setsAfterTimestampEpochSeconds) && int.TryParse(setsAfterTimestampEpochSeconds, out var timestampEpochSeconds))
+            if (isTimestamped)
             {
                 sets = sets.Where(x => x.CompletedAt != null && x.CompletedAt > timestampEpochSeconds);
             }
@@ -282,7 +286,7 @@ namespace SmashExplorerWeb.Controllers
 
             var ret = new
             {
-                Events = new
+                Event = isTimestamped ? null : new
                 {
                     Id = eventData.Id,
                     TournamentName = eventData.TournamentName,
@@ -293,7 +297,7 @@ namespace SmashExplorerWeb.Controllers
                     CreatedAt = eventData.CreatedAt,
                     NumEntrants = eventData.NumEntrants
                 },
-                Entrants = entrants.Select(entrant =>
+                DictKeys = isTimestamped ? null : entrants.Select(entrant =>
                 {
                     return new
                     {
@@ -304,8 +308,10 @@ namespace SmashExplorerWeb.Controllers
                         Seeding = entrant.Seeding
                     };
                 }),
-                Sets = goodSets.Select(set =>
+                AllSets = goodSets.Select(set =>
                 {
+                    var upset = SmashExplorerDatabase.MapToUpset(set);
+
                     return new
                     {
                         set.Id,
@@ -319,13 +325,14 @@ namespace SmashExplorerWeb.Controllers
                                 se.Id,
                                 se.InitialSeedNum,
                                 se.Name
-                        };
+                            };
                         }),
                         set.FullRoundText,
                         set.EntrantIds,
                         EntrantSlugs = set.EntrantIds.Select(x => entrants.First(e => e.Id == x)).Select(x => x.UserSlugs?.FirstOrDefault()),
                         set.DetailedScore,
-                        set.IsUpsetOrNotable
+                        set.IsUpsetOrNotable,
+                        UpsetFactor = upset.CompletedUpset && set.IsUpsetOrNotable ? upset.UpsetFactor : 0
                     };
                 })
             };

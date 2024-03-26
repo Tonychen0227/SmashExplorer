@@ -27,6 +27,8 @@ namespace SmashExplorerWeb.Controllers
 
                 var retrievedSet = await SmashExplorerDatabase.Instance.GetSetAsync(id);
 
+                MetricsManager.Instance.AddPageView(nameof(ReportScoreAPIController), id);
+
                 if (retrievedSet == null)
                 {
                     return new HttpNotFoundResult("Set not found");
@@ -88,6 +90,8 @@ namespace SmashExplorerWeb.Controllers
 
                 // Invalidate Sets Cache and shorten TTL for 60 seconds
                 CacheManager.Instance.InvalidateSetsAndShortenTTL(retrievedSet.EventId, 60);
+
+                MetricsManager.Instance.AddReportedSet(retrievedSet.EventId);
 
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)

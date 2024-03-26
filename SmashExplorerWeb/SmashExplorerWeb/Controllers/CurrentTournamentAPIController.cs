@@ -10,6 +10,7 @@ namespace SmashExplorerWeb.Controllers
         public async Task<ActionResult> Index()
         {
             ViewBag.Title = "Current Tournament API";
+            MetricsManager.Instance.AddPageView(nameof(CurrentTournamentAPIController), string.Empty);
 
             var retrievedEvent = await SmashExplorerDatabase.Instance.GetCurrentTournamentsAsync();
 

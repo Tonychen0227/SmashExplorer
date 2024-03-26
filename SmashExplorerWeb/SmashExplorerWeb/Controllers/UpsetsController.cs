@@ -13,6 +13,8 @@ namespace SmashExplorerWeb.Controllers
 
             if (string.IsNullOrWhiteSpace(id)) return View();
 
+            MetricsManager.Instance.AddPageView(nameof(UpsetsController), id);
+
             UpsetsModel model = new UpsetsModel();
 
             var upsets = await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(id);

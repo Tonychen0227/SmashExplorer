@@ -9,6 +9,8 @@ namespace SmashExplorerWeb.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(string id)
         {
+            MetricsManager.Instance.AddLogin(id);
+
             var retObject = await StartGGDatabase.Instance.GetUserTokenDetails(id);
             retObject.Token = id.GetSha256Hash();
 

@@ -186,7 +186,7 @@ query TournamentSlugQuery($slug: String) {
 query TournamentIdQuery($id: ID) {
   tournament(id:$id){
     id
-    events(filter: {videogameId: [1, 1386]}) {
+    events(filter: {videogameId: [1, 1386, 43868, 49783]}) {
       name
       id
       startAt
@@ -320,7 +320,7 @@ query GetGalintAppData($tournamentId: ID) {
       type
       url
     }
-    events(filter: {videogameId: [1, 1386]}){
+    events(filter: {videogameId: [1, 1386, 43868, 49783]}){
       id
       images {
         ratio

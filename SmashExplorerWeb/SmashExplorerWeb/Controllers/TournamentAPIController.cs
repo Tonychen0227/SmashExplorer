@@ -10,6 +10,8 @@ namespace SmashExplorerWeb.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(string id, string userSlug)
         {
+            MetricsManager.Instance.AddTournamentAPIVisit(id, userSlug);
+
             dynamic ret = new System.Dynamic.ExpandoObject();
             var tournamentEvents = (await StartGGDatabase.Instance.GetTournamentEvents(id)).Tournament.Events;
 

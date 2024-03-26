@@ -9,6 +9,8 @@ namespace SmashExplorerWeb.Controllers
     {
         public async Task<ActionResult> Index(string id)
         {
+            MetricsManager.Instance.AddPageView(nameof(SelectEntrantsController), id);
+
             var isNumeric = int.TryParse(id, out int n);
 
             var selectedEntrantIds = new List<string>();

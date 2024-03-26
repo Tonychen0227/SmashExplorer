@@ -17,6 +17,7 @@ public class SmashExplorerDatabase
     private readonly Container DanessSeedingContainer;
     private readonly Container PRDataContainer;
     private readonly Container GalintAuthenticationContainer;
+    private readonly Container MetricsContainer;
 
     public static Dictionary<int, int> PlacementToRounds;
 
@@ -47,6 +48,7 @@ public class SmashExplorerDatabase
         DanessSeedingContainer = GetContainer("DanessSeedingContainer");
         PRDataContainer = GetContainer("PRData");
         GalintAuthenticationContainer = GetContainer("GalintAuthenticationTokens");
+        MetricsContainer = GetContainer("Metrics");
 
         PlacementToRounds = new Dictionary<int, int>();
 
@@ -87,6 +89,19 @@ public class SmashExplorerDatabase
         }
         
         return results.FirstOrDefault();
+    }
+    public async Task UpsertMetricsAsync(SmashExplorerMetricsModel metrics)
+    {
+        try
+        {
+            await MetricsContainer.UpsertItemAsync(metrics, new PartitionKey(metrics.Id));
+        }
+        catch (Exception ce)
+        {
+            return;
+        }
+
+        return;
     }
 
     public async Task UpsertGalintAuthenticationTokenAsync(StartGGUser user)
@@ -584,7 +599,7 @@ public class SmashExplorerDatabase
         }
     }
 
-    private Upset MapToUpset(Set set)
+    public static Upset MapToUpset(Set set)
     {
         Entrant winner = set.Entrants.Where(x => x.Id == set.WinnerId).Single();
         Entrant loser = set.Entrants.Where(x => x.Id != set.WinnerId).Single();

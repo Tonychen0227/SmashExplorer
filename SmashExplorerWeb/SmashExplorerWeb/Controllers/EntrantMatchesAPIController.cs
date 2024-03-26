@@ -12,6 +12,8 @@ namespace SmashExplorerWeb.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(string id)
         {
+            MetricsManager.Instance.AddPageView(nameof(EntrantMatchesAPIController), id);
+
             dynamic ret = new System.Dynamic.ExpandoObject();
 
             var entrant = await SmashExplorerDatabase.Instance.GetEntrantAsync(id);

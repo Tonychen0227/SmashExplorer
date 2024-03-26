@@ -9,6 +9,8 @@ namespace SmashExplorerWeb.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(string id)
         {
+            MetricsManager.Instance.AddPageView(nameof(EventAPIController), id);
+
             ViewBag.Title = "Event API";
 
             var retrievedEvent = await SmashExplorerDatabase.Instance.GetEventAsync(id);
