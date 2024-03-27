@@ -35,6 +35,7 @@ namespace SmashExplorerWeb.Controllers
                 }
 
                 System.Diagnostics.Trace.TraceInformation($"Reporting set {id} with token {body.AuthUserToken}");
+                MetricsManager.Instance.AddStartReportSet(retrievedSet.EventId, body.AuthUserToken.GetSha256Hash() ?? string.Empty);
 
                 if (body.AuthUserToken == null)
                 {
@@ -91,7 +92,7 @@ namespace SmashExplorerWeb.Controllers
                 // Invalidate Sets Cache and shorten TTL for 60 seconds
                 CacheManager.Instance.InvalidateSetsAndShortenTTL(retrievedSet.EventId, 60);
 
-                MetricsManager.Instance.AddReportedSet(retrievedSet.EventId);
+                MetricsManager.Instance.AddSuccessReportSet(retrievedSet.EventId, body.AuthUserToken ?? string.Empty);
 
                 return new HttpStatusCodeResult(HttpStatusCode.OK);
             } catch (Exception e)

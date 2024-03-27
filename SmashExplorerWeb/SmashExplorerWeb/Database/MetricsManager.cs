@@ -10,7 +10,7 @@ public class MetricsManager
 
     private List<SmashExplorerMetricsModel> _metricsModels;
 
-    private SmashExplorerMetricsModel CurrentModel => _metricsModels.Last();
+    public SmashExplorerMetricsModel CurrentModel => _metricsModels.Last();
 
     private readonly object _lock = new object();
 
@@ -30,16 +30,39 @@ public class MetricsManager
 
     public static MetricsManager Instance { get { return lazy.Value; } }
 
-    public void AddReportedSet(string eventId)
+    public void AddStartReportSet(string eventId, string hashedToken)
     {
         lock (_lock)
         {
             if (!CurrentModel.SetsReported.ContainsKey(eventId))
             {
-                CurrentModel.SetsReported[eventId] = 0;
+                CurrentModel.SetsReported[eventId] = new Dictionary<string, SetReportModel>();
             }
-            
-            CurrentModel.SetsReported[eventId]++;
+
+            if (!CurrentModel.SetsReported[eventId].ContainsKey(hashedToken))
+            {
+                CurrentModel.SetsReported[eventId][hashedToken] = new SetReportModel();
+            }
+
+            CurrentModel.SetsReported[eventId][hashedToken].IncrementStarted();
+        }
+    }
+
+    public void AddSuccessReportSet(string eventId, string hashedToken)
+    {
+        lock (_lock)
+        {
+            if (!CurrentModel.SetsReported.ContainsKey(eventId))
+            {
+                CurrentModel.SetsReported[eventId] = new Dictionary<string, SetReportModel>();
+            }
+
+            if (!CurrentModel.SetsReported[eventId].ContainsKey(hashedToken))
+            {
+                CurrentModel.SetsReported[eventId][hashedToken] = new SetReportModel();
+            }
+
+            CurrentModel.SetsReported[eventId][hashedToken].IncrementCompleted();
         }
     }
 

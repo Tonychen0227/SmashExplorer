@@ -20,6 +20,7 @@ public class CacheManager
     private readonly Cache<ExploreModel> FullEventsCache = new Cache<ExploreModel>(30);
     private readonly Cache<StartGGTournamentResponse> TournamentEventsCache = new Cache<StartGGTournamentResponse>(600);
     private readonly Cache<Dictionary<string, (string Name, List<Image>)>> TournamentAvatarsCache = new Cache<Dictionary<string, (string Name, List<Image>)>>(86400);
+    private readonly Cache<List<SmashExplorerMetricsModel>> MetricsCache = new Cache<List<SmashExplorerMetricsModel>>(300);
 
     private CacheManager() {
         _cleanupTimer = new Timer(TimeSpan.FromMinutes(2).TotalMilliseconds)
@@ -45,6 +46,23 @@ public class CacheManager
         {
             cachedObject[setId] = reportedSet;
         });
+    }
+
+    public List<SmashExplorerMetricsModel> GetMetrics(int hoursBack)
+    {
+        if (MetricsCache.ContainsKey(hoursBack.ToString()))
+        {
+            return MetricsCache.GetFromCache(hoursBack.ToString());
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void SetMetrics(List<SmashExplorerMetricsModel> metrics)
+    {
+        MetricsCache.SetCacheObject(_defaultKey, metrics);
     }
 
     public List<Event> GetUpcomingEvents()

@@ -227,43 +227,49 @@ namespace SmashExplorerWeb.Controllers
                 {
                     eventData = EventCache.GetFromCache(id);
                 }
+                else
+                {
+                    var apiCall = await SmashExplorerDatabase.Instance.GetEventAsync(id);
 
-                var apiCall = await SmashExplorerDatabase.Instance.GetEventAsync(id);
+                    apiCall.Standings = null;
 
-                apiCall.Standings = null;
+                    EventCache.SetCacheObject(id, apiCall);
 
-                EventCache.SetCacheObject(id, apiCall);
-
-                eventData = apiCall;
+                    eventData = apiCall;
+                }
 
                 if (EntrantCache.ContainsKey(id))
                 {
                     entrants = EntrantCache.GetFromCache(id);
                 }
+                else
+                {
+                    var entrantsApiCall = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
 
-                var entrantsApiCall = await SmashExplorerDatabase.Instance.GetEntrantsAsync(id);
+                    EntrantCache.SetCacheObject(id, entrantsApiCall);
 
-                EntrantCache.SetCacheObject(id, entrantsApiCall);
-
-                entrants = entrantsApiCall;
+                    entrants = entrantsApiCall;
+                }
 
                 if (SetCache.ContainsKey(id))
                 {
                     sets = SetCache.GetFromCache(id);
                 }
+                else
+                {
+                    var setsApiCall = await SmashExplorerDatabase.Instance.GetSetsAsync(id);
 
-                var setsApiCall = await SmashExplorerDatabase.Instance.GetSetsAsync(id);
+                    SetCache.SetCacheObject(id, setsApiCall);
 
-                SetCache.SetCacheObject(id, setsApiCall);
-
-                sets = setsApiCall;
+                    sets = setsApiCall;
+                }
             }
 
             sets = sets.Where(x => x.DisplayScore != "DQ" && !string.IsNullOrEmpty(x.WinnerId) && x.WinnerId != "None");
 
             if (isTimestamped)
             {
-                sets = sets.Where(x => x.CompletedAt != null && x.CompletedAt > timestampEpochSeconds);
+                sets = sets.Where(x => x.CompletedAt != null && x.CompletedAt >= timestampEpochSeconds);
             }
 
             List<Set> goodSets = new List<Set>();
@@ -318,6 +324,7 @@ namespace SmashExplorerWeb.Controllers
                         set.DisplayScore,
                         set.WinnerId,
                         set.CompletedAt,
+                        set.PhaseName,
                         Entrants = set.Entrants.Select(se =>
                         {
                             return new
@@ -328,6 +335,7 @@ namespace SmashExplorerWeb.Controllers
                             };
                         }),
                         set.FullRoundText,
+                        set.BracketType,
                         set.EntrantIds,
                         EntrantSlugs = set.EntrantIds.Select(x => entrants.First(e => e.Id == x)).Select(x => x.UserSlugs?.FirstOrDefault()),
                         set.DetailedScore,

@@ -13,6 +13,8 @@ namespace SmashExplorerWeb.Controllers
 
         public async Task<ActionResult> Index()
         {
+            MetricsManager.Instance.AddPageView(nameof(HomeController), string.Empty);
+
             ViewBag.Title = "Smash Explorer";
 
             var startingModel = new TournamentFilterModel()

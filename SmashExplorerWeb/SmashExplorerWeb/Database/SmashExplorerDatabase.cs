@@ -90,6 +90,33 @@ public class SmashExplorerDatabase
         
         return results.FirstOrDefault();
     }
+
+    public async Task<List<SmashExplorerMetricsModel>> GetMetricsAsync(int hoursBack)
+    {
+        var cached = CacheManager.Instance.GetMetrics(hoursBack);
+
+        if (cached != null)
+        {
+            return cached;
+        }
+
+        var results = new List<SmashExplorerMetricsModel>();
+
+        using (var iterator = MetricsContainer.GetItemQueryIterator<SmashExplorerMetricsModel>(
+                $"select * from t where t._ts > {DateTimeOffset.UtcNow.AddHours(-1 * hoursBack).ToUnixTimeSeconds()}"))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
+            }
+        }
+
+        CacheManager.Instance.SetMetrics(results);
+
+        return results;
+    }
+
     public async Task UpsertMetricsAsync(SmashExplorerMetricsModel metrics)
     {
         try

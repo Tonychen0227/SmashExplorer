@@ -52,6 +52,8 @@ namespace SmashExplorerWeb.Controllers
         {
             if (model.IsFinal)
             {
+                MetricsManager.Instance.AddPageView($"{nameof(SelectEntrantsController)}-CreateVanityLink", model.EventId);
+
                 VanityLink vanityLink 
                     = await SmashExplorerDatabase.Instance.CreateVanityLinkAsync(model.EventId, model.Title, model.SelectedEntrantIds);
 

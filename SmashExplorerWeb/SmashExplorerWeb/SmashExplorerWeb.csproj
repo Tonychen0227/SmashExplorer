@@ -273,6 +273,7 @@
     <Compile Include="Controllers\EventAPIController.cs" />
     <Compile Include="Controllers\EventUserAvatarsAPIController.cs" />
     <Compile Include="Controllers\GameMetadataController.cs" />
+    <Compile Include="Controllers\MetricsAPIController.cs" />
     <Compile Include="Controllers\OnboardNewGalintTournamentAPIController.cs" />
     <Compile Include="Controllers\PRDataController.cs" />
     <Compile Include="Controllers\ReportScoreAPIController.cs" />
@@ -292,6 +293,7 @@
     <Compile Include="Controllers\SeedVisualizerController.cs" />
     <Compile Include="Database\AvatarsDatabase.cs" />
     <Compile Include="Database\CacheManager.cs" />
+    <Compile Include="Database\MetricsManager.cs" />
     <Compile Include="Database\StartGGDatabase.cs" />
     <Compile Include="Database\SmashExplorerDatabase.cs" />
     <Compile Include="Global.asax.cs">
@@ -322,6 +324,7 @@
     <Compile Include="Models\ScoreboardStage.cs" />
     <Compile Include="Models\ScoreboardState.cs" />
     <Compile Include="Models\Set.cs" />
+    <Compile Include="Models\SmashExplorerMetricsModel.cs" />
     <Compile Include="Models\Stage.cs" />
     <Compile Include="Models\Standing.cs" />
     <Compile Include="Models\StartGGApi\StartGGResponse.cs" />
