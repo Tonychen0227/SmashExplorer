@@ -345,7 +345,7 @@ query GetGalintAppData($tournamentId: ID) {
             }
         };
 
-        var response = await SendQueryAsync<StartGGGalintTournamentResponse>(query);
+        var response = await SendQueryAsync<StartGGGalintTournamentResponse>(query, GetMutationClient());
         var httpResponse = response.AsGraphQLHttpResponse();
 
         return httpResponse;
