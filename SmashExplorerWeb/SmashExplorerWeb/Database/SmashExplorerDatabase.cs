@@ -409,7 +409,10 @@ public class SmashExplorerDatabase
             }
         }
 
-        return results.FirstOrDefault();
+        var retSet = results.FirstOrDefault();
+        ProcessSet(retSet);
+
+        return retSet;
     }
 
     public async Task<List<Set>> GetSetsAsync(string eventId, bool useLongerCache = false)
@@ -433,9 +436,30 @@ public class SmashExplorerDatabase
         }
 
         long? ttl = (eventId == "864717" || useLongerCache) ? (long?) 86400 : null;
+
+        foreach (var set in results)
+        {
+            ProcessSet(set);
+        }
+
         CacheManager.Instance.SetEventSets(eventId, results, ttl);
 
         return results;
+    }
+
+    private void ProcessSet(Set set)
+    {
+        if (set?.DisplayScore == "DQ" && set?.DetailedScore == null)
+        {
+            var winnerId = set.WinnerId;
+            var loserId = set.EntrantIds.FirstOrDefault(x => x != winnerId);
+
+            set.DetailedScore = new Dictionary<string, string>()
+            {
+                { winnerId, "0" },
+                { loserId, "-1" }
+            };
+        }
     }
 
     public async Task<VanityLink> CreateVanityLinkAsync(string eventId, string name, List<string> entrantIds)

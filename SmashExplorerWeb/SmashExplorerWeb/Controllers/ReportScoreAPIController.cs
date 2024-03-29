@@ -31,6 +31,7 @@ namespace SmashExplorerWeb.Controllers
 
                 if (retrievedSet == null)
                 {
+                    System.Diagnostics.Trace.TraceError($"Failing set report due to set not found {id}");
                     return new HttpNotFoundResult("Set not found");
                 }
 

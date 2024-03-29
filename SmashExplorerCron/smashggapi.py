@@ -393,6 +393,14 @@ class API:
         try:
             if return_set["displayScore"] is None or return_set["winnerId"] is None \
                     or return_set["displayScore"] == "Bye" or return_set["displayScore"] == "DQ":
+                if return_set["displayScore"] == "DQ" and return_set["winnerId"] is not None:
+                    winner = [x for x in return_set["entrants"] if str(return_set["winnerId"]) == str(x["id"])][0]
+                    loser = [x for x in return_set["entrants"] if str(return_set["winnerId"]) != str(x["id"])][0]
+                    return_set["detailedScore"] = {
+                        winner["id"]: "0",
+                        loser["id"]: "-1"
+                    }
+
                 return return_set
 
             if len(return_set["entrants"]) != 2:

@@ -134,7 +134,7 @@
                                     }
                                     var opponent = set.Entrants.Where(x => x.Id != entrant.Id).SingleOrDefault();
                                     string detailedScore;
-                                    if (opponent != null && set.DetailedScore != null)
+                                    if (opponent != null && set.DetailedScore != null && set.DisplayScore != "DQ")
                                     {
                                         if (set.WinnerId == entrant.Id)
                                         {
