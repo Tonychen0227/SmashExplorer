@@ -30,6 +30,9 @@ public class TournamentEvent
 {
     public string Id { get; set; }
     public string Name { get; set; }
+    public long StartAt { get; set; }
+    public int NumEntrants { get; set; }
+    public List<Upset> TournamentUpsets { get; set; }
     public List<Image> Images { get; set; }
     public List<TournamentEventPhase> Phases { get; set; }
 }

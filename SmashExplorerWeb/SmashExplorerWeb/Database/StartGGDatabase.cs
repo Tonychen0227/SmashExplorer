@@ -328,6 +328,8 @@ query GetGalintAppData($tournamentId: ID) {
         url
       }
       name
+      startAt
+      numEntrants
       phases{
         name
         id

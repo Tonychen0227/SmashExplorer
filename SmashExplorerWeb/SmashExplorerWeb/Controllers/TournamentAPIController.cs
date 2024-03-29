@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
@@ -13,12 +14,29 @@ namespace SmashExplorerWeb.Controllers
             MetricsManager.Instance.AddTournamentAPIVisit(id, userSlug);
 
             dynamic ret = new System.Dynamic.ExpandoObject();
-            var tournamentEvents = (await StartGGDatabase.Instance.GetTournamentEvents(id)).Tournament.Events;
 
-            var tournamentUpsetTasks = tournamentEvents.Select(async x => await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(x.Id));
-            var tournamentUpsets = (await Task.WhenAll(tournamentUpsetTasks)).SelectMany(x => x).Where(x => x.CompletedUpset);
+            var tournaments = await SmashExplorerDatabase.Instance.GetCurrentTournamentsAsync();
+            var targetTournament = tournaments.FirstOrDefault(x => x.Id == id);
 
-            ret.Events = tournamentEvents;
+            IEnumerable<Upset> tournamentUpsets;
+
+            if (targetTournament != null)
+            {
+                var tournamentEvents = targetTournament.Events;
+
+                var tournamentUpsetTasks = tournamentEvents.Select(async x => await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(x.Id));
+                tournamentUpsets = (await Task.WhenAll(tournamentUpsetTasks)).SelectMany(x => x).Where(x => x.CompletedUpset);
+
+                ret.Events = tournamentEvents;
+            }
+            else
+            {
+                var tournamentEvents = (await StartGGDatabase.Instance.GetTournamentEvents(id)).Tournament.Events;
+                var tournamentUpsetTasks = tournamentEvents.Select(async x => await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(x.Id));
+                tournamentUpsets = (await Task.WhenAll(tournamentUpsetTasks)).SelectMany(x => x).Where(x => x.CompletedUpset);
+
+                ret.Events = tournamentEvents;
+            }
             
             foreach (var retEvent in ret.Events)
             {
@@ -26,8 +44,9 @@ namespace SmashExplorerWeb.Controllers
                 retEvent.TournamentUpsets = tournamentUpsets.Where(x => x.Set.EventId == retEvent.Id).ToList();
             }
 
-            if (userSlug != null)
+            if (userSlug != null && targetTournament != null)
             {
+                var tournamentEvents = targetTournament.Events;
                 var eventEntrantsTasks = tournamentEvents.Select(async x => await SmashExplorerDatabase.Instance.GetEntrantBySlugAndEventAsync(userSlug, x.Id)).ToList();
                 var eventEntrants = await Task.WhenAll(eventEntrantsTasks);
 
