@@ -57,7 +57,7 @@ public class SmashExplorerMetricsModel
                 SetsFailed[key] = new Dictionary<string, string>();
             }
 
-            foreach (var subKey in additionalModel.SetsReported[key].Keys.ToList())
+            foreach (var subKey in additionalModel.SetsFailed[key].Keys.ToList())
             {
                 SetsFailed[key][subKey] = additionalModel.SetsFailed[key][subKey];
             }

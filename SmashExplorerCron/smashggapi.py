@@ -354,6 +354,7 @@ class API:
             "winnerId": str(tournament_set["winnerId"]),
             "round": tournament_set["round"],
             "createdAt": tournament_set["createdAt"],
+            "identifier": tournament_set["identifier"],
             "startedAt": tournament_set["startedAt"],
             "completedAt": tournament_set["completedAt"],
             "wPlacement": tournament_set["wPlacement"],
@@ -508,6 +509,7 @@ class API:
                     }
                     setGamesType
                     totalGames
+                    identifier
                     phaseGroup{
                       id
                       displayIdentifier
