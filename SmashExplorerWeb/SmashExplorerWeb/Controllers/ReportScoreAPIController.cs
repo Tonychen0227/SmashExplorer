@@ -36,6 +36,27 @@ namespace SmashExplorerWeb.Controllers
                     return new HttpNotFoundResult("Set not found");
                 }
 
+                if (retrievedSet.IsFakeSet ?? false && !string.IsNullOrEmpty(retrievedSet.Identifier))
+                {
+                    var tournamentSets = await SmashExplorerDatabase.Instance.GetSetsAsync(retrievedSet.EventId);
+                    var target = tournamentSets
+                        .FirstOrDefault(x => !(x.IsFakeSet ?? false)
+                            && x.PhaseGroupId == retrievedSet.PhaseGroupId
+                            && x.PhaseId == retrievedSet.PhaseId
+                            && !string.IsNullOrEmpty(x.Identifier)
+                            && !string.IsNullOrEmpty(x.FullRoundText)
+                            && !string.IsNullOrEmpty(x.PhaseIdentifier)
+                            && x.Identifier == retrievedSet.Identifier
+                            && x.FullRoundText == retrievedSet.FullRoundText
+                            && x.PhaseIdentifier == retrievedSet.PhaseIdentifier); 
+
+                    if (target != null)
+                    {
+                        System.Diagnostics.Trace.TraceInformation($"Correlating fake set {retrievedSet.Id} with {target.Id}");
+                        retrievedSet = target;
+                    }
+                }
+
                 System.Diagnostics.Trace.TraceInformation($"Reporting set {id} with token {body.AuthUserToken}");
                 MetricsManager.Instance.AddStartReportSet(retrievedSet.EventId, body.AuthUserToken.GetSha256Hash() ?? string.Empty);
 

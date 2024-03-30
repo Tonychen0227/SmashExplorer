@@ -4,6 +4,7 @@ public class Set
 {
     public string Id { get; set; }
     public string VideoGameName { get; set; }
+    public string Identifier { get; set; }
     public string VideoGameId { get; set; }
     public string EventId { get; set; }
     public string FullRoundText { get; set; }
