@@ -171,6 +171,31 @@ public class SmashExplorerDatabase
         return results.Where(x => x.TournamentOwner?.Id == null || !BannedOwners.Contains(x.TournamentOwner.Id)).ToList();
     }
 
+    public async Task<List<Tournament>> GetCurrentTournamentsAllAsync()
+    {
+        var cached = CacheManager.Instance.GetCurrentAllTournaments();
+
+        if (cached != null)
+        {
+            return cached;
+        }
+
+        var results = new List<Tournament>();
+
+        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<Tournament>($"SELECT * FROM c OFFSET 0 LIMIT 10"))
+        {
+            while (iterator.HasMoreResults)
+            {
+                var next = await iterator.ReadNextAsync();
+                results.AddRange(next.Resource);
+            }
+        }
+
+        CacheManager.Instance.SetAllCurrentTournaments(results);
+
+        return results.ToList();
+    }
+
     public async Task<List<Tournament>> GetCurrentTournamentsAsync()
     {
         var cached = CacheManager.Instance.GetCurrentTournaments();
@@ -410,7 +435,7 @@ public class SmashExplorerDatabase
         }
 
         var retSet = results.FirstOrDefault();
-        ProcessSet(retSet);
+        retSet = ProcessSet(retSet);
 
         return retSet;
     }
@@ -437,17 +462,14 @@ public class SmashExplorerDatabase
 
         long? ttl = (eventId == "864717" || useLongerCache) ? (long?) 86400 : null;
 
-        foreach (var set in results)
-        {
-            ProcessSet(set);
-        }
+        results = results.Where(x => x.IsFakeSet != true).Select(x => ProcessSet(x)).ToList();
 
         CacheManager.Instance.SetEventSets(eventId, results, ttl);
 
         return results;
     }
 
-    private void ProcessSet(Set set)
+    private Set ProcessSet(Set set)
     {
         if (set?.DisplayScore == "DQ" && set?.DetailedScore == null)
         {
@@ -460,6 +482,8 @@ public class SmashExplorerDatabase
                 { loserId, "-1" }
             };
         }
+
+        return set;
     }
 
     public async Task<VanityLink> CreateVanityLinkAsync(string eventId, string name, List<string> entrantIds)

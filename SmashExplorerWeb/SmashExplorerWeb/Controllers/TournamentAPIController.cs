@@ -15,7 +15,7 @@ namespace SmashExplorerWeb.Controllers
 
             dynamic ret = new System.Dynamic.ExpandoObject();
 
-            var tournaments = await SmashExplorerDatabase.Instance.GetCurrentTournamentsAsync();
+            var tournaments = await SmashExplorerDatabase.Instance.GetCurrentTournamentsAllAsync();
             var targetTournament = tournaments.FirstOrDefault(x => x.Id == id);
 
             IEnumerable<Upset> tournamentUpsets;

@@ -9,6 +9,7 @@ public class Set
     public string FullRoundText { get; set; }
     public string DisplayScore { get; set; }
     public string WinnerId { get; set; }
+    public bool? IsFakeSet { get; set; }
     public int? Round { get; set; }
     public int? WPlacement { get; set; }
     public int? LPlacement { get; set; }

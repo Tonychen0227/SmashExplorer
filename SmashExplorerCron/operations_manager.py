@@ -168,7 +168,8 @@ class OperationsManager:
         if delete_bogus_sets:
             for cosmos_set in self.cosmos.get_event_sets(event_id):
                 if cosmos_set["id"] not in [x["id"] for x in sets]:
-                    self.cosmos.delete_set(event_id, cosmos_set["id"])
+                    cosmos_set["isFakeSet"] = True
+                    self.cosmos.create_set(cosmos_set)
 
     def delete_event(self, event_id):
         self.cosmos.delete_event(event_id)

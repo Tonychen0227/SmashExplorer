@@ -99,6 +99,18 @@ public class CacheManager
         CachedEntrantSeedingCache.SetCacheObject(eventId, cachedSeeding);
     }
 
+    public List<Tournament> GetCurrentAllTournaments()
+    {
+        if (CurrentTournamentsCache.ContainsKey("all"))
+        {
+            return CurrentTournamentsCache.GetFromCache("all");
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public List<Tournament> GetCurrentTournaments()
     {
         if (CurrentTournamentsCache.ContainsKey(_defaultKey))
@@ -109,6 +121,11 @@ public class CacheManager
         {
             return null;
         }
+    }
+
+    public void SetAllCurrentTournaments(List<Tournament> currentTournaments)
+    {
+        CurrentTournamentsCache.SetCacheObject("all", currentTournaments);
     }
 
     public void SetCurrentTournaments(List<Tournament> currentTournaments)
