@@ -12,7 +12,9 @@ public class SmashExplorerMetricsModel
         = new Dictionary<string, Dictionary<string, SetReportModel>>();
 
     public Dictionary<string, Dictionary<string, string>> SetsFailed { get; set; } = new Dictionary<string, Dictionary<string, string>>();
- 
+    
+    public List<(string, string)> SetsCorrelated { get; set; } = new List<(string, string)>();
+
     public Dictionary<string, int> Logins { get; set; } = new Dictionary<string, int>();
 
     public Dictionary<string, Dictionary<string, int>> TournamentAPIVisits { get; set; } = new Dictionary<string, Dictionary<string, int>>();
@@ -49,6 +51,8 @@ public class SmashExplorerMetricsModel
                     SetsReported[key][subKey].Completed + additionalModel.SetsReported[key][subKey].Completed);
             }
         }
+
+        SetsCorrelated.AddRange(additionalModel?.SetsCorrelated ?? new List<(string, string)>());
 
         foreach (var key in additionalModel.SetsFailed.Keys.ToList())
         {

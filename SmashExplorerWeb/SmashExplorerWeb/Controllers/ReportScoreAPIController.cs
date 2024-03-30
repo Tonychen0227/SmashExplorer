@@ -53,6 +53,7 @@ namespace SmashExplorerWeb.Controllers
                     if (target != null)
                     {
                         System.Diagnostics.Trace.TraceInformation($"Correlating fake set {retrievedSet.Id} with {target.Id}");
+                        MetricsManager.Instance.AddCorrelatedSet((retrievedSet.Id, target.Id));
                         retrievedSet = target;
                     }
                 }

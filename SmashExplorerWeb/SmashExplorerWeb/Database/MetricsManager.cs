@@ -79,6 +79,17 @@ public class MetricsManager
         }
     }
 
+    public void AddCorrelatedSet((string, string) item)
+    {
+        lock (_lock)
+        {
+            if (!CurrentModel.SetsCorrelated.Contains(item))
+            {
+                CurrentModel.SetsCorrelated.Add(item);
+            }
+        }
+    }
+
     public void AddLogin(string hashedToken)
     {
         lock (_lock)
