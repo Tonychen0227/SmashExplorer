@@ -11,6 +11,8 @@ public class SmashExplorerMetricsModel
     public Dictionary<string, Dictionary<string, SetReportModel>> SetsReported { get; set; }
         = new Dictionary<string, Dictionary<string, SetReportModel>>();
 
+    public Dictionary<string, Dictionary<string, string>> SetsFailed { get; set; } = new Dictionary<string, Dictionary<string, string>>();
+ 
     public Dictionary<string, int> Logins { get; set; } = new Dictionary<string, int>();
 
     public Dictionary<string, Dictionary<string, int>> TournamentAPIVisits { get; set; } = new Dictionary<string, Dictionary<string, int>>();
@@ -45,6 +47,19 @@ public class SmashExplorerMetricsModel
                 SetsReported[key][subKey] = new SetReportModel(
                     SetsReported[key][subKey].Started + additionalModel.SetsReported[key][subKey].Started,
                     SetsReported[key][subKey].Completed + additionalModel.SetsReported[key][subKey].Completed);
+            }
+        }
+
+        foreach (var key in additionalModel.SetsFailed.Keys.ToList())
+        {
+            if (!SetsFailed.ContainsKey(key))
+            {
+                SetsFailed[key] = new Dictionary<string, string>();
+            }
+
+            foreach (var subKey in additionalModel.SetsReported[key].Keys.ToList())
+            {
+                SetsFailed[key][subKey] = additionalModel.SetsFailed[key][subKey];
             }
         }
 

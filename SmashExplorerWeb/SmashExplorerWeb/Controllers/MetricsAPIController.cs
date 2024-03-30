@@ -8,7 +8,7 @@ namespace SmashExplorerWeb.Controllers
     public class MetricsAPIController : Controller
     {
         [HttpGet]
-        public async Task<ActionResult> Index(string id)
+        public async Task<ActionResult> Index(string id, bool prettify = false)
         {
             var hoursBack = string.IsNullOrEmpty(id) ? 1 : int.Parse(id);
 
@@ -23,7 +23,14 @@ namespace SmashExplorerWeb.Controllers
 
             summaryMetric.Consolidate(MetricsManager.Instance.CurrentModel);
 
-            return Content(JsonConvert.SerializeObject(summaryMetric), "application/json");
+            if (prettify)
+            {
+                return View(summaryMetric);
+            }
+            else
+            {
+                return Content(JsonConvert.SerializeObject(summaryMetric), "application/json");
+            }
         }
     }
 }

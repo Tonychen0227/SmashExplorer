@@ -32,6 +32,7 @@ namespace SmashExplorerWeb.Controllers
                 if (retrievedSet == null)
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to set not found {id}");
+                    MetricsManager.Instance.AddFailReportSet(string.Empty, id, "Set not found");
                     return new HttpNotFoundResult("Set not found");
                 }
 
@@ -41,6 +42,7 @@ namespace SmashExplorerWeb.Controllers
                 if (body.AuthUserToken == null)
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to no token passed");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Token not passed");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "No token passed!");
                 }
 
@@ -51,6 +53,7 @@ namespace SmashExplorerWeb.Controllers
                 if (retrievedAuth == null)
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to token not being in server");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Token not stored");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
@@ -60,12 +63,14 @@ namespace SmashExplorerWeb.Controllers
                 if (authenticatedEntrant == null || !retrievedSet.EntrantIds.Contains(authenticatedEntrant.Id))
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to token not correctly matching an entrant");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Token mismatch");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
                 if (!(retrievedSet.WinnerId == null || retrievedSet.WinnerId == "None"))
                 {
                     System.Diagnostics.Trace.TraceError($"Set is already finished");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Set already done");
                     return new HttpStatusCodeResult(HttpStatusCode.Conflict, "Set is already completed!");
                 }
 
@@ -77,6 +82,7 @@ namespace SmashExplorerWeb.Controllers
                 } catch (Exception ex)
                 {
                     System.Diagnostics.Trace.TraceError($"Exception from StartGG: {ex.Message}");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, ex.Message);
                     if (ex.Message.Contains("Cannot report completed set"))
                     {
                         if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))

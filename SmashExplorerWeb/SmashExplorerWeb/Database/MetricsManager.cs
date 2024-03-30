@@ -66,6 +66,19 @@ public class MetricsManager
         }
     }
 
+    public void AddFailReportSet(string eventId, string setId, string reason)
+    {
+        lock (_lock)
+        {
+            if (!CurrentModel.SetsFailed.ContainsKey(eventId))
+            {
+                CurrentModel.SetsFailed[eventId] = new Dictionary<string, string>();
+            }
+
+            CurrentModel.SetsFailed[eventId][setId] = reason;
+        }
+    }
+
     public void AddLogin(string hashedToken)
     {
         lock (_lock)

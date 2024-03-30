@@ -1,0 +1,26 @@
+﻿@model SmashExplorerMetricsModel
+
+@foreach (var eventWithReportedSet in @Model.SetsReported) { 
+    <h3>Event @eventWithReportedSet.Key</h3>
+    var completed = 0;
+    var started = 0;
+    foreach (var detail in eventWithReportedSet.Value) {
+        completed += detail.Value.Completed;
+        started += detail.Value.Started;
+    }
+    <ul>
+        <li>Started: @started</li>
+        <li>Completed: @completed</li>
+    </ul>
+}
+
+<h3>Set report failures</h3>
+@foreach (var failedReport in Model.SetsFailed) { 
+    <h3>Event: @failedReport.Key</h3>
+
+    <ul>
+        @foreach (var failedSet in failedReport.Value) {
+            <li>Set @failedSet.Key - @failedSet.Value</li>
+        }
+    </ul>
+} 
