@@ -24,7 +24,18 @@ namespace SmashExplorerWeb.Controllers
             {
                 var tournamentEvents = targetTournament.Events;
 
-                var tournamentUpsetTasks = tournamentEvents.Select(async x => await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(x.Id));
+                var tournamentUpsetTasks = tournamentEvents.Select(async x =>
+                {
+                    if (x.ShowUpsets ?? true)
+                    {
+                        return await SmashExplorerDatabase.Instance.GetUpsetsAndNotableAsync(x.Id);
+                    }
+                    else
+                    {
+                        return new List<Upset>();
+                    }
+                });
+
                 tournamentUpsets = (await Task.WhenAll(tournamentUpsetTasks)).SelectMany(x => x).Where(x => x.CompletedUpset);
 
                 ret.Events = tournamentEvents;

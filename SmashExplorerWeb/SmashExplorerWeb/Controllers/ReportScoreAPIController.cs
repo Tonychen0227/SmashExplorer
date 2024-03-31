@@ -46,9 +46,11 @@ namespace SmashExplorerWeb.Controllers
                             && !string.IsNullOrEmpty(x.Identifier)
                             && !string.IsNullOrEmpty(x.FullRoundText)
                             && !string.IsNullOrEmpty(x.PhaseIdentifier)
+                            && x.EntrantIds?.Count == 2
                             && x.Identifier == retrievedSet.Identifier
                             && x.FullRoundText == retrievedSet.FullRoundText
-                            && x.PhaseIdentifier == retrievedSet.PhaseIdentifier); 
+                            && x.PhaseIdentifier == retrievedSet.PhaseIdentifier
+                            && x.EntrantIds.OrderBy(k => k) == retrievedSet.EntrantIds.OrderBy(k => k)); 
 
                     if (target != null)
                     {
@@ -64,7 +66,7 @@ namespace SmashExplorerWeb.Controllers
                 if (body.AuthUserToken == null)
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to no token passed");
-                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Token not passed");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, retrievedSet.Id, "Token not passed");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "No token passed!");
                 }
 
@@ -75,7 +77,7 @@ namespace SmashExplorerWeb.Controllers
                 if (retrievedAuth == null)
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to token not being in server");
-                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Token not stored");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, retrievedSet.Id, "Token not stored");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
@@ -85,14 +87,14 @@ namespace SmashExplorerWeb.Controllers
                 if (authenticatedEntrant == null || !retrievedSet.EntrantIds.Contains(authenticatedEntrant.Id))
                 {
                     System.Diagnostics.Trace.TraceError($"Failing set report due to token not correctly matching an entrant");
-                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Token mismatch");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, retrievedSet.Id, "Token mismatch");
                     return new HttpStatusCodeResult(HttpStatusCode.Unauthorized, "Unauthenticated user!");
                 }
 
                 if (!(retrievedSet.WinnerId == null || retrievedSet.WinnerId == "None"))
                 {
                     System.Diagnostics.Trace.TraceError($"Set is already finished");
-                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, "Set already done");
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, retrievedSet.Id, "Set already done");
                     return new HttpStatusCodeResult(HttpStatusCode.Conflict, "Set is already completed!");
                 }
 
@@ -100,11 +102,11 @@ namespace SmashExplorerWeb.Controllers
 
                 try
                 {
-                    await StartGGDatabase.Instance.ReportSet(id, body);
+                    await StartGGDatabase.Instance.ReportSet(retrievedSet.Id, body);
                 } catch (Exception ex)
                 {
                     System.Diagnostics.Trace.TraceError($"Exception from StartGG: {ex.Message}");
-                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, id, ex.Message);
+                    MetricsManager.Instance.AddFailReportSet(retrievedSet.EventId, retrievedSet.Id, ex.Message);
                     if (ex.Message.Contains("Cannot report completed set"))
                     {
                         if (reportedSets != null && reportedSets.ContainsKey(retrievedSet.Id))
