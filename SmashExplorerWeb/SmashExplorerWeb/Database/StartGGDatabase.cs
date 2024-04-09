@@ -70,6 +70,37 @@ mutation ReportBracketSet($id: ID!, $winnerId: ID, $gameData: [BracketSetGameDat
         }
     }
 
+    public async Task<StartGGAPISet> GetSet(string setId)
+    {
+        var client = GetMutationClient();
+
+        var query = new GraphQLRequest
+        {
+            Query = @"
+query SetQuery($id: ID!) {
+  set(id:$id){
+    id
+    winnerId
+    displayScore
+    slots {
+      entrant {
+        id
+        name
+      }
+    }
+  }
+}",
+            Variables = new
+            {
+                id = setId
+            }
+        };
+
+        var response = await SendQueryAsync<StartGGSetResponse>(query, client);
+
+        return response.Data.Set;
+    }
+
     public async Task<StartGGUser> GetUserTokenDetails(string token)
     {
         var client = GetClient(token);

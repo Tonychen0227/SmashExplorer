@@ -312,6 +312,7 @@
     <Compile Include="Models\EntrantInfo.cs" />
     <Compile Include="Models\EntrantLocation.cs" />
     <Compile Include="Models\Event.cs" />
+    <Compile Include="Models\FailedReportSetModel.cs" />
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\GameSelection.cs" />
     <Compile Include="Models\Image.cs" />

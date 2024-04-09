@@ -119,6 +119,30 @@ public class StartGGUserResponse
     public StartGGUser CurrentUser { get; set; }
 }
 
+public class StartGGSetResponse
+{
+    public StartGGAPISet Set { get; set; }
+}
+
+public class StartGGAPISet
+{
+    public int? Id { get; set; }
+    public int? WinnerId { get; set; }
+    public string DisplayScore { get; set; }
+    public List<StartGGAPISetSlot> Slots { get; set; }
+}
+
+public class StartGGAPISetSlot
+{
+    public StartGGAPIEntrant Entrant { get; set; }
+}
+
+public class StartGGAPIEntrant
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+
 public class StartGGUser
 {
     [JsonProperty("id")]

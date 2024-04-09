@@ -12,12 +12,12 @@ namespace SmashExplorerWeb.Controllers
         {
             var hoursBack = string.IsNullOrEmpty(id) ? 1 : int.Parse(id);
 
-            if (hoursBack > 72)
+            if (hoursBack > 144)
             {
-                hoursBack = 72;
+                hoursBack = 144;
             }
 
-            var metrics = await SmashExplorerDatabase.Instance.GetMetricsAsync(string.IsNullOrEmpty(id) ? 1 : int.Parse(id));
+            var metrics = await SmashExplorerDatabase.Instance.GetMetricsAsync(hoursBack);
 
             var summaryMetric = metrics.Aggregate(metrics.First(), (acc, x) => acc.Consolidate(x));
 
