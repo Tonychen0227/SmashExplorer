@@ -21,13 +21,15 @@ if __name__ == '__main__':
 
     logger.log("Starting Backfill, Mutex ensured")
 
-    new_events = [1062267]
+    new_events = []
 
     current_tournaments = operations.get_active_current_tournaments()
 
     for current_tournament in current_tournaments:
         new_events.extend([int(x["Id"]) for x in current_tournament["Events"]])
 
+    hardcoded_events = False
+    '''
     hardcoded_events = len(new_events) != 0
     if len(new_events) == 0:
         days_back = 14
@@ -44,6 +46,7 @@ if __name__ == '__main__':
             new_events.extend(operations.get_new_events(days_back=days_back, days_forward=(-1 * current_days_forward)))
 
             days_back = current_days_forward
+    '''
 
     events_size = len(new_events)
 

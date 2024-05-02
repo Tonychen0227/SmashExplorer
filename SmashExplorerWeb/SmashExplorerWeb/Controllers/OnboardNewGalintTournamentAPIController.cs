@@ -47,6 +47,11 @@ namespace SmashExplorerWeb.Controllers
                         .FirstOrDefault(x => x.Id == phase.Id)?
                         .BestOf ?? 3;
                 }
+
+                tournamentEvent.ShowUpsets = existingCurrentTournament?
+                        .Events?
+                        .FirstOrDefault(x => x.Id == tournamentEvent.Id)?
+                        .ShowUpsets ?? true;
             }
 
             tournament.Twitter = string.IsNullOrEmpty(twitter) ? 
@@ -54,6 +59,8 @@ namespace SmashExplorerWeb.Controllers
                 : twitter;
 
             await SmashExplorerDatabase.Instance.AddCurrentTournamentAndSetAsActiveAsync(tournament);
+
+            CacheManager.Instance.InvalidateCurrentTournamentCache();
 
             return new HttpStatusCodeResult(System.Net.HttpStatusCode.Created);
         }

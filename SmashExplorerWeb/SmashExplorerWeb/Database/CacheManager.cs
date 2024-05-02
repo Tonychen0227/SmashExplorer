@@ -285,6 +285,11 @@ public class CacheManager
         TournamentAvatarsCache.CleanupCache();
     }
 
+    public void InvalidateCurrentTournamentCache()
+    {
+        CurrentTournamentsCache.InvalidateCache(_defaultKey);
+    }
+
     public void InvalidateCaches(string eventId, string tournamentId)
     {
         ReportedSetsCache.InvalidateCache(eventId);
