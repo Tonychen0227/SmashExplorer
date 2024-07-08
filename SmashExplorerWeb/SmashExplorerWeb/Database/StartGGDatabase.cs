@@ -346,6 +346,7 @@ query GetGalintAppData($tournamentId: ID) {
     id
     slug
     name
+    startAt
     images {
       ratio
       type

@@ -277,6 +277,7 @@
     <Compile Include="Controllers\OnboardNewGalintTournamentAPIController.cs" />
     <Compile Include="Controllers\PRDataController.cs" />
     <Compile Include="Controllers\ReportScoreAPIController.cs" />
+    <Compile Include="Controllers\EventSetsController.cs" />
     <Compile Include="Controllers\SetAPIController.cs" />
     <Compile Include="Controllers\TournamentAPIController.cs" />
     <Compile Include="Controllers\TournamentUserAvatarsAPIController.cs" />
@@ -308,6 +309,7 @@
     <Compile Include="Models\DanessModel.cs" />
     <Compile Include="Models\DanessEntrantSeeding.cs" />
     <Compile Include="Models\DataPoint.cs" />
+    <Compile Include="Models\EventSets.cs" />
     <Compile Include="Models\Entrant.cs" />
     <Compile Include="Models\EntrantInfo.cs" />
     <Compile Include="Models\EntrantLocation.cs" />
@@ -556,6 +558,7 @@
     <Content Include="Views\Daness\Index.cshtml" />
     <Content Include="Views\PRData\Index.cshtml" />
     <Content Include="Views\MetricsAPI\Index.cshtml" />
+    <Content Include="Views\EventSets\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

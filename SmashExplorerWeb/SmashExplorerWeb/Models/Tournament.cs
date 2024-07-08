@@ -6,6 +6,7 @@ public class BackendTournament
     [JsonProperty("id")]
     public string Id { get; set; }
     public bool IsActive { get; set; }
+    public long StartAt { get; set; }
     public string Name { get; set; }
     public bool ShowUpsets { get; set; } = true;
     public List<TournamentEvent> Events { get; set; }
@@ -18,6 +19,7 @@ public class BackendTournament
 public class Tournament
 {
     public string Id { get; set; }
+    public long StartAt { get; set; }
     public bool IsActive { get; set; }
     public string Name { get; set; }
     public List<TournamentEvent> Events { get; set; }

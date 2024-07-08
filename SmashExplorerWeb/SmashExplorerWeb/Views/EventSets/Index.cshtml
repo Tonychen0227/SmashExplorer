@@ -1,0 +1,46 @@
+﻿@model EventSetsModel
+
+<script>
+</script>
+<div class="jumbotron">
+    <h1>View Sets for event @Model.TournamentEvent.TournamentName - @Model.TournamentEvent.Name</h1>
+</div>
+
+@foreach (var grouping in Model.Sets) { 
+    <h2>@grouping.Key</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>Round</td>
+                <td>Score</td>
+                <td>Winner</td>
+                <td>Entrant1</td>
+                <td>Entrant2</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var set in grouping.Value)
+            {
+            <tr>
+                <td>@set.Id</td>
+                <td>@set.FullRoundText</td>
+                <td>@(set.DetailedScore == null ? "N/A" : set.DisplayScore == "DQ" ? "DQ" : set.WinnerId == null ? "N/A" : $"{set.DetailedScore[set.WinnerId]} - {set.DetailedScore.First(x => x.Key != set.WinnerId).Value}")</td>
+                <td><strong>@(set.WinnerId == null || set.WinnerId == "None" ? "N/A" : set.Entrants.First(x => x.Id == set.WinnerId).Name + " - (Seed " + set.Entrants.First(x => x.Id == set.WinnerId).InitialSeedNum + ")")</strong></td>
+                @foreach (var entrant in set.Entrants)
+                {
+                    if (string.IsNullOrEmpty(entrant.Name))
+                    {
+                        <td><i>PreReq: @entrant.PreReqType - @entrant.PreReqId</i></td>
+                    }
+                    else
+                    {
+                        <td>@entrant.Name - (Seed @entrant.InitialSeedNum)</td>
+                    }
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+}

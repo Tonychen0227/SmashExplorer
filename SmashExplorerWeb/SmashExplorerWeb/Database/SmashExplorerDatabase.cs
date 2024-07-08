@@ -207,7 +207,7 @@ public class SmashExplorerDatabase
 
         var results = new List<Tournament>();
 
-        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<Tournament>($"SELECT * FROM c WHERE (c.isActive or c.IsActive) OFFSET 0 LIMIT 10"))
+        using (var iterator = CurrentTournamentsContainer.GetItemQueryIterator<Tournament>($"SELECT * FROM c ORDER BY c._ts DESC OFFSET 0 LIMIT 10"))
         {
             while (iterator.HasMoreResults)
             {

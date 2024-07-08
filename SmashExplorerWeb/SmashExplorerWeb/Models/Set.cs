@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class Set
 {
@@ -32,4 +33,7 @@ public class Set
     public int? TotalGames { get; set; }
     public Station Station { get; set; }
     public ReportScoreAPIRequestBody ReportedScoreViaAPI { get; set; }
+
+    [JsonProperty("_ts")]
+    public int Timestamp { get; set; }
 }
