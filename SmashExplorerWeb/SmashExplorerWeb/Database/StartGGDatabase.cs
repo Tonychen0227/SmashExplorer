@@ -37,7 +37,7 @@ public class StartGGDatabase
 
     private GraphQLHttpClient GetClient(string token)
     {
-        var graphQLClient = new GraphQLHttpClient("https://api.smash.gg/gql/alpha", new NewtonsoftJsonSerializer());
+        var graphQLClient = new GraphQLHttpClient("https://api.start.gg/gql/alpha", new NewtonsoftJsonSerializer());
         graphQLClient.HttpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
         return graphQLClient;
     }
@@ -217,7 +217,7 @@ query TournamentSlugQuery($slug: String) {
 query TournamentIdQuery($id: ID) {
   tournament(id:$id){
     id
-    events(filter: {videogameId: [1, 1386, 43868, 49783]}) {
+    events(filter: {videogameId: [1, 1386, 43868, 49783, 53945]}) {
       name
       id
       startAt
@@ -352,7 +352,7 @@ query GetGalintAppData($tournamentId: ID) {
       type
       url
     }
-    events(filter: {videogameId: [1, 1386, 43868, 49783]}){
+    events(filter: {videogameId: [1, 1386, 43868, 49783, 53945]}){
       id
       images {
         ratio

@@ -22,7 +22,7 @@ class API:
         self.clients = []
 
         for token in tokens.split(" "):
-            client = GraphQLClient('https://api.smash.gg/gql/alpha')
+            client = GraphQLClient('https://api.start.gg/gql/alpha')
             client.inject_token(f'Bearer {token}')
             self.clients.append(client)
 
