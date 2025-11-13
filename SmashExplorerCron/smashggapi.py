@@ -103,7 +103,7 @@ class API:
         before_date = int(end_time.timestamp())
         query_string = '''
             query TournamentEvents($beforeDate: Timestamp, $afterDate: Timestamp, $page: Int) {
-              tournaments(query:{page: $page, perPage: 200, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1, 24, 1386, 53945], published:true, publiclySearchable:true}}) {
+              tournaments(query:{page: $page, perPage: 200, filter:{afterDate:$afterDate, beforeDate:$beforeDate, videogameIds: [1, 24, 1386, 39281, 49644, 53945], published:true, publiclySearchable:true}}) {
                 pageInfo{
                   perPage
                   totalPages
@@ -113,7 +113,7 @@ class API:
                   totalPages
                 }
                 nodes {
-                  events(filter:{published:true, videogameId: [1, 24, 1386, 53945]}) {
+                  events(filter:{published:true, videogameId: [1, 24, 1386, 39281, 49644, 53945]}) {
                     id
                     numEntrants
                   }
@@ -238,7 +238,7 @@ class API:
         query_string = '''
             query TournamentEventsQuery($slug: String) {
               tournament(slug: $slug) {
-                events(filter:{published:true, videogameId: [1, 24, 1386]}) {
+                events(filter:{published:true, videogameId: [1, 24, 1386, 39281, 49644, 53945]}) {
                   id
               }}}
             '''
