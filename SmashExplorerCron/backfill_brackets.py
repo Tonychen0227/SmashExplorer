@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     logger.log("Starting Backfill, Mutex ensured")
 
-    new_events = []
+    new_events = [1526133]
 
     current_tournaments = operations.get_active_current_tournaments()
 
